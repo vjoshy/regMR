@@ -1,3 +1,26 @@
+#' Title
+#'
+#' @param i
+#' @param x
+#' @param y
+#' @param G
+#' @param reps
+#' @param tol
+#' @param max_iter
+#' @param lambda
+#' @param lambda_max
+#' @param n_lambda
+#' @param alpha
+#' @param verbose
+#' @param penalty
+#' @param random
+#' @param n_random_la
+#' @param automatic_stopping
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
                           lambda = NULL, lambda_max = NULL, n_lambda = 100,
                           alpha = seq(0, 1, by = 0.1), verbose = TRUE,
@@ -5,20 +28,20 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
                           automatic_stopping = FALSE){
   # ----initialize workers and session----
   old_plan <- future::plan()
-  on.exit(future::plan(oplan), add = TRUE)
+  on.exit(future::plan(old_plan), add = TRUE)
   future::plan(future::multisession,
                workers = max(1, floor(future::availableCores()/2)))
 
   if (verbose) cat("\n")
-  if (verbose) cat(blue$bold("+----------------------------------+\n"))
-  if (verbose) cat(blue$bold("|  =====     ======   ===     ===  |\n"))
-  if (verbose) cat(blue$bold("| ==   ==      ==     == =   = ==  |\n"))
-  if (verbose) cat(blue$bold("|  ==          ==     ==  = =  ==  |\n"))
-  if (verbose) cat(blue$bold("|    ==        ==     ==   =   ==  |\n"))
-  if (verbose) cat(blue$bold("|      ==      ==     ==       ==  |\n"))
-  if (verbose) cat(blue$bold("| ==   ==      ==     ==       ==  |\n"))
-  if (verbose) cat(blue$bold("|  =====     ======  ====     ==== |\n"))
-  if (verbose) cat(blue$bold("+----------------------------------+\n\n"))
+  if (verbose) cat(crayon::blue$bold("+----------------------------------+\n"))
+  if (verbose) cat(crayon::blue$bold("|  =====     ======   ===     ===  |\n"))
+  if (verbose) cat(crayon::blue$bold("| ==   ==      ==     == =   = ==  |\n"))
+  if (verbose) cat(crayon::blue$bold("|  ==          ==     ==  = =  ==  |\n"))
+  if (verbose) cat(crayon::blue$bold("|    ==        ==     ==   =   ==  |\n"))
+  if (verbose) cat(crayon::blue$bold("|      ==      ==     ==       ==  |\n"))
+  if (verbose) cat(crayon::blue$bold("| ==   ==      ==     ==       ==  |\n"))
+  if (verbose) cat(crayon::blue$bold("|  =====     ======  ====     ==== |\n"))
+  if (verbose) cat(crayon::blue$bold("+----------------------------------+\n\n"))
 
 
   # ----get covariates----
@@ -65,13 +88,13 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
   }
   else{
     # ----parallelize MM algorithm over 2 -> G----
-    models <- future_map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
+    models <- furrr::future_map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
                          tol = tol, max_iter = max_iter, lambda = lambda,
                          lambda_max = lambda_max, n_lambda = n_lambda,
                          alpha = alpha, verbose = verbose, penalty = penalty,
                          random = random, n_random_la = n_random_la,
                          .progress = FALSE,
-                         .options = furrr_options(seed = TRUE))
+                         .options = furrr::furrr_options(seed = TRUE))
   }
 
   for (i in 1:(G-1)){

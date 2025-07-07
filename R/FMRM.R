@@ -1,3 +1,26 @@
+#' Title
+#'
+#' @param x
+#' @param y
+#' @param G
+#' @param reps
+#' @param sims
+#' @param tol
+#' @param max_iter
+#' @param lambda
+#' @param lambda_max
+#' @param n_lambda
+#' @param alpha
+#' @param verbose
+#' @param penalty
+#' @param random
+#' @param n_random_la
+#' @param automatic_stopping
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 FMRM <- function(x, y, G, reps = 1, sims = 1, tol = 10e-08,
                  max_iter = 500, lambda = NULL, lambda_max = NULL,
                  n_lambda = 100, alpha = seq(0, 1, by = 0.1),
@@ -25,15 +48,15 @@ FMRM <- function(x, y, G, reps = 1, sims = 1, tol = 10e-08,
   # ----if verbose, print compartment selection table----
   if (verbose && sims > 1){
     if (verbose) cat("\n")
-    if (verbose) cat(blue$bold("+--------------------------------------------------------+\n"))
-    if (verbose) cat(blue$bold("| =====    ======  =====  ==   == ==    ========  =====  |\n"))
-    if (verbose) cat(blue$bold("| ==   ==  ==     ==   == ==   == ==       ==    ==   == |\n"))
-    if (verbose) cat(blue$bold("| ==   ==  ==      ==     ==   == ==       ==     ==     |\n"))
-    if (verbose) cat(blue$bold("| ======   ====      ==   ==   == ==       ==       ==   |\n"))
-    if (verbose) cat(blue$bold("| ====     ==          == ==   == ==       ==         == |\n"))
-    if (verbose) cat(blue$bold("| ==  ==   ==     ==   == ==   == ==       ==    ==   == |\n"))
-    if (verbose) cat(blue$bold("| ==   ==  ======  =====  ======= ======   ==     =====  |\n"))
-    if (verbose) cat(blue$bold("+--------------------------------------------------------+\n\n"))
+    if (verbose) cat(crayon::blue$bold("+--------------------------------------------------------+\n"))
+    if (verbose) cat(crayon::blue$bold("| =====    ======  =====  ==   == ==    ========  =====  |\n"))
+    if (verbose) cat(crayon::blue$bold("| ==   ==  ==     ==   == ==   == ==       ==    ==   == |\n"))
+    if (verbose) cat(crayon::blue$bold("| ==   ==  ==      ==     ==   == ==       ==     ==     |\n"))
+    if (verbose) cat(crayon::blue$bold("| ======   ====      ==   ==   == ==       ==       ==   |\n"))
+    if (verbose) cat(crayon::blue$bold("| ====     ==          == ==   == ==       ==         == |\n"))
+    if (verbose) cat(crayon::blue$bold("| ==  ==   ==     ==   == ==   == ==       ==    ==   == |\n"))
+    if (verbose) cat(crayon::blue$bold("| ==   ==  ======  =====  ======= ======   ==     =====  |\n"))
+    if (verbose) cat(crayon::blue$bold("+--------------------------------------------------------+\n\n"))
     model_choice <- numeric(0)
     for (i in 1:sims){
       if (is.na(model_choice[models[[i]]$g])) model_choice[models[[i]]$g] <- 0

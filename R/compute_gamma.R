@@ -1,3 +1,15 @@
+#' Title
+#'
+#' @param x
+#' @param y
+#' @param pi
+#' @param beta
+#' @param sigma
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 compute_gamma <- function(x, y, pi, beta, sigma){
   y <- as.vector(y)
   sigma <- as.vector(sigma)
@@ -11,7 +23,7 @@ compute_gamma <- function(x, y, pi, beta, sigma){
 
   # ----weighted densities for all i and g----
   gamma_mat <- vapply(1:G, function(g)
-    pi[g] * dnorm(y, mean = mu[, g], sd = sigma[g]),
+    pi[g] * stats::dnorm(y, mean = mu[, g], sd = sigma[g]),
     numeric(n))
 
   # ----divide each element by the sum of weighted densities across g----

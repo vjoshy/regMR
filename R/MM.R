@@ -1,3 +1,24 @@
+#' Title
+#'
+#' @param x
+#' @param y
+#' @param G
+#' @param reps
+#' @param tol
+#' @param max_iter
+#' @param lambda
+#' @param alpha
+#' @param init_pi
+#' @param init_beta
+#' @param init_sigma
+#' @param init_gamma
+#' @param verbose
+#' @param penalty
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 MM <- function(x, y, G, reps = 1, tol = 10e-08, max_iter = 500, lambda = 0,
                alpha = 0, init_pi = NULL, init_beta = NULL, init_sigma = NULL,
                init_gamma = NULL, verbose = TRUE, penalty = TRUE){
@@ -22,23 +43,23 @@ MM <- function(x, y, G, reps = 1, tol = 10e-08, max_iter = 500, lambda = 0,
 
   # ----initialize parameter estimates using Mclust function----
   if(is.null(init_pi)){
-    init_mod <- Mclust(y, G = G, modelNames = "V", verbose = FALSE)
+    init_mod <- mclust::Mclust(y, G = G, modelNames = "V", verbose = FALSE)
     init_pi <- init_mod$parameters$pro
   }
 
   if(is.null(init_beta)){
-    init_mod <- Mclust(y, G = G, modelNames = "V", verbose = FALSE)
+    init_mod <- mclust::Mclust(y, G = G, modelNames = "V", verbose = FALSE)
     init_beta <- matrix(rep(1e-10, (p + 1) * G), ncol = p + 1, nrow = G)
     init_beta[, 1] <- t(init_mod$parameters$mean)
   }
 
   if(is.null(init_sigma)){
-    init_mod <- Mclust(y, G = G, modelNames = "V", verbose = FALSE)
+    init_mod <- mclust::Mclust(y, G = G, modelNames = "V", verbose = FALSE)
     init_sigma <- sqrt(init_mod$parameters$variance$sigmasq)
   }
 
   if(is.null(init_gamma)){
-    init_mod <- Mclust(y, G = G, modelNames = "V", verbose = FALSE)
+    init_mod <- mclust::Mclust(y, G = G, modelNames = "V", verbose = FALSE)
     init_gamma <- init_mod$z
   }
 

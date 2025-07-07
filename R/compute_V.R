@@ -1,3 +1,13 @@
+#' Title
+#'
+#' @param G
+#' @param beta
+#' @param alpha
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 compute_V <- function(G, beta, alpha){
   # ----get beta with no intercept----
   beta_noint <- beta[ , -1, drop=FALSE]

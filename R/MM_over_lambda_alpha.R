@@ -1,3 +1,24 @@
+#' Title
+#'
+#' @param g
+#' @param x
+#' @param y
+#' @param reps
+#' @param tol
+#' @param max_iter
+#' @param lambda
+#' @param lambda_max
+#' @param n_lambda
+#' @param alpha
+#' @param verbose
+#' @param penalty
+#' @param random
+#' @param n_random_la
+#'
+#' @returns
+#' @export
+#'
+#' @examples
 MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
                                  max_iter = 500, lambda = NULL,
                                  lambda_max = NULL, n_lambda = 100,
@@ -6,7 +27,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
                                  n_random_la = 100){
   # ----initialize workers and session----
   old_plan <- future::plan()
-  on.exit(future::plan(oplan), add = TRUE)
+  on.exit(future::plan(old_plan), add = TRUE)
   future::plan(future::multisession,
                workers = max(1, floor(future::availableCores()/2)))
 
@@ -19,7 +40,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
   bic <- numeric(n_lambda * length(alpha))
 
   # ----initialize default values----
-  init_mod <- Mclust(y, G = g, modelNames = "V", verbose = FALSE)
+  init_mod <- mclust::Mclust(y, G = g, modelNames = "V", verbose = FALSE)
 
   init_pi <- list()
   init_pi[[g]] <- init_mod$parameters$pro
@@ -68,12 +89,12 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
     }
 
     # ---- fit models in parallel ----
-    parameters <- future_pmap(param_grid, function(alpha, lambda) {
+    parameters <- furrr::future_pmap(param_grid, function(alpha, lambda) {
       return(MM(x, y, g, reps, tol, max_iter, lambda, alpha,
                 init_pi[[g]], init_beta[[g]], init_sigma[[g]],
                 init_gamma[[g]], verbose, penalty))
     },
-    .options = furrr_options(seed = TRUE)
+    .options = furrr::furrr_options(seed = TRUE)
     )
 
     # ----extract selection criteria----
