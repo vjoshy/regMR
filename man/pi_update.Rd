@@ -2,7 +2,8 @@
 % Please edit documentation in R/pi_update.R
 \name{pi_update}
 \alias{pi_update}
-\title{Update mixing proportions within MM Algorithm}
+\title{Update mixing proportions for finite Gaussian mixture regression model within
+MM Algorithm}
 \usage{
 pi_update(n, gamma_mat)
 }
@@ -10,5 +11,6 @@ pi_update(n, gamma_mat)
 \item{gamma_mat}{}
 }
 \description{
-Update mixing proportions within MM Algorithm
+Update mixing proportions for finite Gaussian mixture regression model within
+MM Algorithm
 }

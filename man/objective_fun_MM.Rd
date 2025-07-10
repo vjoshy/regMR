@@ -2,7 +2,8 @@
 % Please edit documentation in R/objective_fun_MM.R
 \name{objective_fun_MM}
 \alias{objective_fun_MM}
-\title{Calculate objective function}
+\title{Calculate objective function for a finite Gaussian mixture regression
+model}
 \usage{
 objective_fun_MM(ll, pen)
 }
@@ -10,5 +11,6 @@ objective_fun_MM(ll, pen)
 \item{pen}{}
 }
 \description{
-Calculate objective function
+Calculate objective function for a finite Gaussian mixture regression
+model
 }

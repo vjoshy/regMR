@@ -162,6 +162,8 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
     }
     cat("\n\n")
 
+    chosen_parameters$LAMBA_MAX <- exp(lambda_max)
+
     # ----return parameters, compartment number----
     return(list(parameters = chosen_parameters, g = g))
   }

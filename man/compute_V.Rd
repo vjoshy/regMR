@@ -2,7 +2,9 @@
 % Please edit documentation in R/compute_V.R
 \name{compute_V}
 \alias{compute_V}
-\title{Title}
+\title{Compute sparse group lasso penalty majorization term for updating
+regression parameters for finite Gaussian mixture regression model within MM
+Algorithm}
 \usage{
 compute_V(G, beta, alpha)
 }
@@ -10,5 +12,7 @@ compute_V(G, beta, alpha)
 \item{alpha}{}
 }
 \description{
-Title
+Compute sparse group lasso penalty majorization term for updating
+regression parameters for finite Gaussian mixture regression model within MM
+Algorithm
 }

@@ -2,7 +2,9 @@
 % Please edit documentation in R/compute_N.R
 \name{compute_N}
 \alias{compute_N}
-\title{Title}
+\title{Compute sum of predicted responsibilities across each group for updating
+mixing proportions and sigma estimates for finite Gaussian mixture regression
+model within MM Algorithm}
 \usage{
 compute_N(gamma_mat)
 }
@@ -10,5 +12,7 @@ compute_N(gamma_mat)
 \item{gamma_mat}{}
 }
 \description{
-Title
+Compute sum of predicted responsibilities across each group for updating
+mixing proportions and sigma estimates for finite Gaussian mixture regression
+model within MM Algorithm
 }

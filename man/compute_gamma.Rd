@@ -2,7 +2,8 @@
 % Please edit documentation in R/compute_gamma.R
 \name{compute_gamma}
 \alias{compute_gamma}
-\title{Title}
+\title{Compute group responsibility matrix for a finite Gaussian mixture regression
+distribution}
 \usage{
 compute_gamma(x, y, pi, beta, sigma)
 }
@@ -10,5 +11,6 @@ compute_gamma(x, y, pi, beta, sigma)
 \item{sigma}{}
 }
 \description{
-Title
+Compute group responsibility matrix for a finite Gaussian mixture regression
+distribution
 }
