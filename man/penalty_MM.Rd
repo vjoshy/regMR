@@ -2,7 +2,7 @@
 % Please edit documentation in R/penalty_MM.R
 \name{penalty_MM}
 \alias{penalty_MM}
-\title{Title}
+\title{Calculate sparse group lasso (SGL) penalty}
 \usage{
 penalty_MM(lambda, alpha, beta, G)
 }
@@ -10,5 +10,5 @@ penalty_MM(lambda, alpha, beta, G)
 \item{G}{}
 }
 \description{
-Title
+Calculate sparse group lasso (SGL) penalty
 }

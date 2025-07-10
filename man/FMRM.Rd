@@ -10,7 +10,7 @@ FMRM(
   G,
   reps = 1,
   sims = 1,
-  tol = 0.01,
+  tol = 0.001,
   max_iter = 500,
   lambda = NULL,
   lambda_max = NULL,
@@ -20,11 +20,12 @@ FMRM(
   penalty = TRUE,
   random = FALSE,
   n_random_la = 100,
-  automatic_stopping = FALSE
+  automatic_stopping = FALSE,
+  parallel = TRUE
 )
 }
 \arguments{
-\item{automatic_stopping}{}
+\item{parallel}{}
 }
 \description{
 Title

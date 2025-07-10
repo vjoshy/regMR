@@ -9,7 +9,7 @@ MM(
   y,
   G,
   reps = 1,
-  tol = 1e-07,
+  tol = 0.001,
   max_iter = 500,
   lambda = 0,
   alpha = 0,

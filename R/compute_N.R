@@ -1,4 +1,6 @@
-#' Title
+#' Compute sum of predicted responsibilities across each group for updating
+#' mixing proportions and sigma estimates for finite Gaussian mixture regression
+#' model within MM Algorithm
 #'
 #' @param gamma_mat
 #'
@@ -7,11 +9,6 @@
 #'
 #' @examples
 compute_N <- function(gamma_mat){
-  # #----input validation/error check----
-  # if(!is.numeric(gamma_mat) || !is.matrix(gamma_mat)){
-  #   stop("Invalid input\n")
-  # }
-
   # ----sum over observations for each group in gamma_mat----
   N <- colSums(gamma_mat)
 

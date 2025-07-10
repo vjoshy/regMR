@@ -2,7 +2,7 @@
 % Please edit documentation in R/pi_update.R
 \name{pi_update}
 \alias{pi_update}
-\title{Title}
+\title{Update mixing proportions within MM Algorithm}
 \usage{
 pi_update(n, gamma_mat)
 }
@@ -10,5 +10,5 @@ pi_update(n, gamma_mat)
 \item{gamma_mat}{}
 }
 \description{
-Title
+Update mixing proportions within MM Algorithm
 }

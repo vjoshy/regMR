@@ -1,4 +1,5 @@
-#' Title
+#' Compute group responsibility matrix for a finite Gaussian mixture regression
+#' distribution
 #'
 #' @param x
 #' @param y
@@ -11,23 +12,6 @@
 #'
 #' @examples
 compute_gamma <- function(x, y, pi, beta, sigma){
-  # #----input validation/error check----
-  # if(!is.numeric(x)){
-  #   stop("Invalid x\n")
-  # }
-  # if(!is.numeric(y)){
-  #   stop("Invalid y\n")
-  # }
-  # if(!is.numeric(pi) || !is.vector(pi)){
-  #   stop("Invalid mixing proportions (pi)\n")
-  # }
-  # if(!is.numeric(beta) || (!is.matrix(beta) && !is.vector(beta))){
-  #   stop("Invalid regression parameters (beta)\n")
-  # }
-  # if(!is.numeric(sigma)){
-  #   stop("Invalid sigma\n")
-  # }
-
   y <- as.vector(y)
   sigma <- as.vector(sigma)
 

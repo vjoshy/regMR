@@ -1,4 +1,5 @@
-#' Title
+#' Calculate objective function for a finite Gaussian mixture regression
+#' model
 #'
 #' @param ll
 #' @param pen
@@ -8,11 +9,6 @@
 #'
 #' @examples
 objective_fun_MM <- function(ll, pen){
-  # #----input validation/error check----
-  # if(!is.numeric(ll) || !is.numeric(pen)){
-  #   stop("Invalid input\n")
-  # }
-
   objective_fun <- -ll + pen
 
   return(objective_fun)

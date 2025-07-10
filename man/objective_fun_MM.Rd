@@ -2,7 +2,7 @@
 % Please edit documentation in R/objective_fun_MM.R
 \name{objective_fun_MM}
 \alias{objective_fun_MM}
-\title{Title}
+\title{Calculate objective function}
 \usage{
 objective_fun_MM(ll, pen)
 }
@@ -10,5 +10,5 @@ objective_fun_MM(ll, pen)
 \item{pen}{}
 }
 \description{
-Title
+Calculate objective function
 }

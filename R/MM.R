@@ -170,7 +170,7 @@ MM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500, lambda = 0,
 
     # ----expected predicted y and mean squared error----
     y_ik <- x %*% t(betas[[min_index]])
-    y_hat <- rowSums(gamma_mat * y_ik)
+    y_hat <- rowSums(gammas[[min_index]] * y_ik)
     MSE <- mean((y_hat - y)^2)
 
     # ----initialize hard version of gamma_mat----

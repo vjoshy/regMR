@@ -2,7 +2,8 @@
 % Please edit documentation in R/log_likelihood.R
 \name{log_likelihood}
 \alias{log_likelihood}
-\title{Title}
+\title{Compute incomplete data log-likelihood for a finite Gaussian mixture
+regression distribution}
 \usage{
 log_likelihood(x, y, pi, beta, sigma)
 }
@@ -10,5 +11,6 @@ log_likelihood(x, y, pi, beta, sigma)
 \item{sigma}{}
 }
 \description{
-Title
+Compute incomplete data log-likelihood for a finite Gaussian mixture
+regression distribution
 }

@@ -9,7 +9,7 @@ MM_over_lambda_alpha(
   x,
   y,
   reps = 1,
-  tol = 1e-07,
+  tol = 0.001,
   max_iter = 500,
   lambda = NULL,
   lambda_max = NULL,
@@ -18,7 +18,8 @@ MM_over_lambda_alpha(
   verbose = TRUE,
   penalty = TRUE,
   random = FALSE,
-  n_random_la = 100
+  n_random_la = 100,
+  parallel = TRUE
 )
 }
 \arguments{

@@ -1,4 +1,5 @@
-#' Title
+#' Compute incomplete data log-likelihood for a finite Gaussian mixture
+#' regression distribution
 #'
 #' @param x
 #' @param y

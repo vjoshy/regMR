@@ -1,4 +1,6 @@
-#' Title
+#' Compute sparse group lasso penalty majorization term for updating
+#' regression parameters for finite Gaussian mixture regression model within MM
+#' Algorithm
 #'
 #' @param G
 #' @param beta
@@ -9,17 +11,6 @@
 #'
 #' @examples
 compute_V <- function(G, beta, alpha){
-  # #----input validation/error check----
-  # if (!is.numeric(G) || G <= 0){
-  #   stop("Invalid group size G\n")
-  # }
-  # if (!is.numeric(alpha)){
-  #   stop("Invalid alpha\n")
-  # }
-  # if(!is.numeric(beta) || !is.matrix(beta) || ncol(beta) < 2){
-  #   stop("Invalid beta\n")
-  # }
-
   # ----get beta with no intercept----
   beta_noint <- beta[ , -1, drop=FALSE]
 
