@@ -15,6 +15,7 @@ Imports:
     furrr,
     future,
     mclust,
+    purrr,
     Rcpp,
     stats
 Suggests: 

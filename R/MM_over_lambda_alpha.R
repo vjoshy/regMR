@@ -25,7 +25,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
                                  lambda_max = NULL, n_lambda = 100,
                                  alpha = seq(0, 1, by = 0.1), verbose = TRUE,
                                  penalty = TRUE, random = FALSE,
-                                 n_random_la = 100){
+                                 n_random_la = 100, parallel = TRUE){
   if (verbose) cat("\n-- g =", g, "--\n")
 
   # ----get covariates----
@@ -82,29 +82,44 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
       param_grid <- param_grid[sample_idx, ]
     }
 
-    # ----initialize workers and session----
-    if (!inherits(future::plan(), "multisession")) {
-      future::plan(future::multisession,
-                   workers = max(1, floor(future::availableCores()/2)))
-    }
+    if (parallel){
+      # ----initialize workers and session----
+      if (!inherits(future::plan(), "multisession")) {
+        future::plan(future::multisession,
+                     workers = max(1, floor(future::availableCores()/2)))
+      }
 
-    # ---- fit models in parallel ----
-    parameters <- furrr::future_pmap(
-      param_grid,
-      function(alpha, lambda) {
-        MM(
-          x, y, g, reps, tol, max_iter, lambda, alpha,
-          init_pi[[g]], init_beta[[g]], init_sigma[[g]],
-          init_gamma[[g]], verbose, penalty
+      # ---- fit models in parallel ----
+      parameters <- furrr::future_pmap(
+        param_grid,
+        function(alpha, lambda) {
+          MM(
+            x, y, g, reps, tol, max_iter, lambda, alpha,
+            init_pi[[g]], init_beta[[g]], init_sigma[[g]],
+            init_gamma[[g]], verbose, penalty
+          )
+        },
+        .options = furrr::furrr_options(
+          seed = TRUE,
+          globals = list(MM = MM)
         )
-      },
-      .options = furrr::furrr_options(
-        seed = TRUE,
-        globals = list(MM = MM)
       )
-    )
 
-    future::plan(future::sequential)
+      future::plan(future::sequential)
+    }
+    else{
+      # ---- fit models----
+      parameters <- purrr::pmap(
+        param_grid,
+        function(alpha, lambda) {
+          MM(
+            x, y, g, reps, tol, max_iter, lambda, alpha,
+            init_pi[[g]], init_beta[[g]], init_sigma[[g]],
+            init_gamma[[g]], verbose, penalty
+          )
+        }
+      )
+    }
 
     # ----extract selection criteria----
     bic <- sapply(parameters, function(p) p$BIC)

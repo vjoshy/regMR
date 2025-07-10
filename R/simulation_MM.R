@@ -43,7 +43,8 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     for (g in 2:G){
       models[[g]] <- MM_over_lambda_alpha(g, x, y, reps, tol, max_iter, lambda,
                                           lambda_max, n_lambda, alpha, verbose,
-                                          penalty, random, n_random_la)
+                                          penalty, random, n_random_la,
+                                          parallel)
 
       # ----get model selection criteria----
       bic[g] <- models[[g]]$parameters$BIC
@@ -105,23 +106,35 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     return(list(parameters = selected_parameters, g = selected_compartment))
   }
   else{
-    # ----initialize workers and session----
-    if (!inherits(future::plan(), "multisession")) {
-      future::plan(future::multisession,
-                   workers = max(1, floor(future::availableCores()/2)))
+    if (parallel){
+      # ----initialize workers and session----
+      if (!inherits(future::plan(), "multisession")) {
+        future::plan(future::multisession,
+                     workers = max(1, floor(future::availableCores()/2)))
+      }
+
+      # ----parallelize MM algorithm over 2 -> G----
+      models <- furrr::future_map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
+                                  tol = tol, max_iter = max_iter, lambda = lambda,
+                                  lambda_max = lambda_max, n_lambda = n_lambda,
+                                  alpha = alpha, verbose = verbose, penalty = penalty,
+                                  random = random, n_random_la = n_random_la,
+                                  parallel = parallel, .progress = FALSE,
+                                  .options = furrr::furrr_options(seed = TRUE))
+
+      future::plan(future::sequential)
     }
+    else{
+      # ----MM algorithm over 2 -> G----
+      models <- purrr::map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
+                                  tol = tol, max_iter = max_iter, lambda = lambda,
+                                  lambda_max = lambda_max, n_lambda = n_lambda,
+                                  alpha = alpha, verbose = verbose, penalty = penalty,
+                                  random = random, n_random_la = n_random_la,
+                                  parallel = parallel)
 
-    # ----parallelize MM algorithm over 2 -> G----
-    models <- furrr::future_map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
-                         tol = tol, max_iter = max_iter, lambda = lambda,
-                         lambda_max = lambda_max, n_lambda = n_lambda,
-                         alpha = alpha, verbose = verbose, penalty = penalty,
-                         random = random, n_random_la = n_random_la,
-                         .progress = FALSE,
-                         .options = furrr::furrr_options(seed = TRUE))
+    }
   }
-
-  future::plan(future::sequential)
 
   for (i in 1:(G-1)){
     models[[i]]$parameters$MSE

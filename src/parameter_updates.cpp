@@ -1,3 +1,5 @@
+#undef ARMA_WARN_LEVEL
+#define ARMA_WARN_LEVEL 1
 #include <RcppArmadillo.h>
 
 // [[Rcpp::depends(RcppArmadillo)]]
@@ -20,9 +22,12 @@ arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
       ext_V_row = arma::join_cols(arma::vec(1, arma::fill::zeros), V_row.t());
       Vg = arma::diagmat(ext_V_row);
     }
+
     z = gamma_mat.col(g); // Z_g matrix in column form
+
     // Multiply column-wise to avoid large matrix multiplication
     XtZX = X.t() * (X.each_col() % z);
+
     // Regularize
     if (penalty){
       XtZX += lambda * Vg;
@@ -30,8 +35,10 @@ arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
     else{
       XtZX += 0.01 * arma::eye<arma::mat>(XtZX.n_rows, XtZX.n_cols);
     }
+
     // Multiply column-wise to avoid large matrix multiplication
     XtZy = X.t() * (y % z);
+
     try{
       // Solve for one row of beta at a time (1 X p)
       beta.row(g) = arma::solve(XtZX, XtZy).t();
