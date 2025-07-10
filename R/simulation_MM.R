@@ -18,32 +18,15 @@
 #' @param automatic_stopping
 #'
 #' @returns
+#' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
 #' @examples
-simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
+simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
                           lambda = NULL, lambda_max = NULL, n_lambda = 100,
                           alpha = seq(0, 1, by = 0.1), verbose = TRUE,
                           penalty = TRUE, random = FALSE, n_random_la = 100,
-                          automatic_stopping = FALSE){
-  # ----initialize workers and session----
-  old_plan <- future::plan()
-  on.exit(future::plan(old_plan), add = TRUE)
-  future::plan(future::multisession,
-               workers = max(1, floor(future::availableCores()/2)))
-
-  if (verbose) cat("\n")
-  if (verbose) cat(crayon::blue$bold("+----------------------------------+\n"))
-  if (verbose) cat(crayon::blue$bold("|  =====     ======   ===     ===  |\n"))
-  if (verbose) cat(crayon::blue$bold("| ==   ==      ==     == =   = ==  |\n"))
-  if (verbose) cat(crayon::blue$bold("|  ==          ==     ==  = =  ==  |\n"))
-  if (verbose) cat(crayon::blue$bold("|    ==        ==     ==   =   ==  |\n"))
-  if (verbose) cat(crayon::blue$bold("|      ==      ==     ==       ==  |\n"))
-  if (verbose) cat(crayon::blue$bold("| ==   ==      ==     ==       ==  |\n"))
-  if (verbose) cat(crayon::blue$bold("|  =====     ======  ====     ==== |\n"))
-  if (verbose) cat(crayon::blue$bold("+----------------------------------+\n\n"))
-
-
+                          automatic_stopping = FALSE, parallel = TRUE){
   # ----get covariates----
   p <- ncol(x)
 
@@ -79,14 +62,55 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
     # ----find compartment -> parameters which minimize model selection criteria
     # ----and return model----
     selected_compartment <- which.min(bic)
-    selected_paramaters <- models[[selected_compartment]]$parameters
-    selected_alpha <- models[[selected_compartment]]$alpha
-    selected_lambda <- models[[selected_compartment]]$lambda
+    selected_parameters <- models[[selected_compartment]]$parameters
 
-    return(list(parameters = selected_paramaters, g = selected_compartment,
-                alpha = selected_alpha, lambda = selected_lambda))
+    if (verbose) cat("\n")
+    if (verbose) cat(strrep("*", getOption("width")), "\n")
+    if (verbose) cat("\n -- overall model chosen --\n\n")
+    if (verbose) cat(" -- G_opt =", selected_compartment, "--\n\n")
+    if (verbose) cat(" lambda_opt =", selected_parameters$LAMBDA,
+                     "|| alpha_opt =", selected_parameters$ALPHA,
+                     "|| log-likelihood =", selected_parameters$LL,
+                     "|| BIC =", selected_parameters$BIC,
+                     "|| \n MSE (mean squared error)", selected_parameters$MSE,
+                     "\n")
+    idx <- seq(1, selected_compartment,
+               length.out = selected_compartment)
+    if (verbose) cat("\n Components:")
+    if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
+
+    if (verbose) cat("\n Pi ->        ")
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$PI),
+                           collapse = " "))
+
+    if (verbose) cat("\n Sigma ->     ")
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$SIGMA),
+                           collapse = " "))
+    if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
+    if (verbose) cat("\n Components:")
+    if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
+    if (verbose) cat("\n Intercept   ")
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$BETA[ , 1]),
+                           collapse = " "))
+    if (verbose) {
+      for (k in 2:ncol(selected_parameters$BETA)){
+        cat("\n Beta", k - 1, "     ")
+        cat(paste(sprintf("%6.3f", selected_parameters$BETA[ , k]),
+                  collapse = " "))
+      }
+    }
+    if (verbose) cat("\n\n")
+    if (verbose) cat(strrep("*", getOption("width")), "\n")
+
+    return(list(parameters = selected_parameters, g = selected_compartment))
   }
   else{
+    # ----initialize workers and session----
+    if (!inherits(future::plan(), "multisession")) {
+      future::plan(future::multisession,
+                   workers = max(1, floor(future::availableCores()/2)))
+    }
+
     # ----parallelize MM algorithm over 2 -> G----
     models <- furrr::future_map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
                          tol = tol, max_iter = max_iter, lambda = lambda,
@@ -96,6 +120,8 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
                          .progress = FALSE,
                          .options = furrr::furrr_options(seed = TRUE))
   }
+
+  future::plan(future::sequential)
 
   for (i in 1:(G-1)){
     models[[i]]$parameters$MSE
@@ -116,13 +142,13 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
     if (verbose) cat(" -- G_opt =", selected_compartment + 1, "--\n\n")
     if (verbose) cat(" lambda_opt =", selected_parameters$LAMBDA,
                      "|| alpha_opt =", selected_parameters$ALPHA,
-                     "|| log-likelihood =", selected_parameters$LOGLIK,
+                     "|| log-likelihood =", selected_parameters$LL,
                      "|| BIC =", selected_parameters$BIC,
                      "|| \n MSE (mean squared error)", selected_parameters$MSE,
                      "\n")
     idx <- seq(1, selected_compartment + 1,
                length.out = selected_compartment + 1)
-    if (verbose) cat("\n Compartment:")
+    if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
     if (verbose) cat("\n Pi ->        ")
@@ -133,7 +159,7 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
     if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$SIGMA),
                            collapse = " "))
     if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
-    if (verbose) cat("\n Compartment:")
+    if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
     if (verbose) cat("\n Intercept   ")
     if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$BETA[ , 1]),
@@ -152,7 +178,6 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-08, max_iter = 500,
   }
   else{
     # ----if error, return NA for each item----
-    return(list(parameters = NA, g = NA,
-                alpha = NA, lambda = NA))
+    return(list(parameters = NA, g = NA))
   }
 }

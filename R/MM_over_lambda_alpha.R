@@ -16,22 +16,17 @@
 #' @param n_random_la
 #'
 #' @returns
+#' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
 #' @examples
-MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
+MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
                                  max_iter = 500, lambda = NULL,
                                  lambda_max = NULL, n_lambda = 100,
                                  alpha = seq(0, 1, by = 0.1), verbose = TRUE,
                                  penalty = TRUE, random = FALSE,
                                  n_random_la = 100){
-  # ----initialize workers and session----
-  old_plan <- future::plan()
-  on.exit(future::plan(old_plan), add = TRUE)
-  future::plan(future::multisession,
-               workers = max(1, floor(future::availableCores()/2)))
-
-  if (verbose) cat("-- g =", g, "--\n")
+  if (verbose) cat("\n-- g =", g, "--\n")
 
   # ----get covariates----
   p = ncol(x)
@@ -83,19 +78,33 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
 
     if (random){
       # ---- create random parameter grid ----
-      set.seed(123)
       sample_idx <- sample(nrow(param_grid), n_random_la)
       param_grid <- param_grid[sample_idx, ]
     }
 
+    # ----initialize workers and session----
+    if (!inherits(future::plan(), "multisession")) {
+      future::plan(future::multisession,
+                   workers = max(1, floor(future::availableCores()/2)))
+    }
+
     # ---- fit models in parallel ----
-    parameters <- furrr::future_pmap(param_grid, function(alpha, lambda) {
-      return(MM(x, y, g, reps, tol, max_iter, lambda, alpha,
-                init_pi[[g]], init_beta[[g]], init_sigma[[g]],
-                init_gamma[[g]], verbose, penalty))
-    },
-    .options = furrr::furrr_options(seed = TRUE)
+    parameters <- furrr::future_pmap(
+      param_grid,
+      function(alpha, lambda) {
+        MM(
+          x, y, g, reps, tol, max_iter, lambda, alpha,
+          init_pi[[g]], init_beta[[g]], init_sigma[[g]],
+          init_gamma[[g]], verbose, penalty
+        )
+      },
+      .options = furrr::furrr_options(
+        seed = TRUE,
+        globals = list(MM = MM)
+      )
     )
+
+    future::plan(future::sequential)
 
     # ----extract selection criteria----
     bic <- sapply(parameters, function(p) p$BIC)
@@ -113,7 +122,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
                      "|| alpha_opt =", chosen_parameters$ALPHA,
                      "|| BIC =", chosen_parameters$BIC, "\n")
     idx <- seq(1, g, length.out = g)
-    if (verbose) cat("\n Compartment:")
+    if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
     if (verbose) cat("\n Pi ->        ")
@@ -124,7 +133,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
     if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$SIGMA),
                            collapse = " "))
     if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
-    if (verbose) cat("\n Compartment:")
+    if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
     if (verbose) cat("\n Intercept   ")
     if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$BETA[ , 1]),
@@ -152,7 +161,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
     if (verbose) cat("\n -- selected model for g =", g, "--\n\n")
     if (verbose) cat(" BIC =", chosen_parameters$BIC, "\n")
     idx <- seq(1, g, length.out = g)
-    if (verbose) cat("\n Compartment:")
+    if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
     if (verbose) cat("\n Pi ->        ")
@@ -163,7 +172,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
     if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$SIGMA),
                            collapse = " "))
     if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
-    if (verbose) cat("\n Compartment:")
+    if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
     if (verbose) cat("\n Intercept   ")
     if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$BETA[ , 1]),
@@ -178,6 +187,6 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-08,
     cat("\n\n")
 
     # ----return parameters, compartment number, lambda, and alpha----
-    return(list(parameters = parameters, g = g, lambda = 0, alpha = 0))
+    return(list(parameters = parameters, g = g))
   }
 }

@@ -16,12 +16,29 @@
 #' @param penalty
 #'
 #' @returns
+#' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
 #' @examples
-MM <- function(x, y, G, reps = 1, tol = 10e-08, max_iter = 500, lambda = 0,
+MM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500, lambda = 0,
                alpha = 0, init_pi = NULL, init_beta = NULL, init_sigma = NULL,
                init_gamma = NULL, verbose = TRUE, penalty = TRUE){
+  #----input validation/error check----
+  if(!is.numeric(x)){
+    stop("Invalid x\n")
+  }
+  if(!is.numeric(y)){
+    stop("Invalid y\n")
+  }
+  if (!is.numeric(G) || G <= 0){
+    stop("Invalid group size G\n")
+  }
+  if (!is.numeric(reps) || !is.numeric(tol) || !is.numeric(max_iter) ||
+      !is.numeric(lambda) ||!is.numeric(alpha) || !is.logical(verbose) ||
+      !is.logical(penalty)){
+    stop("Invalid input\n")
+  }
+
   # ----get number of covariates and samples, add ones for the intercept----
   p = ncol(x)
   n = nrow(x)
@@ -114,7 +131,11 @@ MM <- function(x, y, G, reps = 1, tol = 10e-08, max_iter = 500, lambda = 0,
       ll <- log_likelihood(x, y, pi, beta, sigma)
 
       # ----PENALTY----
-      pen <- penalty_MM(lambda, alpha, beta, G)
+      if (penalty){
+        pen <- penalty_MM(lambda, alpha, beta, G)
+      } else {
+        pen <- 0
+      }
 
       # ----OBJECTIVE FUNCTION----
       objective_fun_old <-  objective_fun_new
