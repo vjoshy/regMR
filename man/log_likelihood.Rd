@@ -8,7 +8,11 @@ regression distribution}
 log_likelihood(x, y, pi, beta, sigma)
 }
 \arguments{
-\item{sigma}{}
+\item{sigma}{Standard deviation for each group of finite Gaussian mixture
+regression model. Either a numeric vector, or something coercible to one}
+}
+\value{
+A single numeric value
 }
 \description{
 Compute incomplete data log-likelihood for a finite Gaussian mixture

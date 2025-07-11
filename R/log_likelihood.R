@@ -5,9 +5,10 @@
 #' @param y
 #' @param pi
 #' @param beta
-#' @param sigma
+#' @param sigma Standard deviation for each group of finite Gaussian mixture
+#' regression model. Either a numeric vector, or something coercible to one
 #'
-#' @returns
+#' @returns A single numeric value
 #' @export
 #'
 #' @examples
