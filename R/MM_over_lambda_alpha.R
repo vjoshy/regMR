@@ -145,7 +145,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
                            collapse = " "))
 
     if (verbose) cat("\n Sigma ->     ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$beta),
+    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
                            collapse = " "))
     if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
     if (verbose) cat("\n Components:")
