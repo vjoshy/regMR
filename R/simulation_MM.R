@@ -47,7 +47,7 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
                                           parallel)
 
       # ----get model selection criteria----
-      bic[g] <- models[[g]]$parameters$BIC
+      bic[g] <- models[[g]]$parameters$bic
 
       # ----apply automatic stopping procedure----
       running_bic <- -bic[2:g]/2
@@ -69,11 +69,11 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     if (verbose) cat(strrep("*", getOption("width")), "\n")
     if (verbose) cat("\n -- overall model chosen --\n\n")
     if (verbose) cat(" -- G_opt =", selected_compartment, "--\n\n")
-    if (verbose) cat(" lambda_opt =", selected_parameters$LAMBDA,
-                     "|| alpha_opt =", selected_parameters$ALPHA,
-                     "|| log-likelihood =", selected_parameters$LL,
-                     "|| BIC =", selected_parameters$BIC,
-                     "|| \n MSE (mean squared error)", selected_parameters$MSE,
+    if (verbose) cat(" lambda_opt =", selected_parameters$lambda,
+                     "|| alpha_opt =", selected_parameters$alpha,
+                     "|| log-likelihood =", selected_parameters$loglik,
+                     "|| BIC =", selected_parameters$bic,
+                     "|| \n MSE (mean squared error)", selected_parameters$mse,
                      "\n")
     idx <- seq(1, selected_compartment,
                length.out = selected_compartment)
@@ -81,22 +81,22 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
     if (verbose) cat("\n Pi ->        ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$PI),
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$pi),
                            collapse = " "))
 
     if (verbose) cat("\n Sigma ->     ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$SIGMA),
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$sigma),
                            collapse = " "))
     if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
     if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
     if (verbose) cat("\n Intercept   ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$BETA[ , 1]),
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
                            collapse = " "))
     if (verbose) {
-      for (k in 2:ncol(selected_parameters$BETA)){
+      for (k in 2:ncol(selected_parameters$beta)){
         cat("\n Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", selected_parameters$BETA[ , k]),
+        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
                   collapse = " "))
       }
     }
@@ -136,12 +136,8 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     }
   }
 
-  for (i in 1:(G-1)){
-    models[[i]]$parameters$MSE
-  }
-
   # ----get model selection criteria----
-  bic <- sapply(models, function(m) m$parameters$BIC)
+  bic <- sapply(models, function(m) m$parameters$bic)
 
   # ----find compartment -> parameters which minimize model selection criteria--
   # ----and return model----
@@ -153,11 +149,11 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     if (verbose) cat(strrep("*", getOption("width")), "\n")
     if (verbose) cat("\n -- overall model chosen --\n\n")
     if (verbose) cat(" -- G_opt =", selected_compartment + 1, "--\n\n")
-    if (verbose) cat(" lambda_opt =", selected_parameters$LAMBDA,
-                     "|| alpha_opt =", selected_parameters$ALPHA,
-                     "|| log-likelihood =", selected_parameters$LL,
-                     "|| BIC =", selected_parameters$BIC,
-                     "|| \n MSE (mean squared error)", selected_parameters$MSE,
+    if (verbose) cat(" lambda_opt =", selected_parameters$lambda,
+                     "|| alpha_opt =", selected_parameters$alpha,
+                     "|| log-likelihood =", selected_parameters$loglik,
+                     "|| BIC =", selected_parameters$bic,
+                     "|| \n MSE (mean squared error)", selected_parameters$mse,
                      "\n")
     idx <- seq(1, selected_compartment + 1,
                length.out = selected_compartment + 1)
@@ -165,22 +161,22 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
     if (verbose) cat("\n Pi ->        ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$PI),
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$pi),
                            collapse = " "))
 
     if (verbose) cat("\n Sigma ->     ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$SIGMA),
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$sigma),
                            collapse = " "))
     if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
     if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
     if (verbose) cat("\n Intercept   ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$BETA[ , 1]),
+    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
                            collapse = " "))
     if (verbose) {
-      for (k in 2:ncol(selected_parameters$BETA)){
+      for (k in 2:ncol(selected_parameters$beta)){
         cat("\n Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", selected_parameters$BETA[ , k]),
+        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
                   collapse = " "))
       }
     }

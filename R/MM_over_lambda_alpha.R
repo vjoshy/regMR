@@ -122,7 +122,7 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
     }
 
     # ----extract selection criteria----
-    bic <- sapply(parameters, function(p) p$BIC)
+    bic <- sapply(parameters, function(p) p$bic)
 
     # ----find model that minimizes bic----
     selected_model <- which.min(bic)
@@ -133,36 +133,36 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
     # ----output progress----
     if (verbose) cat(strrep("=", getOption("width")), "\n")
     if (verbose) cat("\n -- selected model for g =", g, "--\n\n")
-    if (verbose) cat(" lambda_opt =", chosen_parameters$LAMBDA,
-                     "|| alpha_opt =", chosen_parameters$ALPHA,
-                     "|| BIC =", chosen_parameters$BIC, "\n")
+    if (verbose) cat(" lambda_opt =", chosen_parameters$lambda,
+                     "|| alpha_opt =", chosen_parameters$alpha,
+                     "|| BIC =", chosen_parameters$bic, "\n")
     idx <- seq(1, g, length.out = g)
     if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
     if (verbose) cat("\n Pi ->        ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$PI),
+    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$pi),
                            collapse = " "))
 
     if (verbose) cat("\n Sigma ->     ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$SIGMA),
+    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$beta),
                            collapse = " "))
     if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
     if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
     if (verbose) cat("\n Intercept   ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$BETA[ , 1]),
+    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
                            collapse = " "))
     if (verbose) {
-      for (k in 2:ncol(chosen_parameters$BETA)){
+      for (k in 2:ncol(chosen_parameters$beta)){
         cat("\n Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", chosen_parameters$BETA[ , k]),
+        cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
                   collapse = " "))
       }
     }
     cat("\n\n")
 
-    chosen_parameters$LAMBA_MAX <- exp(lambda_max)
+    chosen_parameters$lambda_max <- exp(lambda_max)
 
     # ----return parameters, compartment number----
     return(list(parameters = chosen_parameters, g = g))
@@ -176,28 +176,28 @@ MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
     # ----output progress----
     if (verbose) cat(strrep("=", getOption("width")), "\n")
     if (verbose) cat("\n -- selected model for g =", g, "--\n\n")
-    if (verbose) cat(" BIC =", chosen_parameters$BIC, "\n")
+    if (verbose) cat(" BIC =", chosen_parameters$bic, "\n")
     idx <- seq(1, g, length.out = g)
     if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
     if (verbose) cat("\n Pi ->        ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$PI),
+    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$pi),
                            collapse = " "))
 
     if (verbose) cat("\n Sigma ->     ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$SIGMA),
+    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
                            collapse = " "))
     if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
     if (verbose) cat("\n Components:")
     if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
     if (verbose) cat("\n Intercept   ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$BETA[ , 1]),
+    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
                            collapse = " "))
     if (verbose) {
-      for (k in 2:ncol(chosen_parameters$BETA)){
+      for (k in 2:ncol(chosen_parameters$beta)){
         cat("\n Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", chosen_parameters$BETA[ , k]),
+        cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
                   collapse = " "))
       }
     }

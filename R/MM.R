@@ -171,9 +171,9 @@ MM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500, lambda = 0,
     # ----expected predicted y and mean squared error----
     y_ik <- x %*% t(betas[[min_index]])
     y_hat <- rowSums(gammas[[min_index]] * y_ik)
-    MSE <- mean((y_hat - y)^2)
+    mse <- mean((y_hat - y)^2)
 
-    # ----initialize hard version of gamma_mat----
+    # ----calculate hard version of gamma_mat----
     gamma_mat_hard <- matrix(nrow = nrow(gammas[[min_index]]),
                              ncol = ncol(gammas[[min_index]]))
     for (i in 1:nrow(gammas[[min_index]])){
@@ -187,16 +187,22 @@ MM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500, lambda = 0,
       }
     }
 
+    # ----mean squared error fitted response----
+    y_hat_hard <- rowSums(gammas[[min_index]] * y_ik)
+    mse_fitted_response <- mean((y_hat_hard - y)^2)
+
     # ----return parameters----
-    return(list(BIC = bics[min_index], LL = logliks[min_index],
-                BETA = betas[[min_index]], PI = pis[[min_index]],
-                SIGMA = sigmas[[min_index]], LAMBDA = lambda, ALPHA = alpha,
-                Z = gammas[[min_index]], Z_hard = gamma_mat_hard,
-                Y_HAT = y_hat, MSE = MSE))
+    return(list(bic = bics[min_index], loglik = logliks[min_index],
+                beta = betas[[min_index]], pi = pis[[min_index]],
+                sigma = sigmas[[min_index]], z = gammas[[min_index]],
+                z_hard = gamma_mat_hard, y_hat = y_hat, mse = mse,
+                mse_fitted = mse_fitted_response, alpha = alpha,
+                lambda = lambda))
   }
   else{
     # ----if all stopping criteria are NA, return NA for each parameter----
-    return(list(BIC = NA, LL = NA, BETA = NA, PI = NA, SIGMA = NA, Z = NA,
-                Y_HAT = NA))
+    return(list(bic = NA, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
+                z_hard = NA, y_hat = NA, mse = NA,mse_fitted = NA,
+                alpha = alpha, lambda = lambda))
   }
 }
