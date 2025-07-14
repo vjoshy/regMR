@@ -7,8 +7,20 @@
 penalty_MM(lambda, alpha, beta, G)
 }
 \arguments{
-\item{G}{}
+\item{lambda}{Tuning parameter}
+
+\item{alpha}{ADD HERE}
+
+\item{beta}{Regression parameters for each group of finite Gaussian mixture
+regression model. A numeric matrix of size G x (p + 1), where the number of
+rows is equal to the number of groups G, and the number of columns is
+equal to the number of covariates p + 1}
+
+\item{G}{Number of groups in finite Gaussian mixture regression model}
+}
+\value{
+A single numeric value
 }
 \description{
-Calculate sparse group lasso penalty
+ADD DESCRIPTION
 }

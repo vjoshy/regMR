@@ -1,10 +1,14 @@
 #' Update mixing proportions for finite Gaussian mixture regression model within
 #' MM Algorithm
 #'
-#' @param n
-#' @param gamma_mat
+#' ADD DESCRIPTION
 #'
-#' @returns
+#' @param n Number of observations
+#' @param gamma_mat Group responsibility matrix. A numeric matrix of size n x G,
+#' where the number of rows is equal to the number of observations n, and the
+#' number of columns is equal to the number of groups G
+#'
+#' @returns A numeric vector
 #' @export
 #'
 #' @examples

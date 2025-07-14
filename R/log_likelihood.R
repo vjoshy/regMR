@@ -1,10 +1,19 @@
 #' Compute incomplete data log-likelihood for a finite Gaussian mixture
 #' regression distribution
 #'
-#' @param x
-#' @param y
-#' @param pi
-#' @param beta
+#' ADD DESCRIPTION
+#'
+#' @param x Design matrix. A numeric matrix of size n x p, where the number of
+#' rows is equal to the number of observations n, and the number of columns is
+#' equal to the number of covariates p
+#' @param y Response vector. Either a numeric vector, or something coercible to
+#' one
+#' @param pi Mixing proportions for each group of finite Gaussian mixture
+#' regression model. Either a numeric vector, or something coercible to one
+#' @param beta Regression parameters for each group of finite Gaussian mixture
+#' regression model. A numeric matrix of size G x (p + 1), where the number of
+#' rows is equal to the number of groups G, and the number of columns is
+#' equal to the number of covariates p + 1
 #' @param sigma Standard deviation for each group of finite Gaussian mixture
 #' regression model. Either a numeric vector, or something coercible to one
 #'

@@ -9,10 +9,20 @@ Algorithm}
 compute_V(G, beta, alpha)
 }
 \arguments{
-\item{alpha}{}
+\item{G}{Number of groups in finite Gaussian mixture regression model}
+
+\item{beta}{Regression parameters for each group of finite Gaussian mixture
+regression model. A numeric matrix of size G x (p + 1), where the number of
+rows is equal to the number of groups G, and the number of columns is
+equal to the number of covariates p + 1}
+
+\item{alpha}{ADD HERE}
+}
+\value{
+A numeric matrix of size G x (p + 1), where the number of
+rows is equal to the number of groups G, and the number of columns is
+equal to the number of covariates p + 1
 }
 \description{
-Compute sparse group lasso penalty majorization term for updating
-regression parameters for finite Gaussian mixture regression model within MM
-Algorithm
+ADD DESCRIPTION
 }

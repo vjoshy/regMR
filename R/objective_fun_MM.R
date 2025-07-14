@@ -1,10 +1,12 @@
 #' Calculate objective function for a finite Gaussian mixture regression
 #' model
 #'
-#' @param ll
-#' @param pen
+#' ADD DESCRIPTION
 #'
-#' @returns
+#' @param ll Log-likelihood
+#' @param pen Penalty term
+#'
+#' @returns A single numeric value
 #' @export
 #'
 #' @examples

@@ -8,9 +8,13 @@ model}
 objective_fun_MM(ll, pen)
 }
 \arguments{
-\item{pen}{}
+\item{ll}{Log-likelihood}
+
+\item{pen}{Penalty term}
+}
+\value{
+A single numeric value
 }
 \description{
-Calculate objective function for a finite Gaussian mixture regression
-model
+ADD DESCRIPTION
 }
