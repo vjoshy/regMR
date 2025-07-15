@@ -33,6 +33,18 @@ one.}
 number of mixture components (groups) in a finite Gaussian mixture regression
 model.}
 
+\item{reps}{An integer greater than or equal to one specifying the number of
+random initializations ran within the MM algorithm. Default value is 1.}
+
+\item{tol}{A non-negative numeric value specifying the stopping criteria for
+the MM algorithm. If the difference in value of the objective function being
+minimized is within tol in two consecutive iterations, then the algorithm
+stops.}
+
+\item{max_iter}{An integer greater than or equal to one specifying the
+maximum number of iterations ran within the MM algorithm. Default value is
+500.}
+
 \item{lambda}{A non-negative numeric value specifying the strength of the
 sparse group lasso penalty. Also known as the tuning parameter. Default value
 is 0 (no penalty applied).}
@@ -42,8 +54,43 @@ weight between the lasso penalty and group lasso penalty being applied (GS).
 Alpha = 1 gives the lasso fit and alpha = 0 (default value) gives the group
 lasso fit (GS).}
 
-\item{penalty}{}
+\item{init_pi}{A numeric vector containing an (optional) initial estimate for
+the mixing proportions of the finite Gaussian mixture model being estimated.
+Default value is NULL, and if an initial estimate is not provided one is
+initialized using the Mclust function from the mclust package.}
+
+\item{init_beta}{(Optional) Initial estimate for the regression parameters
+for each mixture component (group) of the finite Gaussian mixture model being
+estimated. Default value is NULL, and if an initial estimate is not provided
+one is initialized using the Mclust function from the mclust package. A
+numeric matrix of size G x (p + 1), where the number of rows is equal to the
+number of mixture components (groups) G, and the number of columns is equal
+to the number of covariates p + 1 (for the intercept term).}
+
+\item{init_sigma}{A numeric vector containing an (optional) initial estimate
+for the standard deviations of the finite Gaussian mixture model being
+estimated. Default value is NULL, and if an initial estimate is not provided
+one is initialized using the Mclust function from the mclust package.}
+
+\item{init_gamma}{(Optional) Initial estimate for the group responsibilities
+of the finite Gaussian mixture model being estimated. Default value is NULL,
+and if an initial estimate is not provided one is initialized using the
+Mclust function from the mclust package. A numeric matrix of size n x G,
+where the number of rows is equal to the number of observations n, and the
+number of columns is equal to the number of mixture components (groups) G.}
+
+\item{verbose}{A logical value which, if true (default value), prints
+progress updates within the function.}
+
+\item{penalty}{A logical value which, if true (default value), applies the
+sparse group lasso penalty to the regression parameter updates and objective
+function within iterations of the MM algorithm.}
 }
 \description{
-Majorization-Minimization Algorithm
+Applies the Majorization-Minimization Algorithm to the inputted data given
+the specified parameters to estimate a finite Gaussian mixture regression
+model. Initial estimates for model parameters (pi, beta, sigma, z) are
+provided within the function using Mclust from the mclust package, but can be
+specified in the function call. This function is used during model
+estimation.
 }
