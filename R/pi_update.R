@@ -1,14 +1,16 @@
-#' Update mixing proportions for finite Gaussian mixture regression model within
-#' MM Algorithm
+#' Mixing Proportions
 #'
-#' ADD DESCRIPTION
+#' Update/compute mixing proportions for a finite Gaussian mixture regression
+#' model. This function is used during model estimation, specifically within
+#' iterations of the MM algorithm.
 #'
-#' @param n Number of observations
+#' @param n A numeric value representing the number of observations.
 #' @param gamma_mat Group responsibility matrix. A numeric matrix of size n x G,
 #' where the number of rows is equal to the number of observations n, and the
-#' number of columns is equal to the number of groups G
+#' number of columns is equal to the number of mixture components (groups) G.
 #'
-#' @returns A numeric vector
+#' @returns A numeric vector containing the mixing proportions for the given
+#' model.
 #' @export
 #'
 #' @examples

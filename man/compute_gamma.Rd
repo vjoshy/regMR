@@ -2,35 +2,37 @@
 % Please edit documentation in R/compute_gamma.R
 \name{compute_gamma}
 \alias{compute_gamma}
-\title{Compute group responsibility matrix for a finite Gaussian mixture regression
-distribution}
+\title{Group Responsibilities}
 \usage{
 compute_gamma(x, y, pi, beta, sigma)
 }
 \arguments{
 \item{x}{Design matrix. A numeric matrix of size n x p, where the number of
 rows is equal to the number of observations n, and the number of columns is
-equal to the number of covariates p}
+equal to the number of covariates p.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
-one}
+one.}
 
-\item{pi}{Mixing proportions for each group of finite Gaussian mixture
-regression model. Either a numeric vector, or something coercible to one}
+\item{pi}{Mixing proportions for each group. Either a numeric vector, or
+something coercible to one.}
 
-\item{beta}{Regression parameters for each group of finite Gaussian mixture
-regression model. A numeric matrix of size G x (p + 1), where the number of
-rows is equal to the number of groups G, and the number of columns is
-equal to the number of covariates p + 1}
+\item{beta}{Regression parameters for each mixture component (group).
+A numeric matrix of size G x (p + 1), where the number of rows is equal to
+the number of mixture components (groups) G, and the number of columns is
+equal to the number of covariates p + 1 (for the intercept term).}
 
-\item{sigma}{Standard deviation for each group of finite Gaussian mixture
-regression model. Either a numeric vector, or something coercible to one}
+\item{sigma}{Standard deviation for each mixture component (group). Either a
+numeric vector, or something coercible to one.}
 }
 \value{
 A numeric matrix of size n x G, where the number of
 rows is equal to the number of observations n, and the number of columns is
-equal to the number of groups G
+equal to the number of mixture components (groups) G, representing the group
+responsibilities for the given model.
 }
 \description{
-ADD DESCRIPTION
+Compute group responsibility matrix for a finite Gaussian mixture regression
+distribution. This function is used during model estimation, specifically
+within iterations of the MM algorithm.
 }

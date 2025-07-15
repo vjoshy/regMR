@@ -2,19 +2,22 @@
 % Please edit documentation in R/objective_fun_MM.R
 \name{objective_fun_MM}
 \alias{objective_fun_MM}
-\title{Calculate objective function for a finite Gaussian mixture regression
-model}
+\title{Objective Function for Finite Gaussian Mixture Regression Model}
 \usage{
 objective_fun_MM(ll, pen)
 }
 \arguments{
-\item{ll}{Log-likelihood}
+\item{ll}{A numeric scalar representing the log-likelihood of the model.}
 
-\item{pen}{Penalty term}
+\item{pen}{A numeric scalar representing the sparse group lasso penalty
+being applied to the log-likelihood.}
 }
 \value{
-A single numeric value
+A numeric scalar representing the negative penalized objective
+function used for minimization.
 }
 \description{
-ADD DESCRIPTION
+Computes the negative penalized log-likelihood objective function for a
+finite Gaussian mixture regression model. This function is used during model
+estimation.
 }

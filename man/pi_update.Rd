@@ -2,21 +2,23 @@
 % Please edit documentation in R/pi_update.R
 \name{pi_update}
 \alias{pi_update}
-\title{Update mixing proportions for finite Gaussian mixture regression model within
-MM Algorithm}
+\title{Mixing Proportions}
 \usage{
 pi_update(n, gamma_mat)
 }
 \arguments{
-\item{n}{Number of observations}
+\item{n}{A numeric value representing the number of observations.}
 
 \item{gamma_mat}{Group responsibility matrix. A numeric matrix of size n x G,
 where the number of rows is equal to the number of observations n, and the
-number of columns is equal to the number of groups G}
+number of columns is equal to the number of mixture components (groups) G.}
 }
 \value{
-A numeric vector
+A numeric vector containing the mixing proportions for the given
+model.
 }
 \description{
-ADD DESCRIPTION
+Update/compute mixing proportions for a finite Gaussian mixture regression
+model. This function is used during model estimation, specifically within
+iterations of the MM algorithm.
 }
