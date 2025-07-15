@@ -86,6 +86,9 @@ progress updates within the function.}
 sparse group lasso penalty to the regression parameter updates and objective
 function within iterations of the MM algorithm.}
 }
+\value{
+ADD HERE
+}
 \description{
 Applies the Majorization-Minimization Algorithm to the inputted data given
 the specified parameters to estimate a finite Gaussian mixture regression

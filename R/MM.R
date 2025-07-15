@@ -58,7 +58,7 @@
 #' sparse group lasso penalty to the regression parameter updates and objective
 #' function within iterations of the MM algorithm.
 #'
-#' @returns
+#' @returns ADD HERE
 #' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
