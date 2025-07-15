@@ -6,7 +6,11 @@
 #' equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
+<<<<<<< HEAD
 #' @param G ADD HERE
+=======
+#' @param G
+>>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 #' @param reps An integer greater than or equal to one specifying the number of
 #' random initializations ran within the MM algorithm. Default value is 1.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
@@ -16,18 +20,31 @@
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
+<<<<<<< HEAD
 #' @param lambda ADD HERE
 #' @param lambda_max A numeric value ADD HERE
 #' @param n_lambda An integer ADD HERE
 #' @param alpha A numeric vector ADD HERE
+=======
+#' @param lambda
+#' @param lambda_max
+#' @param n_lambda
+#' @param alpha
+>>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 #' @param verbose A logical value which, if true (default value), prints
 #' progress updates within the function.
 #' @param penalty A logical value which, if true (default value), applies the
 #' sparse group lasso penalty to the regression parameter updates and objective
 #' function within iterations of the MM algorithm.
+<<<<<<< HEAD
 #' @param random A logical value ADD HERE
 #' @param n_random_la An integer ADD HERE
 #' @param automatic_stopping A logical value ADD HERE
+=======
+#' @param random
+#' @param n_random_la
+#' @param automatic_stopping
+>>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 #'
 #' @returns ADD HERE
 #' @importFrom mclust Mclust mclustBIC

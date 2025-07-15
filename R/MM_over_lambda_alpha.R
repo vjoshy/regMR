@@ -19,17 +19,29 @@
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
+<<<<<<< HEAD
 #' @param lambda ADD HERE
 #' @param lambda_max A numeric value ADD HERE
 #' @param n_lambda An integer ADD HERE
 #' @param alpha A numeric vector ADD HERE
+=======
+#' @param lambda
+#' @param lambda_max
+#' @param n_lambda
+#' @param alpha
+>>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 #' @param verbose A logical value which, if true (default value), prints
 #' progress updates within the function.
 #' @param penalty A logical value which, if true (default value), applies the
 #' sparse group lasso penalty to the regression parameter updates and objective
 #' function within iterations of the MM algorithm.
+<<<<<<< HEAD
 #' @param random A logical value ADD HERE
 #' @param n_random_la An integer ADD HERE
+=======
+#' @param random
+#' @param n_random_la
+>>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 #'
 #' @returns ADD HERE
 #' @importFrom mclust Mclust mclustBIC
