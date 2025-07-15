@@ -86,6 +86,11 @@ progress updates within the function.}
 sparse group lasso penalty to the regression parameter updates and objective
 function within iterations of the MM algorithm.}
 }
+\value{
+A list containing the parameters of the estimated finite Gaussian
+mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
+y_hat, mse, mse_fitted, alpha, lambda)
+}
 \description{
 Applies the Majorization-Minimization Algorithm to the inputted data given
 the specified parameters to estimate a finite Gaussian mixture regression

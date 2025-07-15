@@ -25,6 +25,8 @@ simulation_MM(
 )
 }
 \arguments{
+\item{i}{ADD HERE}
+
 \item{x}{Design matrix. A numeric matrix of size n x p where the number of
 rows is equal to the number of observations n, and the number of columns is
 equal to the number of covariates p.}
@@ -32,7 +34,43 @@ equal to the number of covariates p.}
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
 
-\item{automatic_stopping}{}
+\item{G}{ADD HERE}
+
+\item{reps}{An integer greater than or equal to one specifying the number of
+random initializations ran within the MM algorithm. Default value is 1.}
+
+\item{tol}{A non-negative numeric value specifying the stopping criteria for
+the MM algorithm. If the difference in value of the objective function being
+minimized is within tol in two consecutive iterations, then the algorithm
+stops.}
+
+\item{max_iter}{An integer greater than or equal to one specifying the
+maximum number of iterations ran within the MM algorithm. Default value is
+500.}
+
+\item{lambda}{ADD HERE}
+
+\item{lambda_max}{A numeric value ADD HERE}
+
+\item{n_lambda}{An integer ADD HERE}
+
+\item{alpha}{A numeric vector ADD HERE}
+
+\item{verbose}{A logical value which, if true (default value), prints
+progress updates within the function.}
+
+\item{penalty}{A logical value which, if true (default value), applies the
+sparse group lasso penalty to the regression parameter updates and objective
+function within iterations of the MM algorithm.}
+
+\item{random}{A logical value ADD HERE}
+
+\item{n_random_la}{An integer ADD HERE}
+
+\item{automatic_stopping}{A logical value ADD HERE}
+}
+\value{
+ADD HERE
 }
 \description{
 Majorization-Minimization Algorithm over Mixing Compartments

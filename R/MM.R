@@ -58,7 +58,9 @@
 #' sparse group lasso penalty to the regression parameter updates and objective
 #' function within iterations of the MM algorithm.
 #'
-#' @returns
+#' @returns A list containing the parameters of the estimated finite Gaussian
+#' mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
+#' y_hat, mse, mse_fitted, alpha, lambda)
 #' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
