@@ -4,9 +4,9 @@
 #' distribution. This function is used during model estimation, specifically
 #' within iterations of the MM algorithm.
 #'
-#' @param x Design matrix. A numeric matrix of size n x p, where the number of
-#' rows is equal to the number of observations n, and the number of columns is
-#' equal to the number of covariates p.
+#' @param x Design matrix. A numeric matrix of size n x (p + 1), where the
+#' number of rows is equal to the number of observations n, and the number of
+#' columns is equal to the number of covariates p + 1 (for the intercept term).
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
 #' @param pi Mixing proportions for each group. Either a numeric vector, or

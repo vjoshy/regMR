@@ -1,13 +1,23 @@
-#' Title
+#' Majorization-Minimization Algorithm
 #'
-#' @param x
-#' @param y
-#' @param G
+#' @param x Design matrix. A numeric matrix of size n x p where the number of
+#' rows is equal to the number of observations n, and the number of columns is
+#' equal to the number of covariates p.
+#' @param y Response vector. Either a numeric vector, or something coercible to
+#' one.
+#' @param G An integer greater than or equal to one representing the
+#' number of mixture components (groups) in a finite Gaussian mixture regression
+#' model.
 #' @param reps
 #' @param tol
 #' @param max_iter
-#' @param lambda
-#' @param alpha
+#' @param lambda A non-negative numeric value specifying the strength of the
+#' sparse group lasso penalty. Also known as the tuning parameter. Default value
+#' is 0 (no penalty applied).
+#' @param alpha A numeric value between zero and one inclusive specifying the
+#' weight between the lasso penalty and group lasso penalty being applied (GS).
+#' Alpha = 1 gives the lasso fit and alpha = 0 (default value) gives the group
+#' lasso fit (GS).
 #' @param init_pi
 #' @param init_beta
 #' @param init_sigma

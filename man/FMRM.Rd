@@ -2,7 +2,7 @@
 % Please edit documentation in R/FMRM.R
 \name{FMRM}
 \alias{FMRM}
-\title{Title}
+\title{Finite Mixture Regression Model Fitting}
 \usage{
 FMRM(
   x,
@@ -25,8 +25,15 @@ FMRM(
 )
 }
 \arguments{
+\item{x}{Design matrix. A numeric matrix of size n x p where the number of
+rows is equal to the number of observations n, and the number of columns is
+equal to the number of covariates p.}
+
+\item{y}{Response vector. Either a numeric vector, or something coercible to
+one.}
+
 \item{parallel}{}
 }
 \description{
-Title
+Finite Mixture Regression Model Fitting
 }

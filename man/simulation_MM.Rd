@@ -2,7 +2,7 @@
 % Please edit documentation in R/simulation_MM.R
 \name{simulation_MM}
 \alias{simulation_MM}
-\title{Title}
+\title{Majorization-Minimization Algorithm over Mixing Compartments}
 \usage{
 simulation_MM(
   i,
@@ -25,8 +25,15 @@ simulation_MM(
 )
 }
 \arguments{
+\item{x}{Design matrix. A numeric matrix of size n x p where the number of
+rows is equal to the number of observations n, and the number of columns is
+equal to the number of covariates p.}
+
+\item{y}{Response vector. Either a numeric vector, or something coercible to
+one.}
+
 \item{automatic_stopping}{}
 }
 \description{
-Title
+Majorization-Minimization Algorithm over Mixing Compartments
 }

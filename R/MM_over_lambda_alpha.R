@@ -1,8 +1,11 @@
-#' Title
+#' Majorization-Minimization Algorithm over Lambda-Alpha Vectors
 #'
 #' @param g
-#' @param x
-#' @param y
+#' @param x Design matrix. A numeric matrix of size n x p where the number of
+#' rows is equal to the number of observations n, and the number of columns is
+#' equal to the number of covariates p.
+#' @param y Response vector. Either a numeric vector, or something coercible to
+#' one.
 #' @param reps
 #' @param tol
 #' @param max_iter

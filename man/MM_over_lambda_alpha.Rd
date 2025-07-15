@@ -2,7 +2,7 @@
 % Please edit documentation in R/MM_over_lambda_alpha.R
 \name{MM_over_lambda_alpha}
 \alias{MM_over_lambda_alpha}
-\title{Title}
+\title{Majorization-Minimization Algorithm over Lambda-Alpha Vectors}
 \usage{
 MM_over_lambda_alpha(
   g,
@@ -23,8 +23,15 @@ MM_over_lambda_alpha(
 )
 }
 \arguments{
+\item{x}{Design matrix. A numeric matrix of size n x p where the number of
+rows is equal to the number of observations n, and the number of columns is
+equal to the number of covariates p.}
+
+\item{y}{Response vector. Either a numeric vector, or something coercible to
+one.}
+
 \item{n_random_la}{}
 }
 \description{
-Title
+Majorization-Minimization Algorithm over Lambda-Alpha Vectors
 }
