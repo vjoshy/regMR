@@ -32,7 +32,6 @@ equal to the number of covariates p.}
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
 
-<<<<<<< HEAD
 \item{G}{An integer ADD HERE}
 
 \item{reps}{An integer greater than or equal to one specifying the number of
@@ -40,11 +39,6 @@ random initializations ran within the MM algorithm. Default value is 1.}
 
 \item{sims}{ADD HERE}
 
-=======
-\item{reps}{An integer greater than or equal to one specifying the number of
-random initializations ran within the MM algorithm. Default value is 1.}
-
->>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm. If the difference in value of the objective function being
 minimized is within tol in two consecutive iterations, then the algorithm
@@ -54,17 +48,14 @@ stops.}
 maximum number of iterations ran within the MM algorithm. Default value is
 500.}
 
-<<<<<<< HEAD
 \item{lambda}{ADD HERE}
 
 \item{lambda_max}{A numeric value ADD HERE}
 
 \item{n_lambda}{An integer ADD HERE}
 
-\item{alpha}{A numeric value ADD HERE}
+\item{alpha}{A numeric vector ADD HERE}
 
-=======
->>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 \item{verbose}{A logical value which, if true (default value), prints
 progress updates within the function.}
 
@@ -72,7 +63,6 @@ progress updates within the function.}
 sparse group lasso penalty to the regression parameter updates and objective
 function within iterations of the MM algorithm.}
 
-<<<<<<< HEAD
 \item{random}{A logical value ADD HERE}
 
 \item{n_random_la}{An integer ADD HERE}
@@ -83,9 +73,6 @@ function within iterations of the MM algorithm.}
 }
 \value{
 ADD HERE
-=======
-\item{parallel}{}
->>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 }
 \description{
 ADD HERE

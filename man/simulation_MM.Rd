@@ -34,11 +34,8 @@ equal to the number of covariates p.}
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
 
-<<<<<<< HEAD
 \item{G}{ADD HERE}
 
-=======
->>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 \item{reps}{An integer greater than or equal to one specifying the number of
 random initializations ran within the MM algorithm. Default value is 1.}
 
@@ -51,7 +48,6 @@ stops.}
 maximum number of iterations ran within the MM algorithm. Default value is
 500.}
 
-<<<<<<< HEAD
 \item{lambda}{ADD HERE}
 
 \item{lambda_max}{A numeric value ADD HERE}
@@ -60,8 +56,6 @@ maximum number of iterations ran within the MM algorithm. Default value is
 
 \item{alpha}{A numeric vector ADD HERE}
 
-=======
->>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 \item{verbose}{A logical value which, if true (default value), prints
 progress updates within the function.}
 
@@ -69,19 +63,17 @@ progress updates within the function.}
 sparse group lasso penalty to the regression parameter updates and objective
 function within iterations of the MM algorithm.}
 
-<<<<<<< HEAD
 \item{random}{A logical value ADD HERE}
 
 \item{n_random_la}{An integer ADD HERE}
 
 \item{automatic_stopping}{A logical value ADD HERE}
+
+\item{parallel}{A logical value ADD HERE}
 }
 \value{
 ADD HERE
-=======
-\item{automatic_stopping}{}
->>>>>>> 3a7fe6fa519823724f2806c7b04d50b6c21a379c
 }
 \description{
-Majorization-Minimization Algorithm over Mixing Compartments
+ADD HERE
 }
