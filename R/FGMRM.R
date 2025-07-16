@@ -1,8 +1,7 @@
-#' Majorization-Minimization Algorithm over Mixing Compartments
+#' Regularized Finite Gaussian Mixture Regression Model Using MM Algorithm
 #'
 #' ADD HERE
 #'
-#' @param i ADD HERE
 #' @param x Design matrix. A numeric matrix of size n x p where the number of
 #' rows is equal to the number of observations n, and the number of columns is
 #' equal to the number of covariates p.
@@ -23,11 +22,11 @@
 #' @param lambda A list of length G of numeric vectors containing non-negative
 #' tuning parameters specifying various strengths of the sparse group lasso
 #' penalty. Finite Gaussian mixture models will be estimated using each lambda
-#' value. Default value is NULL as function will initialize lambdas for each
+#' value. Default value is NULL as the function will initialize lambdas for each
 #' group count from 2 to G using an algorithm.
 #' @param lambda_max A non-negative numeric value specifying the maximum lambda
 #' value (tuning parameter) used in creation of each lambda vector. Default
-#' value is NULL as function will initialize lambda_max for each group count
+#' value is NULL as the function will initialize lambda_max for each group count
 #' from 2 to G using an algorithm.
 #' @param n_lambda An integer ADD HERE
 #' @param alpha A numeric vector ADD HERE
@@ -45,13 +44,34 @@
 #'
 #' @returns ADD HERE
 #' @importFrom mclust Mclust mclustBIC
+#' @export
 #'
-#' @keywords internal
-simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
-                          lambda = NULL, lambda_max = NULL, n_lambda = 100,
-                          alpha = seq(0, 1, by = 0.1), verbose = TRUE,
-                          penalty = TRUE, random = FALSE, n_random_la = 100,
-                          automatic_stopping = FALSE, parallel = TRUE){
+#' @examples
+FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
+                  lambda = NULL, lambda_max = NULL, n_lambda = 100,
+                  alpha = seq(0, 1, by = 0.1), verbose = TRUE, penalty = TRUE,
+                  random = FALSE, n_random_la = 100, automatic_stopping = FALSE,
+                  parallel = TRUE){
+  #----input validation/error check----
+  if(!is.numeric(x)){
+    stop("Invalid x\n")
+  }
+  if(!is.numeric(y)){
+    stop("Invalid y\n")
+  }
+  if (!is.numeric(G) || G <= 1){
+    stop("Invalid group size G\n")
+  }
+  if (!is.numeric(reps) || !is.numeric(tol) || !is.numeric(max_iter) ||
+      !is.numeric(n_lambda) || !is.numeric(alpha) || !is.logical(verbose) ||
+      !is.logical(penalty) || !is.logical(random) || !is.numeric(n_random_la)
+      || !is.logical(automatic_stopping)){
+    stop("Invalid input\n")
+  }
+  if (length(alpha) * n_lambda < n_random_la && random){
+    stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
+  }
+
   # ----get covariates----
   p <- ncol(x)
 
@@ -98,7 +118,7 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
                      "|| alpha_opt =", selected_parameters$alpha,
                      "|| log-likelihood =", selected_parameters$loglik,
                      "|| BIC =", selected_parameters$bic,
-                     "|| \n MSE (mean squared error)", selected_parameters$mse,
+                     "|| MSE (mean squared error)", selected_parameters$mse,
                      "\n")
     idx <- seq(1, selected_compartment,
                length.out = selected_compartment)
@@ -152,11 +172,11 @@ simulation_MM <- function(i, x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     else{
       # ----MM algorithm over 2 -> G----
       models <- purrr::map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
-                                  tol = tol, max_iter = max_iter, lambda = lambda,
-                                  lambda_max = lambda_max, n_lambda = n_lambda,
-                                  alpha = alpha, verbose = verbose, penalty = penalty,
-                                  random = random, n_random_la = n_random_la,
-                                  parallel = parallel)
+                           tol = tol, max_iter = max_iter, lambda = lambda,
+                           lambda_max = lambda_max, n_lambda = n_lambda,
+                           alpha = alpha, verbose = verbose, penalty = penalty,
+                           random = random, n_random_la = n_random_la,
+                           parallel = parallel)
 
     }
   }

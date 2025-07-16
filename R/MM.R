@@ -147,17 +147,17 @@ MM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500, lambda = 0,
     # ----MM algorithm iterated until stopping criteria is met----
     while (iter < max_iter){
       # ----Zig----
-      gamma_mat <- compute_gamma(x, y, pi, beta, sigma)
+      gamma_mat <- compute_gamma_FGMRM(x, y, pi, beta, sigma)
 
       # ----N (column sums of gamma_mat)----
-      N <- compute_N(gamma_mat)
+      N <- compute_N_FGMRM(gamma_mat)
       if (any(is.na(N))){
         break
       }
 
       # ----if penalty is true, calculate V matrix for penalty----
       if (penalty) {
-        V <- compute_V(G, beta, alpha)
+        V <- compute_V_FGMRM(G, beta, alpha)
       }
 
       # ----UPDATE BETA PARAMETER----
@@ -167,24 +167,24 @@ MM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500, lambda = 0,
       }
 
       # ----UPDATE PI PARAMETER----
-      pi <- pi_update(n, gamma_mat)
+      pi <- pi_update_FGMRM(n, gamma_mat)
 
       # ----UPDATE SIGMA PARAMETER----
       sigma <- sigma_update(x, y, gamma_mat, beta, N)
 
       # ----LOG LIKELIHOOD----
-      ll <- log_likelihood(x, y, pi, beta, sigma)
+      ll <- log_likelihood_FGMRM(x, y, pi, beta, sigma)
 
       # ----PENALTY----
       if (penalty){
-        pen <- penalty_MM(lambda, alpha, beta, G)
+        pen <- sgl_penalty_FGMRM(lambda, alpha, beta, G)
       } else {
         pen <- 0
       }
 
       # ----OBJECTIVE FUNCTION----
       objective_fun_old <-  objective_fun_new
-      objective_fun_new <- objective_fun_MM(ll, pen)
+      objective_fun_new <- objective_function_FGMRM(ll, pen)
 
       if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol){
         break

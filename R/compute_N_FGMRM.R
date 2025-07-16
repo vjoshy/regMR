@@ -12,7 +12,7 @@
 #' @returns A numeric vector containing the column sums of gamma_mat.
 #'
 #' @keywords internal
-compute_N <- function(gamma_mat){
+compute_N_FGMRM <- function(gamma_mat){
   # ----sum over observations for each group in gamma_mat----
   N <- colSums(gamma_mat)
 

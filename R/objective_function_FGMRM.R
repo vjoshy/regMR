@@ -13,8 +13,8 @@
 #' objective function used for minimization.
 #'
 #' @keywords internal
-objective_fun_MM <- function(ll, pen){
-  objective_fun <- -ll + pen
+objective_function_FGMRM <- function(ll, pen){
+  obj_fun <- -ll + pen
 
-  return(objective_fun)
+  return(obj_fun)
 }

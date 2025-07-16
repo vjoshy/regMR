@@ -1,8 +1,8 @@
-#' Mixing Proportions
+#' Mixing Proportions for Finite Gaussian Mixture Regression Distribution
 #'
 #' Update/compute mixing proportions for a finite Gaussian mixture regression
-#' model. This function is used during model estimation, specifically within
-#' iterations of the MM algorithm.
+#' distribution. This function is used during model estimation, specifically
+#' within iterations of the MM algorithm.
 #'
 #' @param n A numeric value representing the number of observations.
 #' @param gamma_mat Group responsibility matrix. A numeric matrix of size n x G,
@@ -13,7 +13,7 @@
 #' corresponding finite Gaussian mixture regression model.
 #'
 #' @keywords internal
-pi_update <- function(n, gamma_mat){
+pi_update_FGMRM <- function(n, gamma_mat){
   # ----sum over observations for each group in gamma_mat----
   N <- colSums(gamma_mat)
 

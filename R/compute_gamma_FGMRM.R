@@ -1,8 +1,8 @@
-#' Incomplete Data Log-likelihood
+#' Group Responsibilities (Z)
 #'
-#' Compute incomplete data log-likelihood for a finite Gaussian mixture
-#' regression distribution. This function is used during model estimation,
-#' specifically within iterations of the MM algorithm.
+#' Compute group responsibility matrix for a finite Gaussian mixture regression
+#' distribution. This function is used during model estimation, specifically
+#' within iterations of the MM algorithm.
 #'
 #' @param x Design matrix. A numeric matrix of size n x (p + 1), where the
 #' number of rows is equal to the number of observations n, and the number of
@@ -18,26 +18,30 @@
 #' @param sigma Standard deviation for each mixture component (group). Either a
 #' numeric vector, or something coercible to one.
 #'
-#' @returns A numeric scalar representing the incomplete data log-likelihood
-#' for the given model.
+#' @returns A numeric matrix of size n x G, where the number of rows is equal to
+#' the number of observations n, and the number of columns is equal to the
+#' number of mixture components (groups) G, representing the group
+#' responsibilities for the given model.
 #'
 #' @keywords internal
-log_likelihood <- function(x, y, pi, beta, sigma){
+compute_gamma_FGMRM <- function(x, y, pi, beta, sigma){
   y <- as.vector(y)
   sigma <- as.vector(sigma)
 
   n <- length(y)
   G <- nrow(beta)
-  componentSum <- matrix(0, n, G)
+  gamma_mat <- matrix(0, n, G)
 
   # ----calculate B_{g0} + x_{i1}B_{g1} + ... + x_{ip}B_{gp} for all i and g----
   mu <- x %*% t(beta)
 
-  # ----calculate weighted densities for all i and g----
-  componentSum <- vapply(1:G, function(g)
+  # ----weighted densities for all i and g----
+  gamma_mat <- vapply(1:G, function(g)
     pi[g] * stats::dnorm(y, mean = mu[, g], sd = sigma[g]),
     numeric(n))
 
-  # ----sum over g, take the log for all i, then sum over i----
-  return(sum(log(rowSums(componentSum))))
+  # ----divide each element by the sum of weighted densities across g----
+  gamma_mat <- gamma_mat/rowSums(gamma_mat)
+
+  return(gamma_mat)
 }

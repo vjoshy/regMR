@@ -20,7 +20,7 @@
 #' @returns A numeric scalar representing the sgl penalty for the given model.
 #'
 #' @keywords internal
-penalty_MM <- function(lambda, alpha, beta, G){
+sgl_penalty_FGMRM <- function(lambda, alpha, beta, G){
   pen = lambda * ((alpha * (sum(colSums(abs(beta[, -1]))))) +
                     (1 - alpha) * (sum(sqrt(G) * sqrt(colSums(beta[ , -1]^2)))))
 

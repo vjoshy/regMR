@@ -22,7 +22,7 @@
 #' term), representing the sgl penalty majorization matrix.
 #'
 #' @keywords internal
-compute_V <- function(G, beta, alpha){
+compute_V_FGMRM <- function(G, beta, alpha){
   # ----get beta with no intercept----
   beta_noint <- beta[ , -1, drop=FALSE]
 
