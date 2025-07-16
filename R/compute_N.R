@@ -1,7 +1,7 @@
 #' Column Sums of Group Responsibility Matrix
 #'
 #' Compute sum of predicted responsibilities along each mixture component
-#' (group) for updating mixing proportion and sigma estimates for finite
+#' (group) for updating mixing proportions (pi) and sigma estimates for finite
 #' Gaussian mixture regression models. This function is used during model
 #' estimation, specifically within iterations of the MM algorithm.
 #'
@@ -10,9 +10,8 @@
 #' number of columns is equal to the number of mixture components (groups) G.
 #'
 #' @returns A numeric vector containing the column sums of gamma_mat.
-#' @export
 #'
-#' @examples
+#' @keywords internal
 compute_N <- function(gamma_mat){
   # ----sum over observations for each group in gamma_mat----
   N <- colSums(gamma_mat)

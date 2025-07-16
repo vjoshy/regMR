@@ -9,11 +9,10 @@
 #' where the number of rows is equal to the number of observations n, and the
 #' number of columns is equal to the number of mixture components (groups) G.
 #'
-#' @returns A numeric vector containing the mixing proportions for the given
-#' model.
-#' @export
+#' @returns A numeric vector containing the mixing proportions for the
+#' corresponding finite Gaussian mixture regression model.
 #'
-#' @examples
+#' @keywords internal
 pi_update <- function(n, gamma_mat){
   # ----sum over observations for each group in gamma_mat----
   N <- colSums(gamma_mat)

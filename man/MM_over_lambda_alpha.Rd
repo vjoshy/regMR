@@ -35,33 +35,42 @@ equal to the number of covariates p.}
 one.}
 
 \item{reps}{An integer greater than or equal to one specifying the number of
-random initializations ran within the MM algorithm. Default value is 1.}
+random initializations ran within the MM algorithm. Default value is one.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
-the MM algorithm. If the difference in value of the objective function being
-minimized is within tol in two consecutive iterations, then the algorithm
-stops.}
+the MM algorithm (default value is 10e-04). If the difference in value of the
+objective function being minimized is within tol in two consecutive
+iterations, then the algorithm stops.}
 
 \item{max_iter}{An integer greater than or equal to one specifying the
 maximum number of iterations ran within the MM algorithm. Default value is
 500.}
 
-\item{lambda}{ADD HERE}
+\item{lambda}{A list of length G of numeric vectors containing non-negative
+tuning parameters specifying various strengths of the sparse group lasso
+penalty. Finite Gaussian mixture models will be estimated using each lambda
+value. Default value is NULL as function will initialize lambdas for each
+group count from 2 to G using an algorithm.}
 
-\item{lambda_max}{A numeric value ADD HERE}
+\item{lambda_max}{A non-negative numeric value specifying the maximum lambda
+value (tuning parameter) used in creation of each lambda vector. Default
+value is NULL as function will initialize lambda_max for each group count
+from 2 to G using an algorithm.}
 
 \item{n_lambda}{An integer ADD HERE}
 
 \item{alpha}{A numeric vector ADD HERE}
 
-\item{verbose}{A logical value which, if true (default value), prints
-progress updates within the function.}
+\item{verbose}{A logical value which, if true (default value), allows the
+function to print progress updates.}
 
-\item{penalty}{A logical value which, if true (default value), applies the
-sparse group lasso penalty to the regression parameter updates and objective
-function within iterations of the MM algorithm.}
+\item{penalty}{A logical value which, if true (default value), allows the
+function to apply the sparse group lasso penalty to the regression parameter
+updates and objective function within iterations of the MM algorithm.}
 
-\item{random}{A logical value ADD HERE}
+\item{random}{A logical value which, if true (false is the default value),
+allows the function to take a random sample of size n_random_la from the
+lambda-alpha pairs and run the MM algorithm over the reduced grid.}
 
 \item{n_random_la}{An integer ADD HERE}
 
@@ -73,3 +82,4 @@ ADD HERE
 \description{
 ADD HERE
 }
+\keyword{internal}

@@ -14,11 +14,12 @@ where the number of rows is equal to the number of observations n, and the
 number of columns is equal to the number of mixture components (groups) G.}
 }
 \value{
-A numeric vector containing the mixing proportions for the given
-model.
+A numeric vector containing the mixing proportions for the
+corresponding finite Gaussian mixture regression model.
 }
 \description{
 Update/compute mixing proportions for a finite Gaussian mixture regression
 model. This function is used during model estimation, specifically within
 iterations of the MM algorithm.
 }
+\keyword{internal}

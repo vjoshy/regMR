@@ -17,10 +17,10 @@ one.}
 \item{pi}{Mixing proportions for each group. Either a numeric vector, or
 something coercible to one.}
 
-\item{beta}{Regression parameters for each mixture component (group).
-A numeric matrix of size G x (p + 1), where the number of rows is equal to
-the number of mixture components (groups) G, and the number of columns is
-equal to the number of covariates p + 1 (for the intercept term).}
+\item{beta}{Regression parameters for each mixture component (group). A
+numeric matrix of size G x (p + 1), where the number of rows is equal to the
+number of mixture components (groups) G, and the number of columns is equal
+to the number of covariates p + 1 (for the intercept term).}
 
 \item{sigma}{Standard deviation for each mixture component (group). Either a
 numeric vector, or something coercible to one.}
@@ -34,3 +34,4 @@ Compute incomplete data log-likelihood for a finite Gaussian mixture
 regression distribution. This function is used during model estimation,
 specifically within iterations of the MM algorithm.
 }
+\keyword{internal}

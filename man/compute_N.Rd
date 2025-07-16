@@ -16,7 +16,8 @@ A numeric vector containing the column sums of gamma_mat.
 }
 \description{
 Compute sum of predicted responsibilities along each mixture component
-(group) for updating mixing proportion and sigma estimates for finite
+(group) for updating mixing proportions (pi) and sigma estimates for finite
 Gaussian mixture regression models. This function is used during model
 estimation, specifically within iterations of the MM algorithm.
 }
+\keyword{internal}
