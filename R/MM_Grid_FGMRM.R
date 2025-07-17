@@ -1,4 +1,4 @@
-#' Majorization-Minimization Algorithm over Lambda-Alpha Vectors
+#' Majorization-Minimization Algorithm over Lambda-Alpha Grid
 #'
 #' ADD HERE
 #'
@@ -22,14 +22,19 @@
 #' @param lambda A list of length G of numeric vectors containing non-negative
 #' tuning parameters specifying various strengths of the sparse group lasso
 #' penalty. Finite Gaussian mixture models will be estimated using each lambda
-#' value. Default value is NULL as function will initialize lambdas for each
+#' value. Default value is NULL as the function will initialize lambdas for each
 #' group count from 2 to G using an algorithm.
 #' @param lambda_max A non-negative numeric value specifying the maximum lambda
 #' value (tuning parameter) used in creation of each lambda vector. Default
-#' value is NULL as function will initialize lambda_max for each group count
+#' value is NULL as the function will initialize lambda_max for each group count
 #' from 2 to G using an algorithm.
-#' @param n_lambda An integer ADD HERE
-#' @param alpha A numeric vector ADD HERE
+#' @param n_lambda An integer greater than one (default value 100) specifying
+#' the length of the lambda vector for each group count from 2 to G.
+#' @param alpha A numeric vector containing values between zero and one
+#' inclusive specifying different weights between the lasso penalty and group
+#' lasso penalty being applied (GS). Alpha = 1 gives the lasso fit and alpha = 0
+#' gives the group lasso fit (GS). Default value is a numeric vector of length
+#' 11: c(0, 0.1, 0.2, ..., 1).
 #' @param verbose A logical value which, if true (default value), allows the
 #' function to print progress updates.
 #' @param penalty A logical value which, if true (default value), allows the
@@ -38,14 +43,18 @@
 #' @param random A logical value which, if true (false is the default value),
 #' allows the function to take a random sample of size n_random_la from the
 #' lambda-alpha pairs and run the MM algorithm over the reduced grid.
-#' @param n_random_la An integer ADD HERE
-#' @param parallel An logical value ADD HERE
+#' @param n_random_la A non-negative integer (default value 100) specifying the
+#' number of lambda-alpha pairs to be sampled when random is TRUE.
+#' @param parallel A logical value which, if true (default value), allows the
+#' function to run parallel workers to increase computational speed.
 #'
-#' @returns ADD HERE
+#' @returns A list containing the parameters of the estimated finite Gaussian
+#' mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
+#' y_hat, mse, mse_fitted, alpha, lambda) and the optimal group count.
 #' @importFrom mclust Mclust mclustBIC
 #'
 #' @keywords internal
-MM_over_lambda_alpha <- function(g, x, y, reps = 1, tol = 10e-04,
+MM_Grid_FGMRM <- function(g, x, y, reps = 1, tol = 10e-04,
                                  max_iter = 500, lambda = NULL,
                                  lambda_max = NULL, n_lambda = 100,
                                  alpha = seq(0, 1, by = 0.1), verbose = TRUE,

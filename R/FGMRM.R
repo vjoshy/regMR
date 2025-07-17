@@ -28,8 +28,13 @@
 #' value (tuning parameter) used in creation of each lambda vector. Default
 #' value is NULL as the function will initialize lambda_max for each group count
 #' from 2 to G using an algorithm.
-#' @param n_lambda An integer ADD HERE
-#' @param alpha A numeric vector ADD HERE
+#' @param n_lambda An integer greater than one (default value 100) specifying
+#' the length of the lambda vector for each group count from 2 to G.
+#' @param alpha A numeric vector containing values between zero and one
+#' inclusive specifying different weights between the lasso penalty and group
+#' lasso penalty being applied (GS). Alpha = 1 gives the lasso fit and alpha = 0
+#' gives the group lasso fit (GS). Default value is a numeric vector of length
+#' 11: c(0, 0.1, 0.2, ..., 1).
 #' @param verbose A logical value which, if true (default value), allows the
 #' function to print progress updates.
 #' @param penalty A logical value which, if true (default value), allows the
@@ -38,11 +43,18 @@
 #' @param random A logical value which, if true (false is the default value),
 #' allows the function to take a random sample of size n_random_la from the
 #' lambda-alpha pairs and run the MM algorithm over the reduced grid.
-#' @param n_random_la An integer ADD HERE
-#' @param automatic_stopping A logical value ADD HERE
-#' @param parallel A logical value ADD HERE
+#' @param n_random_la A non-negative integer (default value 100) specifying the
+#' number of lambda-alpha pairs to be sampled when random is TRUE.
+#' @param automatic_stopping A logical value which, if true (false is the
+#' default value), allows the function to implement BIC automatic stopping over
+#' the group count from 2 to G. When the condition for stopping is met, the
+#' function stops iterating over the group count.
+#' @param parallel A logical value which, if true (default value), allows the
+#' function to run parallel workers to increase computational speed.
 #'
-#' @returns ADD HERE
+#' @returns A list containing the parameters of the estimated finite Gaussian
+#' mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
+#' y_hat, mse, mse_fitted, alpha, lambda) and the optimal group count.
 #' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
@@ -63,9 +75,9 @@ FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     stop("Invalid group size G\n")
   }
   if (!is.numeric(reps) || !is.numeric(tol) || !is.numeric(max_iter) ||
-      !is.numeric(n_lambda) || !is.numeric(alpha) || !is.logical(verbose) ||
-      !is.logical(penalty) || !is.logical(random) || !is.numeric(n_random_la)
-      || !is.logical(automatic_stopping)){
+      !is.numeric(n_lambda) || n_lambda < 2 || !is.numeric(alpha) ||
+      !is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
+      !is.numeric(n_random_la) || !is.logical(automatic_stopping)){
     stop("Invalid input\n")
   }
   if (length(alpha) * n_lambda < n_random_la && random){
@@ -86,7 +98,7 @@ FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
 
   if (automatic_stopping){
     for (g in 2:G){
-      models[[g]] <- MM_over_lambda_alpha(g, x, y, reps, tol, max_iter, lambda,
+      models[[g]] <- MM_Grid_FGMRM(g, x, y, reps, tol, max_iter, lambda,
                                           lambda_max, n_lambda, alpha, verbose,
                                           penalty, random, n_random_la,
                                           parallel)
@@ -159,10 +171,11 @@ FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
       }
 
       # ----parallelize MM algorithm over 2 -> G----
-      models <- furrr::future_map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
-                                  tol = tol, max_iter = max_iter, lambda = lambda,
-                                  lambda_max = lambda_max, n_lambda = n_lambda,
-                                  alpha = alpha, verbose = verbose, penalty = penalty,
+      models <- furrr::future_map(2:G, MM_Grid_FGMRM, x = x, y = y, reps = reps,
+                                  tol = tol, max_iter = max_iter,
+                                  lambda = lambda, lambda_max = lambda_max,
+                                  n_lambda = n_lambda, alpha = alpha,
+                                  verbose = verbose, penalty = penalty,
                                   random = random, n_random_la = n_random_la,
                                   parallel = parallel, .progress = FALSE,
                                   .options = furrr::furrr_options(seed = TRUE))
@@ -171,7 +184,7 @@ FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     }
     else{
       # ----MM algorithm over 2 -> G----
-      models <- purrr::map(2:G, MM_over_lambda_alpha, x = x, y = y, reps = reps,
+      models <- purrr::map(2:G, MM_Grid_FGMRM, x = x, y = y, reps = reps,
                            tol = tol, max_iter = max_iter, lambda = lambda,
                            lambda_max = lambda_max, n_lambda = n_lambda,
                            alpha = alpha, verbose = verbose, penalty = penalty,

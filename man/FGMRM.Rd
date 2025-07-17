@@ -58,9 +58,14 @@ value (tuning parameter) used in creation of each lambda vector. Default
 value is NULL as the function will initialize lambda_max for each group count
 from 2 to G using an algorithm.}
 
-\item{n_lambda}{An integer ADD HERE}
+\item{n_lambda}{An integer greater than one (default value 100) specifying
+the length of the lambda vector for each group count from 2 to G.}
 
-\item{alpha}{A numeric vector ADD HERE}
+\item{alpha}{A numeric vector containing values between zero and one
+inclusive specifying different weights between the lasso penalty and group
+lasso penalty being applied (GS). Alpha = 1 gives the lasso fit and alpha = 0
+gives the group lasso fit (GS). Default value is a numeric vector of length
+11: c(0, 0.1, 0.2, ..., 1).}
 
 \item{verbose}{A logical value which, if true (default value), allows the
 function to print progress updates.}
@@ -73,14 +78,21 @@ updates and objective function within iterations of the MM algorithm.}
 allows the function to take a random sample of size n_random_la from the
 lambda-alpha pairs and run the MM algorithm over the reduced grid.}
 
-\item{n_random_la}{An integer ADD HERE}
+\item{n_random_la}{A non-negative integer (default value 100) specifying the
+number of lambda-alpha pairs to be sampled when random is TRUE.}
 
-\item{automatic_stopping}{A logical value ADD HERE}
+\item{automatic_stopping}{A logical value which, if true (false is the
+default value), allows the function to implement BIC automatic stopping over
+the group count from 2 to G. When the condition for stopping is met, the
+function stops iterating over the group count.}
 
-\item{parallel}{A logical value ADD HERE}
+\item{parallel}{A logical value which, if true (default value), allows the
+function to run parallel workers to increase computational speed.}
 }
 \value{
-ADD HERE
+A list containing the parameters of the estimated finite Gaussian
+mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
+y_hat, mse, mse_fitted, alpha, lambda) and the optimal group count.
 }
 \description{
 ADD HERE
