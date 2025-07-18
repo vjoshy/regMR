@@ -1,6 +1,10 @@
 #' Regularized Finite Gaussian Mixture Regression Model Using MM Algorithm
 #'
-#' ADD HERE
+#' Applies the Majorization-Minimization Algorithm to the inputted data over all
+#' group counts from 2 to G and all lambda-alpha pairs given the specified
+#' parameters to estimate a finite Gaussian mixture regression model. The
+#' function chooses the model with the lowest bic. It can be ran sequentially or
+#' in parallel. This function is for model estimation.
 #'
 #' @param x Design matrix. A numeric matrix of size n x p where the number of
 #' rows is equal to the number of observations n, and the number of columns is

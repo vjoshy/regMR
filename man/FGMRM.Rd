@@ -91,5 +91,9 @@ mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
 y_hat, mse, mse_fitted, alpha, lambda) and the optimal group count.
 }
 \description{
-ADD HERE
+Applies the Majorization-Minimization Algorithm to the inputted data over all
+group counts from 2 to G and all lambda-alpha pairs given the specified
+parameters to estimate a finite Gaussian mixture regression model. The
+function chooses the model with the lowest bic. It can be ran sequentially or
+in parallel. This function is for model estimation.
 }
