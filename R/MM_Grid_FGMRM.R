@@ -1,7 +1,11 @@
 #' Majorization-Minimization Algorithm over Lambda-Alpha Grid for Finite
 #' Gaussian Mixture Regression Models
 #'
-#' ADD HERE
+#' Applies the Majorization-Minimization Algorithm to the inputted data over all
+#' lambda-alpha pairs given the specified parameters to estimate a finite
+#' Gaussian mixture regression model. The function chooses the model with the
+#' lowest bic. It can be ran sequentially or in parallel. This function is used
+#' during model estimation.
 #'
 #' @param g An integer greater than or equal to one representing the
 #' number of mixture components (groups) in a finite Gaussian mixture regression
@@ -51,8 +55,9 @@
 #' mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
 #' y_hat, mse, mse_fitted, alpha, lambda) and the optimal group count.
 #' @importFrom mclust Mclust mclustBIC
+#' @export
 #'
-#' @keywords internal
+#' @examples
 MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
                           lambda_max = NULL, n_lambda = 100,
                           alpha = seq(0, 1, by = 0.1), verbose = TRUE,

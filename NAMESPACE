@@ -2,6 +2,7 @@
 
 export(FGMRM)
 export(MM_FGMRM)
+export(MM_Grid_FGMRM)
 importFrom(Rcpp,sourceCpp)
 importFrom(mclust,Mclust)
 importFrom(mclust,mclustBIC)
