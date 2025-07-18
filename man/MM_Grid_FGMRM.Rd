@@ -2,13 +2,13 @@
 % Please edit documentation in R/MM_Grid_FGMRM.R
 \name{MM_Grid_FGMRM}
 \alias{MM_Grid_FGMRM}
-\title{Majorization-Minimization Algorithm over Lambda-Alpha Grid}
+\title{Majorization-Minimization Algorithm over Lambda-Alpha Grid for Finite
+Gaussian Mixture Regression Models}
 \usage{
 MM_Grid_FGMRM(
   g,
   x,
   y,
-  reps = 1,
   tol = 0.001,
   max_iter = 500,
   lambda = NULL,
@@ -33,9 +33,6 @@ equal to the number of covariates p.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
-
-\item{reps}{An integer greater than or equal to one specifying the number of
-random initializations ran within the MM algorithm. Default value is one.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the

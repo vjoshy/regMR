@@ -8,7 +8,6 @@ FGMRM(
   x,
   y,
   G,
-  reps = 1,
   tol = 0.001,
   max_iter = 500,
   lambda = NULL,
@@ -34,9 +33,6 @@ one.}
 \item{G}{An integer greater than or equal to two specifying the maximum
 number of mixture components (groups) in the estimated model that the
 function will attempt to fit the data to.}
-
-\item{reps}{An integer greater than or equal to one specifying the number of
-random initializations ran within the MM algorithm. Default value is one.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the

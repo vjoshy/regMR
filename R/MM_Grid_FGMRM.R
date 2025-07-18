@@ -1,4 +1,5 @@
-#' Majorization-Minimization Algorithm over Lambda-Alpha Grid
+#' Majorization-Minimization Algorithm over Lambda-Alpha Grid for Finite
+#' Gaussian Mixture Regression Models
 #'
 #' ADD HERE
 #'
@@ -10,8 +11,6 @@
 #' equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
-#' @param reps An integer greater than or equal to one specifying the number of
-#' random initializations ran within the MM algorithm. Default value is one.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -54,12 +53,11 @@
 #' @importFrom mclust Mclust mclustBIC
 #'
 #' @keywords internal
-MM_Grid_FGMRM <- function(g, x, y, reps = 1, tol = 10e-04,
-                                 max_iter = 500, lambda = NULL,
-                                 lambda_max = NULL, n_lambda = 100,
-                                 alpha = seq(0, 1, by = 0.1), verbose = TRUE,
-                                 penalty = TRUE, random = FALSE,
-                                 n_random_la = 100, parallel = TRUE){
+MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
+                          lambda_max = NULL, n_lambda = 100,
+                          alpha = seq(0, 1, by = 0.1), verbose = TRUE,
+                          penalty = TRUE, random = FALSE, n_random_la = 100,
+                          parallel = TRUE){
   if (verbose) cat("\n-- g =", g, "--\n")
 
   # ----get covariates----
@@ -127,15 +125,13 @@ MM_Grid_FGMRM <- function(g, x, y, reps = 1, tol = 10e-04,
       parameters <- furrr::future_pmap(
         param_grid,
         function(alpha, lambda) {
-          MM(
-            x, y, g, reps, tol, max_iter, lambda, alpha,
-            init_pi[[g]], init_beta[[g]], init_sigma[[g]],
-            init_gamma[[g]], verbose, penalty
-          )
+          MM_FGMRM(x, y, g, tol, max_iter, lambda, alpha, init_pi[[g]],
+                   init_beta[[g]], init_sigma[[g]], init_gamma[[g]], verbose,
+                   penalty)
         },
         .options = furrr::furrr_options(
           seed = TRUE,
-          globals = list(MM = MM)
+          globals = list(MM_FGMRM = MM_FGMRM)
         )
       )
 
@@ -146,11 +142,9 @@ MM_Grid_FGMRM <- function(g, x, y, reps = 1, tol = 10e-04,
       parameters <- purrr::pmap(
         param_grid,
         function(alpha, lambda) {
-          MM(
-            x, y, g, reps, tol, max_iter, lambda, alpha,
-            init_pi[[g]], init_beta[[g]], init_sigma[[g]],
-            init_gamma[[g]], verbose, penalty
-          )
+          MM_FGMRM(x, y, g, tol, max_iter, lambda, alpha, init_pi[[g]],
+                   init_beta[[g]], init_sigma[[g]], init_gamma[[g]], verbose,
+                   penalty)
         }
       )
     }
@@ -203,9 +197,9 @@ MM_Grid_FGMRM <- function(g, x, y, reps = 1, tol = 10e-04,
   }
   else{
     # ----if penalty is false, call MM once with lambda, alpha = 0----
-    parameters <- MM(x, y, g, reps, tol, max_iter, 0, 0, init_pi[[g]],
-                     init_beta[[g]], init_sigma[[g]], init_gamma[[g]], verbose,
-                     penalty)
+    chosen_parameters <- MM_FGMRM(x, y, g, tol, max_iter, 0, 0, init_pi[[g]],
+                                  init_beta[[g]], init_sigma[[g]],
+                                  init_gamma[[g]], verbose, penalty)
 
     # ----output progress----
     if (verbose) cat(strrep("=", getOption("width")), "\n")
@@ -238,6 +232,6 @@ MM_Grid_FGMRM <- function(g, x, y, reps = 1, tol = 10e-04,
     cat("\n\n")
 
     # ----return parameters, compartment number, lambda, and alpha----
-    return(list(parameters = parameters, g = g))
+    return(list(parameters = chosen_parameters, g = g))
   }
 }

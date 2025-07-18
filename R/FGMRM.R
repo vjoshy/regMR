@@ -10,8 +10,6 @@
 #' @param G An integer greater than or equal to two specifying the maximum
 #' number of mixture components (groups) in the estimated model that the
 #' function will attempt to fit the data to.
-#' @param reps An integer greater than or equal to one specifying the number of
-#' random initializations ran within the MM algorithm. Default value is one.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -59,7 +57,7 @@
 #' @export
 #'
 #' @examples
-FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
+FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
                   lambda = NULL, lambda_max = NULL, n_lambda = 100,
                   alpha = seq(0, 1, by = 0.1), verbose = TRUE, penalty = TRUE,
                   random = FALSE, n_random_la = 100, automatic_stopping = FALSE,
@@ -74,10 +72,10 @@ FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
   if (!is.numeric(G) || G <= 1){
     stop("Invalid group size G\n")
   }
-  if (!is.numeric(reps) || !is.numeric(tol) || !is.numeric(max_iter) ||
-      !is.numeric(n_lambda) || n_lambda < 2 || !is.numeric(alpha) ||
-      !is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
-      !is.numeric(n_random_la) || !is.logical(automatic_stopping)){
+  if (!is.numeric(tol) || !is.numeric(max_iter) || !is.numeric(n_lambda) ||
+      n_lambda < 2 || !is.numeric(alpha) || !is.logical(verbose) ||
+      !is.logical(penalty) || !is.logical(random) || !is.numeric(n_random_la) ||
+      !is.logical(automatic_stopping)){
     stop("Invalid input\n")
   }
   if (length(alpha) * n_lambda < n_random_la && random){
@@ -98,10 +96,9 @@ FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
 
   if (automatic_stopping){
     for (g in 2:G){
-      models[[g]] <- MM_Grid_FGMRM(g, x, y, reps, tol, max_iter, lambda,
-                                          lambda_max, n_lambda, alpha, verbose,
-                                          penalty, random, n_random_la,
-                                          parallel)
+      models[[g]] <- MM_Grid_FGMRM(g, x, y, tol, max_iter, lambda, lambda_max,
+                                   n_lambda, alpha, verbose, penalty, random,
+                                   n_random_la, parallel)
 
       # ----get model selection criteria----
       bic[g] <- models[[g]]$parameters$bic
@@ -171,12 +168,12 @@ FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
       }
 
       # ----parallelize MM algorithm over 2 -> G----
-      models <- furrr::future_map(2:G, MM_Grid_FGMRM, x = x, y = y, reps = reps,
-                                  tol = tol, max_iter = max_iter,
-                                  lambda = lambda, lambda_max = lambda_max,
-                                  n_lambda = n_lambda, alpha = alpha,
-                                  verbose = verbose, penalty = penalty,
-                                  random = random, n_random_la = n_random_la,
+      models <- furrr::future_map(2:G, MM_Grid_FGMRM, x = x, y = y, tol = tol,
+                                  max_iter = max_iter, lambda = lambda,
+                                  lambda_max = lambda_max, n_lambda = n_lambda,
+                                  alpha = alpha, verbose = verbose,
+                                  penalty = penalty, random = random,
+                                  n_random_la = n_random_la,
                                   parallel = parallel, .progress = FALSE,
                                   .options = furrr::furrr_options(seed = TRUE))
 
@@ -184,8 +181,8 @@ FGMRM <- function(x, y, G, reps = 1, tol = 10e-04, max_iter = 500,
     }
     else{
       # ----MM algorithm over 2 -> G----
-      models <- purrr::map(2:G, MM_Grid_FGMRM, x = x, y = y, reps = reps,
-                           tol = tol, max_iter = max_iter, lambda = lambda,
+      models <- purrr::map(2:G, MM_Grid_FGMRM, x = x, y = y, tol = tol,
+                           max_iter = max_iter, lambda = lambda,
                            lambda_max = lambda_max, n_lambda = n_lambda,
                            alpha = alpha, verbose = verbose, penalty = penalty,
                            random = random, n_random_la = n_random_la,
