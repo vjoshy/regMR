@@ -63,6 +63,39 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
                           alpha = seq(0, 1, by = 0.1), verbose = TRUE,
                           penalty = TRUE, random = FALSE, n_random_la = 100,
                           parallel = TRUE){
+  #----input validation/error check----
+  if(!is.numeric(x)){
+    stop("Invalid x\n")
+  }
+  if(!is.numeric(y)){
+    stop("Invalid y\n")
+  }
+  if (!is.numeric(g) || g < 1){
+    stop("Invalid group size g\n")
+  }
+  if (!is.numeric(tol) || tol <= 0){
+    stop("Invalid tolerance level\n")
+  }
+  if (!is.numeric(max_iter) || max_iter < 1){
+    stop("Invalid max_iter\n")
+  }
+  if (!is.numeric(n_lambda) || n_lambda < 2){
+    stop("Invalid n_lambda\n")
+  }
+  if (!is.numeric(alpha) || !is.vector(alpha)){
+    stop("Invalid alpha\n")
+  }
+  if (!is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
+      !is.logical(parallel)){
+    stop("Invalid input\n")
+  }
+  if (!is.numeric(n_random_la) || n_random_la <= 0){
+    stop("Invalid n_random_la\n")
+  }
+  if (length(alpha) * n_lambda < n_random_la && random){
+    stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
+  }
+
   if (verbose) cat("\n-- g =", g, "--\n")
 
   # ----get covariates----
@@ -70,6 +103,7 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
 
   # ----vector for lambda-alpha selection process----
   bic <- numeric(n_lambda * length(alpha))
+  parameters <- list()
 
   # ----initialize default values----
   init_mod <- mclust::Mclust(y, G = g, modelNames = "V", verbose = FALSE)
@@ -94,15 +128,18 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       lambda <- list()
 
       # ----calculate lambda_max for g, log the value----
-      lambda_max <- log(lambda_max_compute(x, y, init_gamma[[g]]))
+      lambda_max <- lambda_max_compute(x, y, init_gamma[[g]])
 
       # ----calculate lambda_min based on lambda_max for g, log the value----
-      lambda_min <- log(0.001 * lambda_max)
+      lambda_min <- 0.001 * lambda_max
+
+      log_lambda_max <- log(lambda_max)
+      log_lambda_min <- log(lambda_min)
 
       # ----calculate vector of lambdas of size n_lambda from lambda_min to----
       # ----lambda_max----
-      lambda[[g]] <- exp(seq(lambda_min, lambda_max,
-                             by = ((lambda_max-lambda_min)/(n_lambda - 1))))
+      lambda[[g]] <- exp(seq(log_lambda_min, log_lambda_max,
+                             by = ((log_lambda_max - log_lambda_min)/(n_lambda - 1))))
     }
     else if (is.null(lambda) && !is.null(lambda_max)){
       lambda <- list()
@@ -144,14 +181,21 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
     }
     else{
       # ---- fit models----
-      parameters <- purrr::pmap(
-        param_grid,
-        function(alpha, lambda) {
-          MM_FGMRM(x, y, g, tol, max_iter, lambda, alpha, init_pi[[g]],
-                   init_beta[[g]], init_sigma[[g]], init_gamma[[g]], verbose,
-                   penalty)
+      for (i in nrow(param_grid):1){
+        parameters[[i]] <- MM_FGMRM(x, y, g, tol, max_iter, param_grid[i, 2],
+                                    param_grid[i, 1], init_pi[[g]],
+                                    init_beta[[g]], init_sigma[[g]],
+                                    init_gamma[[g]], verbose, penalty)
+
+        # ----use parameters (beta, sigma, z) from previous lambda and same
+        # ----alpha as initial estimate for next lambda-alpha
+        if (i <= nrow(param_grid) - (length(alpha) - 1) &&
+            !is.na(parameters[[i + length(alpha) - 1]]$bic)){
+          init_beta[[g]][ , 1] <- parameters[[i + length(alpha) - 1]]$beta[ , 1]
+          init_sigma[[g]] <- parameters[[i + length(alpha) - 1]]$sigma
+          init_gamma[[g]] <- parameters[[i + length(alpha) - 1]]$z
         }
-      )
+      }
     }
 
     # ----extract selection criteria----

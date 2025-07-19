@@ -76,11 +76,24 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
   if (!is.numeric(G) || G <= 1){
     stop("Invalid group size G\n")
   }
-  if (!is.numeric(tol) || !is.numeric(max_iter) || !is.numeric(n_lambda) ||
-      n_lambda < 2 || !is.numeric(alpha) || !is.logical(verbose) ||
-      !is.logical(penalty) || !is.logical(random) || !is.numeric(n_random_la) ||
-      !is.logical(automatic_stopping)){
+  if (!is.numeric(tol) || tol <= 0){
+    stop("Invalid tolerance level\n")
+  }
+  if (!is.numeric(max_iter) || max_iter < 1){
+    stop("Invalid max_iter\n")
+  }
+  if (!is.numeric(n_lambda) || n_lambda < 2){
+    stop("Invalid n_lambda\n")
+  }
+  if (!is.numeric(alpha) || !is.vector(alpha)){
+    stop("Invalid alpha\n")
+  }
+  if (!is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
+      !is.logical(automatic_stopping) || !is.logical(parallel)){
     stop("Invalid input\n")
+  }
+  if (!is.numeric(n_random_la) || n_random_la <= 0){
+    stop("Invalid n_random_la\n")
   }
   if (length(alpha) * n_lambda < n_random_la && random){
     stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")

@@ -74,11 +74,22 @@ MM_FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500, lambda = 0,
   if(!is.numeric(y)){
     stop("Invalid y\n")
   }
-  if (!is.numeric(G) || G <= 0){
+  if (!is.numeric(G) || G < 1){
     stop("Invalid group size G\n")
   }
-  if (!is.numeric(tol) || !is.numeric(max_iter) || !is.numeric(lambda) ||
-      !is.numeric(alpha) || !is.logical(verbose) || !is.logical(penalty)){
+  if (!is.numeric(tol) || tol <= 0){
+    stop("Invalid tolerance level\n")
+  }
+  if (!is.numeric(max_iter) || max_iter < 1){
+    stop("Invalid max_iter\n")
+  }
+  if (!is.numeric(lambda) || lambda < 0){
+    stop("Invalid lambda\n")
+  }
+  if (!is.numeric(alpha) || alpha > 1 || alpha < 0){
+    stop("Invalid alpha\n")
+  }
+  if (!is.logical(verbose) || !is.logical(penalty)){
     stop("Invalid input\n")
   }
 
