@@ -63,6 +63,20 @@
 #' @export
 #'
 #' @examples
+#'
+#' # Simulate data
+#' set.seed(123)
+#' n <- 100  # number of observations
+#' p <- 10   # number of covariates
+#'
+#' # Predictor/design matrix
+#' x <- matrix(stats::rnorm(n * p), nrow = n, ncol = p)
+#'
+#' # Response vector
+#' y <- stats::rnorm(n)
+#'
+#' model_one <- MM_FGMRM(x, y, G = 2, lambda = 1, alpha = 1)
+#' model_two <- MM_FGMRM(x, y, G = 2, penalty = FALSE)
 MM_FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500, lambda = 0,
                      alpha = 0, init_pi = NULL, init_beta = NULL,
                      init_sigma = NULL, init_gamma = NULL, verbose = TRUE,
@@ -97,6 +111,7 @@ MM_FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500, lambda = 0,
   p = ncol(x)
   n = nrow(x)
   x <- cbind(1, x)
+  y <- as.matrix(y)
 
   # ----parameters----
   pi <- numeric(G)
@@ -140,6 +155,7 @@ MM_FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500, lambda = 0,
   gamma_mat <- init_gamma
 
   # ----loop controls----
+  objective_fun_old <- 0
   objective_fun_new <- 0
   iter <- 1
 
@@ -182,7 +198,7 @@ MM_FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500, lambda = 0,
     }
 
     # ----OBJECTIVE FUNCTION----
-    objective_fun_old <-  objective_fun_new
+    objective_fun_old <- objective_fun_new
     objective_fun_new <- objective_function_FGMRM(ll, pen)
 
     if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol){

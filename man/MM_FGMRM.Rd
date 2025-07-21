@@ -95,3 +95,19 @@ provided within the function using the Mclust function from the mclust
 package, but can be specified in the function call. This function is used
 during model estimation.
 }
+\examples{
+
+# Simulate data
+set.seed(123)
+n <- 100  # number of observations
+p <- 10   # number of covariates
+
+# Predictor/design matrix
+x <- matrix(stats::rnorm(n * p), nrow = n, ncol = p)
+
+# Response vector
+y <- stats::rnorm(n)
+
+model_one <- MM_FGMRM(x, y, G = 2, lambda = 1, alpha = 1)
+model_two <- MM_FGMRM(x, y, G = 2, penalty = FALSE)
+}

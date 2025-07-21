@@ -97,3 +97,22 @@ parameters to estimate a finite Gaussian mixture regression model. The
 function chooses the model with the lowest bic. It can be ran sequentially or
 in parallel. This function is for model estimation.
 }
+\examples{
+
+# Simulate data
+set.seed(123)
+n <- 100  # number of observations
+p <- 10   # number of covariates
+
+# Predictor/design matrix
+x <- matrix(stats::rnorm(n * p), nrow = n, ncol = p)
+
+# Response vector
+y <- stats::rnorm(n)
+
+model_one <- FGMRM(x, y, G = 6, verbose = FALSE)
+model_two <- FGMRM(x, y, G = 6, penalty = FALSE, verbose = FALSE)
+model_three <- FGMRM(x, y, G = 6, random = TRUE, verbose = FALSE)
+model_four <- FGMRM(x, y, G = 6, automatic_stopping = TRUE, verbose = FALSE)
+model_five <- FGMRM(x, y, G = 6, parallel = FALSE, verbose = FALSE)
+}

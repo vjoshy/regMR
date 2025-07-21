@@ -58,6 +58,22 @@
 #' @export
 #'
 #' @examples
+#'
+#' # Simulate data
+#' set.seed(123)
+#' n <- 100  # number of observations
+#' p <- 10   # number of covariates
+#'
+#' # Predictor/design matrix
+#' x <- matrix(stats::rnorm(n * p), nrow = n, ncol = p)
+#'
+#' # Response vector
+#' y <- stats::rnorm(n)
+#'
+#' model_one <- MM_Grid_FGMRM(g = 2, x, y, verbose = FALSE)
+#' model_two <- MM_Grid_FGMRM(g = 2, x, y, penalty = FALSE, verbose = FALSE)
+#' model_three <- MM_Grid_FGMRM(g = 2, x, y, random = TRUE, verbose = FALSE)
+#' model_four <- MM_Grid_FGMRM(g = 2, x, y, parallel = FALSE, verbose = FALSE)
 MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
                           lambda_max = NULL, n_lambda = 100,
                           alpha = seq(0, 1, by = 0.1), verbose = TRUE,
@@ -96,6 +112,8 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
     stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
   }
 
+  y <- as.matrix(y)
+
   if (verbose) cat("\n-- g =", g, "--\n")
 
   # ----get covariates----
@@ -104,22 +122,43 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
   # ----vector for lambda-alpha selection process----
   bic <- numeric(n_lambda * length(alpha))
   parameters <- list()
+  init_pi <- list()
+  init_beta <- list()
+  init_sigma <- list()
+  init_gamma <- list()
 
   # ----initialize default values----
   init_mod <- mclust::Mclust(y, G = g, modelNames = "V", verbose = FALSE)
+  if (is.null(init_mod)){
+    warning("Mclust initialization failed, using random initialization")
 
-  init_pi <- list()
-  init_pi[[g]] <- init_mod$parameters$pro
+    vec <- stats::runif(g, min = 0.1, max = 1)
+    pi_g <- vec/sum(vec)
+    beta_g <- matrix(stats::rnorm((p + 1) * g), ncol = p + 1, nrow = g)
+    sigma_g <- abs(stats::rnorm(g, mean = stats::sd(y), sd = stats::sd(y)/2))
 
-  init_beta <- list()
-  init_beta[[g]] <- matrix(rep(1e-10, (p + 1) * g), ncol = p + 1, nrow = g)
-  init_beta[[g]][, 1] <- t(init_mod$parameters$mean)
+    init_mod <- MM_FGMRM(x, y, g, tol, max_iter, 0, 0, pi_g, beta_g, sigma_g,
+                         0, verbose, FALSE)
 
-  init_sigma <- list()
-  init_sigma[[g]] <- sqrt(init_mod$parameters$variance$sigmasq)
+    init_pi[[g]] <- init_mod$pi
 
-  init_gamma <- list()
-  init_gamma[[g]] <- init_mod$z
+    init_beta[[g]] <- matrix(rep(1e-10, (p + 1) * g), ncol = p + 1, nrow = g)
+    init_beta[[g]][, 1] <- init_mod$beta[ , 1]
+
+    init_sigma[[g]] <- init_mod$sigma
+
+    init_gamma[[g]] <- init_mod$z
+  }
+  else{
+    init_pi[[g]] <- init_mod$parameters$pro
+
+    init_beta[[g]] <- matrix(rep(1e-10, (p + 1) * g), ncol = p + 1, nrow = g)
+    init_beta[[g]][, 1] <- init_mod$parameters$mean
+
+    init_sigma[[g]] <- sqrt(init_mod$parameters$variance$sigmasq)
+
+    init_gamma[[g]] <- init_mod$z
+  }
 
   # ----if penalty is being applied (is true), call MM over lambda-alpha pairs--
   if (penalty){
@@ -201,45 +240,52 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
     # ----extract selection criteria----
     bic <- sapply(parameters, function(p) p$bic)
 
-    # ----find model that minimizes bic----
-    selected_model <- which.min(bic)
+    if (!all(is.na(bic))){
+      # ----find model that minimizes bic----
+      selected_model <- which.min(bic)
 
-    # ----extract parameters----
-    chosen_parameters <- parameters[[selected_model]]
+      # ----extract parameters----
+      chosen_parameters <- parameters[[selected_model]]
 
-    # ----output progress----
-    if (verbose) cat(strrep("=", getOption("width")), "\n")
-    if (verbose) cat("\n -- selected model for g =", g, "--\n\n")
-    if (verbose) cat(" lambda_opt =", chosen_parameters$lambda,
-                     "|| alpha_opt =", chosen_parameters$alpha,
-                     "|| BIC =", chosen_parameters$bic, "\n")
-    idx <- seq(1, g, length.out = g)
-    if (verbose) cat("\n Components:")
-    if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
+      # ----output progress----
+      if (verbose) cat(strrep("=", getOption("width")), "\n")
+      if (verbose) cat("\n -- selected model for g =", g, "--\n\n")
+      if (verbose) cat(" lambda_opt =", chosen_parameters$lambda,
+                       "|| alpha_opt =", chosen_parameters$alpha,
+                       "|| BIC =", chosen_parameters$bic, "\n")
+      idx <- seq(1, g, length.out = g)
+      if (verbose) cat("\n Components:")
+      if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
-    if (verbose) cat("\n Pi ->        ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$pi),
-                           collapse = " "))
+      if (verbose) cat("\n Pi ->        ")
+      if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$pi),
+                             collapse = " "))
 
-    if (verbose) cat("\n Sigma ->     ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
-                           collapse = " "))
-    if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
-    if (verbose) cat("\n Components:")
-    if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
-    if (verbose) cat("\n Intercept   ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
-                           collapse = " "))
-    if (verbose) {
-      for (k in 2:ncol(chosen_parameters$beta)){
-        cat("\n Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
-                  collapse = " "))
+      if (verbose) cat("\n Sigma ->     ")
+      if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
+                             collapse = " "))
+      if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
+      if (verbose) cat("\n Components:")
+      if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
+      if (verbose) cat("\n Intercept   ")
+      if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
+                             collapse = " "))
+      if (verbose) {
+        for (k in 2:ncol(chosen_parameters$beta)){
+          cat("\n Beta", k - 1, "     ")
+          cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
+                    collapse = " "))
+        }
       }
-    }
-    cat("\n\n")
+      if (verbose) cat("\n\n")
 
-    chosen_parameters$lambda_max <- exp(lambda_max)
+      chosen_parameters$lambda_max <- exp(lambda_max)
+    }
+    else{
+      if (verbose) cat("\n -- no selected model for g =", g, "--\n\n")
+
+      chosen_parameters <- parameters[[1]]
+    }
 
     # ----return parameters, compartment number----
     return(list(parameters = chosen_parameters, g = g))
@@ -250,35 +296,42 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
                                   init_beta[[g]], init_sigma[[g]],
                                   init_gamma[[g]], verbose, penalty)
 
-    # ----output progress----
-    if (verbose) cat(strrep("=", getOption("width")), "\n")
-    if (verbose) cat("\n -- selected model for g =", g, "--\n\n")
-    if (verbose) cat(" BIC =", chosen_parameters$bic, "\n")
-    idx <- seq(1, g, length.out = g)
-    if (verbose) cat("\n Components:")
-    if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
+    if (!is.na(chosen_parameters$bic)){
+      # ----output progress----
+      if (verbose) cat(strrep("=", getOption("width")), "\n")
+      if (verbose) cat("\n -- selected model for g =", g, "--\n\n")
+      if (verbose) cat(" lambda_opt =", chosen_parameters$lambda,
+                       "|| alpha_opt =", chosen_parameters$alpha,
+                       "|| BIC =", chosen_parameters$bic, "\n")
+      idx <- seq(1, g, length.out = g)
+      if (verbose) cat("\n Components:")
+      if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
-    if (verbose) cat("\n Pi ->        ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$pi),
-                           collapse = " "))
+      if (verbose) cat("\n Pi ->        ")
+      if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$pi),
+                             collapse = " "))
 
-    if (verbose) cat("\n Sigma ->     ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
-                           collapse = " "))
-    if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
-    if (verbose) cat("\n Components:")
-    if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
-    if (verbose) cat("\n Intercept   ")
-    if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
-                           collapse = " "))
-    if (verbose) {
-      for (k in 2:ncol(chosen_parameters$beta)){
-        cat("\n Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
-                  collapse = " "))
+      if (verbose) cat("\n Sigma ->     ")
+      if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
+                             collapse = " "))
+      if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
+      if (verbose) cat("\n Components:")
+      if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
+      if (verbose) cat("\n Intercept   ")
+      if (verbose) cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
+                             collapse = " "))
+      if (verbose) {
+        for (k in 2:ncol(chosen_parameters$beta)){
+          cat("\n Beta", k - 1, "     ")
+          cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
+                    collapse = " "))
+        }
       }
+      if (verbose) cat("\n\n")
     }
-    cat("\n\n")
+    else{
+      if (verbose) cat("\n -- no selected model for g =", g, "--\n\n")
+    }
 
     # ----return parameters, compartment number, lambda, and alpha----
     return(list(parameters = chosen_parameters, g = g))

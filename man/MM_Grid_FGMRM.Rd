@@ -92,3 +92,21 @@ Gaussian mixture regression model. The function chooses the model with the
 lowest bic. It can be ran sequentially or in parallel. This function is used
 during model estimation.
 }
+\examples{
+
+# Simulate data
+set.seed(123)
+n <- 100  # number of observations
+p <- 10   # number of covariates
+
+# Predictor/design matrix
+x <- matrix(stats::rnorm(n * p), nrow = n, ncol = p)
+
+# Response vector
+y <- stats::rnorm(n)
+
+model_one <- MM_Grid_FGMRM(g = 2, x, y, verbose = FALSE)
+model_two <- MM_Grid_FGMRM(g = 2, x, y, penalty = FALSE, verbose = FALSE)
+model_three <- MM_Grid_FGMRM(g = 2, x, y, random = TRUE, verbose = FALSE)
+model_four <- MM_Grid_FGMRM(g = 2, x, y, parallel = FALSE, verbose = FALSE)
+}

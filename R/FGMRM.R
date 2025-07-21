@@ -61,6 +61,23 @@
 #' @export
 #'
 #' @examples
+#'
+#' # Simulate data
+#' set.seed(123)
+#' n <- 100  # number of observations
+#' p <- 10   # number of covariates
+#'
+#' # Predictor/design matrix
+#' x <- matrix(stats::rnorm(n * p), nrow = n, ncol = p)
+#'
+#' # Response vector
+#' y <- stats::rnorm(n)
+#'
+#' model_one <- FGMRM(x, y, G = 6, verbose = FALSE)
+#' model_two <- FGMRM(x, y, G = 6, penalty = FALSE, verbose = FALSE)
+#' model_three <- FGMRM(x, y, G = 6, random = TRUE, verbose = FALSE)
+#' model_four <- FGMRM(x, y, G = 6, automatic_stopping = TRUE, verbose = FALSE)
+#' model_five <- FGMRM(x, y, G = 6, parallel = FALSE, verbose = FALSE)
 FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
                   lambda = NULL, lambda_max = NULL, n_lambda = 100,
                   alpha = seq(0, 1, by = 0.1), verbose = TRUE, penalty = TRUE,
@@ -99,6 +116,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
     stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
   }
 
+  y <- as.matrix(y)
+
   # ----get covariates----
   p <- ncol(x)
 
@@ -133,48 +152,56 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
 
     # ----find compartment -> parameters which minimize model selection criteria
     # ----and return model----
-    selected_compartment <- which.min(bic)
-    selected_parameters <- models[[selected_compartment]]$parameters
+    if (!all(is.na(bic))){
+      selected_compartment <- which.min(bic)
+      selected_parameters <- models[[selected_compartment]]$parameters
 
-    if (verbose) cat("\n")
-    if (verbose) cat(strrep("*", getOption("width")), "\n")
-    if (verbose) cat("\n -- overall model chosen --\n\n")
-    if (verbose) cat(" -- G_opt =", selected_compartment, "--\n\n")
-    if (verbose) cat(" lambda_opt =", selected_parameters$lambda,
-                     "|| alpha_opt =", selected_parameters$alpha,
-                     "|| log-likelihood =", selected_parameters$loglik,
-                     "|| BIC =", selected_parameters$bic,
-                     "|| MSE (mean squared error)", selected_parameters$mse,
-                     "\n")
-    idx <- seq(1, selected_compartment,
-               length.out = selected_compartment)
-    if (verbose) cat("\n Components:")
-    if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
+      if (verbose) cat("\n")
+      if (verbose) cat(strrep("*", getOption("width")), "\n")
+      if (verbose) cat("\n -- overall model chosen --\n\n")
+      if (verbose) cat(" -- G_opt =", selected_compartment, "--\n\n")
+      if (verbose) cat(" lambda_opt =", selected_parameters$lambda,
+                       "|| alpha_opt =", selected_parameters$alpha,
+                       "|| log-likelihood =", selected_parameters$loglik,
+                       "|| BIC =", selected_parameters$bic,
+                       "|| MSE (mean squared error)", selected_parameters$mse,
+                       "\n")
+      idx <- seq(1, selected_compartment,
+                 length.out = selected_compartment)
+      if (verbose) cat("\n Components:")
+      if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
 
-    if (verbose) cat("\n Pi ->        ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$pi),
-                           collapse = " "))
+      if (verbose) cat("\n Pi ->        ")
+      if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$pi),
+                             collapse = " "))
 
-    if (verbose) cat("\n Sigma ->     ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$sigma),
-                           collapse = " "))
-    if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
-    if (verbose) cat("\n Components:")
-    if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
-    if (verbose) cat("\n Intercept   ")
-    if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
-                           collapse = " "))
-    if (verbose) {
-      for (k in 2:ncol(selected_parameters$beta)){
-        cat("\n Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
-                  collapse = " "))
+      if (verbose) cat("\n Sigma ->     ")
+      if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$sigma),
+                             collapse = " "))
+      if (verbose) cat("\n\n Beta (Regression Parameters) ->\n")
+      if (verbose) cat("\n Components:")
+      if (verbose) cat(paste(sprintf("%6.0f", idx), collapse = " "))
+      if (verbose) cat("\n Intercept   ")
+      if (verbose) cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
+                             collapse = " "))
+      if (verbose) {
+        for (k in 2:ncol(selected_parameters$beta)){
+          cat("\n Beta", k - 1, "     ")
+          cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
+                    collapse = " "))
+        }
       }
-    }
-    if (verbose) cat("\n\n")
-    if (verbose) cat(strrep("*", getOption("width")), "\n")
+      if (verbose) cat("\n\n")
+      if (verbose) cat(strrep("*", getOption("width")), "\n")
 
-    return(list(parameters = selected_parameters, g = selected_compartment))
+      return(list(parameters = selected_parameters, g = selected_compartment))
+    }
+    else{
+      # ----if error, return NA for each item----
+      if (verbose) cat("\n -- no model chosen --\n\n")
+
+      return(list(parameters = NA, g = NA))
+    }
   }
   else{
     if (parallel){
@@ -259,6 +286,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
   }
   else{
     # ----if error, return NA for each item----
+    if (verbose) cat("\n -- no model chosen --\n\n")
+
     return(list(parameters = NA, g = NA))
   }
 }
