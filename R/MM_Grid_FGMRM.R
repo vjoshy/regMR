@@ -51,9 +51,11 @@
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
 #'
-#' @returns A list containing the parameters of the estimated finite Gaussian
-#' mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
-#' y_hat, mse, mse_fitted, alpha, lambda) and the optimal group count.
+#' @returns An object of class FGMRM containing the parameters of the estimated
+#' finite Gaussian mixture regression model (bic, log_likelihood, beta, pi,
+#' sigma, z, z_hard, y_hat, mse, mse_fitted, alpha, lambda), the optimal group
+#' count, and the parameters of models with the same alpha and group count for
+#' plotting purposes.
 #' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
@@ -61,19 +63,42 @@
 #'
 #' # Simulate data
 #' set.seed(123)
-#' n <- 100  # number of observations
-#' p <- 10   # number of covariates
 #'
-#' # Predictor/design matrix
-#' x <- matrix(stats::rnorm(n * p), nrow = n, ncol = p)
+#' n <- 500
+#' G <- 3
+#' p <- 10
+#' rho = 0.2
 #'
-#' # Response vector
-#' y <- stats::rnorm(n)
+#' # ----true parameters for 3 clusters----
+#' sigma_squared_true <- c(3, 1.5, 1)
+#' pi_true <- c(0.4, 0.4, 0.2)
+#' beta_true <- matrix(c(
+#' -1, -3.22, 0, 0, 0, 0, 0.583, 0, 5.17, 0, 0,
+#' 1, 0, 0, 0, 0, 0, -4.56, 0.514, -2.98, 0, 0,
+#' 3, 0, 0, 0, 3.11, 0, 0, 0, -3.11, 0, 0
+#' ), nrow = G, byrow = TRUE)
 #'
-#' model_one <- MM_Grid_FGMRM(g = 2, x, y, verbose = FALSE)
-#' model_two <- MM_Grid_FGMRM(g = 2, x, y, penalty = FALSE, verbose = FALSE)
-#' model_three <- MM_Grid_FGMRM(g = 2, x, y, random = TRUE, verbose = FALSE)
-#' model_four <- MM_Grid_FGMRM(g = 2, x, y, parallel = FALSE, verbose = FALSE)
+#' # ----generate correlation matrix----
+#' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
+#' Sigma <- cor_mat
+#'
+#' # ----simulate each group----
+#' x <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
+#'
+#' # ----generate responsibilities----
+#' z <- rmultinom(n, size = 1, prob = pi_true)
+#' groups <- apply(z, 2, which.max)
+#'
+#' # ----b0 + b1x1 + b2x2 + ... + bkxk----
+#' mu_vec <- rowSums(cbind(1, x) * beta_true[groups, ])
+#'
+#' # ----simulate response y----
+#' y <- rnorm(n, mean = mu_vec, sd = sqrt(sigma_squared_true[groups]))
+#'
+#' model_one <- MM_Grid_FGMRM(g = 3, x, y, verbose = FALSE)
+#' model_two <- MM_Grid_FGMRM(g = 3, x, y, penalty = FALSE, verbose = FALSE)
+#' model_three <- MM_Grid_FGMRM(g = 3, x, y, random = TRUE, verbose = FALSE)
+#' model_four <- MM_Grid_FGMRM(g = 3, x, y, parallel = FALSE, verbose = FALSE)
 MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
                           lambda_max = NULL, n_lambda = 100,
                           alpha = seq(0, 1, by = 0.1), verbose = TRUE,
@@ -122,6 +147,7 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
   # ----vector for lambda-alpha selection process----
   bic <- numeric(n_lambda * length(alpha))
   parameters <- list()
+  parameters_same_alpha <- list()
   init_pi <- list()
   init_beta <- list()
   init_sigma <- list()
@@ -247,6 +273,13 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       # ----extract parameters----
       chosen_parameters <- parameters[[selected_model]]
 
+      # ----get parameters for models with same alpha as optimal alpha for all--
+      # ----lambda----
+      chosen_alpha <- chosen_parameters$alpha
+      idx <- which(sapply(parameters,
+                          function(p) isTRUE(all.equal(p$alpha, chosen_alpha))))
+      parameters_same_alpha <- parameters[idx]
+
       # ----output progress----
       if (verbose) cat(strrep("=", getOption("width")), "\n")
       if (verbose) cat("\n -- selected model for g =", g, "--\n\n")
@@ -279,16 +312,23 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       }
       if (verbose) cat("\n\n")
 
-      chosen_parameters$lambda_max <- exp(lambda_max)
+      chosen_parameters$lambda_max <- lambda_max
+      chosen_parameters$lambda_vector <- lambda[[g]]
     }
     else{
       if (verbose) cat("\n -- no selected model for g =", g, "--\n\n")
 
       chosen_parameters <- parameters[[1]]
+      chosen_parameters$lambda_max <- lambda_max
+      chosen_parameters$lambda_vector <- lambda[[g]]
     }
 
+    results <- list(parameters = chosen_parameters, g = g,
+                    parameters_same_alpha = parameters_same_alpha)
+    class(results) <- "FGMRM"
+
     # ----return parameters, compartment number----
-    return(list(parameters = chosen_parameters, g = g))
+    return(results)
   }
   else{
     # ----if penalty is false, call MM once with lambda, alpha = 0----
@@ -333,7 +373,14 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       if (verbose) cat("\n -- no selected model for g =", g, "--\n\n")
     }
 
-    # ----return parameters, compartment number, lambda, and alpha----
-    return(list(parameters = chosen_parameters, g = g))
+    chosen_parameters$lambda_max <- NA
+    chosen_parameters$lambda_vector <- NA
+
+    results <- list(parameters = chosen_parameters, g = g,
+                    parameters_same_alpha = NA)
+    class(results) <- "FGMRM"
+
+    # ----return parameters, compartment number----
+    return(results)
   }
 }

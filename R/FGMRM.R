@@ -54,9 +54,11 @@
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
 #'
-#' @returns A list containing the parameters of the estimated finite Gaussian
-#' mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
-#' y_hat, mse, mse_fitted, alpha, lambda) and the optimal group count.
+#' @returns An object of class FGMRM containing the parameters of the estimated
+#' finite Gaussian mixture regression model (bic, log_likelihood, beta, pi,
+#' sigma, z, z_hard, y_hat, mse, mse_fitted, alpha, lambda), the optimal group
+#' count, and the parameters of models with the same alpha and group count for
+#' plotting purposes.
 #' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
@@ -64,14 +66,37 @@
 #'
 #' # Simulate data
 #' set.seed(123)
-#' n <- 100  # number of observations
-#' p <- 10   # number of covariates
 #'
-#' # Predictor/design matrix
-#' x <- matrix(stats::rnorm(n * p), nrow = n, ncol = p)
+#' n <- 500
+#' G <- 3
+#' p <- 10
+#' rho = 0.2
 #'
-#' # Response vector
-#' y <- stats::rnorm(n)
+#' # ----true parameters for 3 clusters----
+#' sigma_squared_true <- c(3, 1.5, 1)
+#' pi_true <- c(0.4, 0.4, 0.2)
+#' beta_true <- matrix(c(
+#' -1, -3.22, 0, 0, 0, 0, 0.583, 0, 5.17, 0, 0,
+#' 1, 0, 0, 0, 0, 0, -4.56, 0.514, -2.98, 0, 0,
+#' 3, 0, 0, 0, 3.11, 0, 0, 0, -3.11, 0, 0
+#' ), nrow = G, byrow = TRUE)
+#'
+#' # ----generate correlation matrix----
+#' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
+#' Sigma <- cor_mat
+#'
+#' # ----simulate each group----
+#' x <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
+#'
+#' # ----generate responsibilities----
+#' z <- rmultinom(n, size = 1, prob = pi_true)
+#' groups <- apply(z, 2, which.max)
+#'
+#' # ----b0 + b1x1 + b2x2 + ... + bkxk----
+#' mu_vec <- rowSums(cbind(1, x) * beta_true[groups, ])
+#'
+#' # ----simulate response y----
+#' y <- rnorm(n, mean = mu_vec, sd = sqrt(sigma_squared_true[groups]))
 #'
 #' model_one <- FGMRM(x, y, G = 6, verbose = FALSE)
 #' model_two <- FGMRM(x, y, G = 6, penalty = FALSE, verbose = FALSE)
@@ -164,7 +189,7 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
                        "|| alpha_opt =", selected_parameters$alpha,
                        "|| log-likelihood =", selected_parameters$loglik,
                        "|| BIC =", selected_parameters$bic,
-                       "|| MSE (mean squared error)", selected_parameters$mse,
+                       "|| MSE =", selected_parameters$mse,
                        "\n")
       idx <- seq(1, selected_compartment,
                  length.out = selected_compartment)
@@ -194,13 +219,21 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
       if (verbose) cat("\n\n")
       if (verbose) cat(strrep("*", getOption("width")), "\n")
 
-      return(list(parameters = selected_parameters, g = selected_compartment))
+      results <- list(parameters = selected_parameters,
+                      g = selected_compartment,
+                      parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha)
+      class(results) <- "FGMRM"
+
+      return(results)
     }
     else{
       # ----if error, return NA for each item----
       if (verbose) cat("\n -- no model chosen --\n\n")
 
-      return(list(parameters = NA, g = NA))
+      results <- list(parameters = NA, g = NA, parameters_same_alpha = NA)
+      class(results) <- "FGMRM"
+
+      return(results)
     }
   }
   else{
@@ -252,7 +285,7 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
                      "|| alpha_opt =", selected_parameters$alpha,
                      "|| log-likelihood =", selected_parameters$loglik,
                      "|| BIC =", selected_parameters$bic,
-                     "|| \n MSE (mean squared error)", selected_parameters$mse,
+                     "|| MSE =", selected_parameters$mse,
                      "\n")
     idx <- seq(1, selected_compartment + 1,
                length.out = selected_compartment + 1)
@@ -282,12 +315,20 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
     if (verbose) cat("\n\n")
     if (verbose) cat(strrep("*", getOption("width")), "\n")
 
-    return(list(parameters = selected_parameters, g = selected_compartment + 1))
+    results <- list(parameters = selected_parameters,
+                    g = selected_compartment + 1,
+                    parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha)
+    class(results) <- "FGMRM"
+
+    return(results)
   }
   else{
     # ----if error, return NA for each item----
     if (verbose) cat("\n -- no model chosen --\n\n")
 
-    return(list(parameters = NA, g = NA))
+    results <- list(parameters = NA, g = NA, parameters_same_alpha = NA)
+    class(results) <- "FGMRM"
+
+    return(results)
   }
 }
