@@ -21,8 +21,8 @@
 #'
 #' @keywords internal
 sgl_penalty_FGMRM <- function(lambda, alpha, beta, G){
-  pen = lambda * ((alpha * (sum(colSums(abs(beta[, -1]))))) +
-                    (1 - alpha) * (sum(sqrt(G) * sqrt(colSums(beta[ , -1]^2)))))
+  pen = lambda * ((alpha * (sum(rowSums(abs(beta[, -1]))))) +
+                    (1 - alpha) * (sum(sqrt(G) * sqrt(rowSums(beta[ , -1]^2)))))
 
   return(pen)
 }

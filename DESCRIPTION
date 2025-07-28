@@ -14,10 +14,13 @@ LinkingTo:
 Imports: 
     furrr,
     future,
+    ggplot2,
     mclust,
     purrr,
     Rcpp,
-    stats
+    reshape2,
+    stats,
+    viridis
 Suggests: 
     mvtnorm,
     testthat (>= 3.0.0)
