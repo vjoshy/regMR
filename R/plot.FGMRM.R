@@ -1,7 +1,13 @@
-#' Title
+#' Plot Method for a Finite Gaussian Mixture Regression Model of class "FGMRM"
 #'
-#' @param mod
-#' @param ... Additional arguments for plotting (currently unused)
+#' This function creates plots for finite Gaussian mixture regression models of
+#' class "FGMRM". It generates three plots: lambdas vs. bics, lambdas vs.
+#' regression coefficients, and lambdas vs. group norms for all models with the
+#' same alpha as the optimal alpha.
+#'
+#' @param mod An object of class "FGMRM", the result of calling FGMRM() or
+#' MM_Grid_FGMRM().
+#' @param ... Additional arguments for plotting (currently unused).
 #'
 #' @returns A list of three ggplot objects: lambdas vs. bics, lambdas vs.
 #' regression coefficients, and lambdas vs. group norms for all models with the
@@ -12,15 +18,55 @@
 #' @import ggplot2
 #'
 #' @examples
+#'
+#' Simulate data
+#' set.seed(123)
+#'
+#' n <- 500
+#' G <- 3
+#' p <- 10
+#' rho = 0.2
+#'
+#' # ----true parameters for 3 clusters----
+#' sigma_squared_true <- c(3, 1.5, 1)
+#' pi_true <- c(0.4, 0.4, 0.2)
+#' beta_true <- matrix(c(
+#' -1, -3.22, 0, 0, 0, 0, 0.583, 0, 5.17, 0, 0,
+#' 1, 0, 0, 0, 0, 0, -4.56, 0.514, -2.98, 0, 0,
+#' 3, 0, 0, 0, 3.11, 0, 0, 0, -3.11, 0, 0
+#' ), nrow = G, byrow = TRUE)
+#'
+#' # ----generate correlation matrix----
+#' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
+#' Sigma <- cor_mat
+#'
+#' # ----simulate each group----
+#' x <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
+#'
+#' # ----generate responsibilities----
+#' z <- rmultinom(n, size = 1, prob = pi_true)
+#' groups <- apply(z, 2, which.max)
+#'
+#' # ----b0 + b1x1 + b2x2 + ... + bkxk----
+#' mu_vec <- rowSums(cbind(1, x) * beta_true[groups, ])
+#'
+#' # ----simulate response y----
+#' y <- rnorm(n, mean = mu_vec, sd = sqrt(sigma_squared_true[groups]))
+#'
+#' mod <- FGMRM(x, y, G = 6, verbose = FALSE)
+#'
+#' plots <- plot(mod)
+#'
+#' # ----display plots----
+#' plots[[1]] # ----lambdas vs. bics----
+#' plots[[2]] # ----lambdas vs. regression coefficients----
+#' plots[[3]] # ----lambdas vs. group norms----
 plot.FGMRM <- function(mod, ...){
   # ----error check----
   if (all(is.na(mod$parameters_same_alpha))){
     stop("plot() on an object of class FGMRM is invalid if model was estimated
          with penalty = FALSE")
   }
-
-  # TO-DO
-  # - manual
 
   # ----plot one----
 
