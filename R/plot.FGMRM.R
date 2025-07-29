@@ -1,9 +1,11 @@
 #' Title
 #'
 #' @param mod
-#' @param ...
+#' @param ... Additional arguments for plotting (currently unused)
 #'
-#' @returns
+#' @returns A list of three ggplot objects: lambdas vs. bics, lambdas vs.
+#' regression coefficients, and lambdas vs. group norms for all models with the
+#' same alpha as the optimal alpha.
 #' @export
 #' @method plot FGMRM
 #'
@@ -12,10 +14,13 @@
 #' @examples
 plot.FGMRM <- function(mod, ...){
   # ----error check----
-  if (is.na(mod$parameters_same_alpha)){
+  if (all(is.na(mod$parameters_same_alpha))){
     stop("plot() on an object of class FGMRM is invalid if model was estimated
          with penalty = FALSE")
   }
+
+  # TO-DO
+  # - manual
 
   # ----plot one----
 
@@ -38,7 +43,7 @@ plot.FGMRM <- function(mod, ...){
   # ----models with the same alpha as the optimal alpha----
   # ----Lambda value that minmizes the bic is highlighted----
   plot_one <- ggplot(df, aes(x = lambdas, y = bics, color = lambda_Values)) +
-    geom_point(size = 3, shape = 20) +
+    geom_point(size = 3, shape = 20, na.rm = TRUE) +
     scale_alpha_identity() +
     scale_color_viridis_d(option = "viridis") +
     theme_bw() +
@@ -66,7 +71,7 @@ plot.FGMRM <- function(mod, ...){
   # ----for the optimal alpha----
   plot_two <- ggplot(long, aes(x = log(lambda), y = value, group = var,
                                color = var)) +
-    geom_line() +
+    geom_line(na.rm = TRUE) +
     scale_color_viridis_c(option = "viridis") +
     theme_bw() +
     labs(y = expression("Coefficients: " * beta), x = expression(log(lambda)),
@@ -91,7 +96,7 @@ plot.FGMRM <- function(mod, ...){
   # ----optimal alpha----
   plot_three <- ggplot(long, aes(x = log(lambda) , y = value, group = groups,
                                  color = groups)) +
-    geom_line() +
+    geom_line(na.rm = TRUE) +
     scale_color_viridis_c(option = "viridis") +
     theme_bw() +
     labs(y = expression("Group Norms: l"[2]), x = expression(log(lambda)),

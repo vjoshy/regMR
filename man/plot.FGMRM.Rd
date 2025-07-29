@@ -7,7 +7,12 @@
 \method{plot}{FGMRM}(mod, ...)
 }
 \arguments{
-\item{...}{}
+\item{...}{Additional arguments for plotting (currently unused)}
+}
+\value{
+A list of three ggplot objects: lambdas vs. bics, lambdas vs.
+regression coefficients, and lambdas vs. group norms for all models with the
+same alpha as the optimal alpha.
 }
 \description{
 Title
