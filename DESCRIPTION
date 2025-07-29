@@ -19,8 +19,7 @@ Imports:
     purrr,
     Rcpp,
     reshape2,
-    stats,
-    viridis
+    stats
 Suggests: 
     mvtnorm,
     testthat (>= 3.0.0)
