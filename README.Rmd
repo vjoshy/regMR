@@ -69,7 +69,7 @@ Plots a specified covariate of the predictor/design matrix (x) against the respo
 
 This is a basic example which shows you how to use all aspects of the regMR package:
 
-```{r example}
+```{r example, echo = FALSE}
 # ----Load the regMR package----
 library(regMR)
 
@@ -110,6 +110,14 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
 mod <- FGMRM(x = X, y = y, G = 6)
+
+plot(mod)
+
+plot2(mod, X, y, 1)
+plot2(mod, X, y, 2)
+plot2(mod, X, y, 3)
+
+summary(mod)
 ```
 
 What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
