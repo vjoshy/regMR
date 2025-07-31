@@ -69,7 +69,7 @@ Plots a specified covariate of the predictor/design matrix (x) against the respo
 
 This is a basic example which shows you how to use all aspects of the regMR package:
 
-```{r example, echo = FALSE}
+```{r example}
 # ----Load the regMR package----
 library(regMR)
 
