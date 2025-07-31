@@ -64,42 +64,41 @@
 #'
 #' @examples
 #'
-#' # Simulate data
-#' set.seed(123)
+#' set.seed(2025)
 #'
-#' n <- 500
-#' G <- 3
-#' p <- 10
-#' rho = 0.2
+#' # ----Simulate data----
+#' n <- 500   # total samples
+#' p <- 3     # number of covariates
+#' G <- 3     # number of mixture components
+#' rho = 0.2  # correlation
 #'
-#' # ----true parameters for 3 clusters----
-#' sigma_squared_true <- c(3, 1.5, 1)
-#' pi_true <- c(0.4, 0.4, 0.2)
-#' beta_true <- matrix(c(
-#' -1, -3.22, 0, 0, 0, 0, 0.583, 0, 5.17, 0, 0,
-#' 1, 0, 0, 0, 0, 0, -4.56, 0.514, -2.98, 0, 0,
-#' 3, 0, 0, 0, 3.11, 0, 0, 0, -3.11, 0, 0
+#' # ----True parameters for 3 clusters----
+#' betas <- matrix(c(
+#'   1,  2, -1,  0.5,   # Component 1
+#'   5, -2,  1,  1.5,   # Component 2
+#'   -3, 0,  2, -1      # Component 3
 #' ), nrow = G, byrow = TRUE)
+#' pis <- c(0.4, 0.4, 0.2)
+#' sigmas <- c(3, 1.5, 1)
 #'
-#' # ----generate correlation matrix----
+#' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
 #' Sigma <- cor_mat
 #'
-#' # ----simulate each group----
-#' x <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
+#' # ----Simulate design matrix X (n × p)----
+#' X <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
 #'
-#' # ----generate responsibilities----
-#' z <- rmultinom(n, size = 1, prob = pi_true)
+#' # ----Generate responsibilities----
+#' z <- rmultinom(n, size = 1, prob = pis)
 #' groups <- apply(z, 2, which.max)
 #'
-#' # ----b0 + b1x1 + b2x2 + ... + bkxk----
-#' mu_vec <- rowSums(cbind(1, x) * beta_true[groups, ])
+#' # ----b0 + b1x1 + b2x2 + ... + bkxp----
+#' mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 #'
-#' # ----simulate response y----
-#' y <- rnorm(n, mean = mu_vec, sd = sqrt(sigma_squared_true[groups]))
+#' # ----Simulate response y----
+#' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' model_one <- MM_FGMRM(x, y, G = 3, lambda = 10, alpha = 1)
-#' model_two <- MM_FGMRM(x, y, G = 3, penalty = FALSE)
+#' mod <- MM_FGMRM(X, y, G = 3, lambda = 5, alpha = 1)
 MM_FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500, lambda = 0,
                      alpha = 0, init_pi = NULL, init_beta = NULL,
                      init_sigma = NULL, init_gamma = NULL, verbose = TRUE,
