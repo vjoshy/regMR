@@ -8,9 +8,10 @@
 [![R-CMD-check](https://github.com/vjoshy/regMR/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/vjoshy/regMR/actions/workflows/R-CMD-check.yaml)
 [![Codecov test
 coverage](https://codecov.io/gh/vjoshy/regMR/graph/badge.svg)](https://app.codecov.io/gh/vjoshy/regMR)
+
 <!-- badges: end -->
 
-The goal of regMR is to …
+## Overview
 
 ## Installation
 
@@ -18,9 +19,55 @@ You can install the development version of regMR from
 [GitHub](https://github.com/) with:
 
 ``` r
-# install.packages("pak")
-pak::pak("vjoshy/regMR")
+# install.packages("devtools")
+library(devtools)
+install_github("vjoshy/regMR")
 ```
+
+## Key Functions
+
+The regMR package includes the following functions for use:
+
+### `FGMRM()`
+
+Fits Regularized Finite Gaussian Mixture Regression Model Using MM
+Algorithm over range of lambda-alpha pairs and group counts.
+
+### `MM_Grid_FGMRM()`
+
+Fits Regularized Finite Gaussian Mixture Regression Model Using MM
+Algorithm over range of lambda-alpha pairs.
+
+### `MM_FGMRM()`
+
+Fits Regularized Finite Gaussian Mixture Regression Model Using MM
+Algorithm
+
+### `summary()`
+
+S3 method for summarizing results from the `FGMRM()` and
+`MM_Grid_FGMRM()` functions of class FGMRM. Outputs the number of
+mixture components, optimal lambda-alpha, log-likelihood, bic,
+mean-squared-error, and parameters (pi, sigma, beta) of the model.
+
+### `plot()`
+
+S3 method for plotting results from the `FGMRM()` and `MM_Grid_FGMRM()`
+functions of class FGMRM. Outputs three plots:
+
+1.  Lambdas vs. the BICs of models with the same alpha as the optimal
+    alpha.
+2.  Regression parameters over lambdas for all models with the same
+    alpha as the optimal alpha.
+3.  Group norms over lambdas for all models with the same alpha as the
+    optimal alpha.
+
+### `plot2()`
+
+Plots a specified covariate of the predictor/design matrix (x) against
+the response vector (y). The observations are coloured per the group
+responsibility matrix (z_hard) in the finite Gaussian mixture regression
+model of class FGMRM passed to the function.
 
 ## Example
 
