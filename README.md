@@ -13,6 +13,11 @@ coverage](https://codecov.io/gh/vjoshy/regMR/graph/badge.svg)](https://app.codec
 
 ## Overview
 
+regMR provides a comprehensive framework for regularized finite mixture
+regression models using the MM algorithm.
+
+The methods implemented are based on research by \[INSERT HERE\].
+
 ## Installation
 
 You can install the development version of regMR from
