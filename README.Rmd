@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-regMR provides a comprehensive framework for fitting regularized finite mixture regression models via the MM algorithm. The sparse-group-lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection [CITE?]. The package provides multiple functions for estimation and allows users to fit finite mixture models over different lambda-alpha penalty combinations and group counts. [SHOULD GAUSSIAN BE SPECIFIED?]
+regMR provides a comprehensive framework for fitting regularized finite mixture regression models via the MM algorithm. The sparse-group-lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection [CITE?]. The package provides multiple functions for estimation and allows users to fit finite mixture regression models over different lambda-alpha penalty combinations and group counts. [SHOULD GAUSSIAN BE SPECIFIED?]
 
 This readme file provides a brief and basic example on how to use the regMR package. It walks through generating clustered data to be modeled, applying one of the main functions, `FGMRM()`, to fit a finite Gaussian mixture regression model to the data, and how to apply the plotting and summary methods/functions to the model, getting the most use out of the package.
 

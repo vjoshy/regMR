@@ -17,9 +17,9 @@ regMR provides a comprehensive framework for fitting regularized finite
 mixture regression models via the MM algorithm. The sparse-group-lasso
 (sgl) penalty is applied to parameter updates within the MM algorithm
 for variable selection \[CITE?\]. The package provides multiple
-functions for estimation and allows users to fit finite mixture models
-over different lambda-alpha penalty combinations and group counts.
-\[SHOULD GAUSSIAN BE SPECIFIED?\]
+functions for estimation and allows users to fit finite mixture
+regression models over different lambda-alpha penalty combinations and
+group counts. \[SHOULD GAUSSIAN BE SPECIFIED?\]
 
 This readme file provides a brief and basic example on how to use the
 regMR package. It walks through generating clustered data to be modeled,
