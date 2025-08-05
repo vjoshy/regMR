@@ -43,7 +43,33 @@ library(devtools)
 install_github("vjoshy/regMR")
 ```
 
+## Example
+
 1.  Generate clustered data to be modeled
+
+To generate the clustered data to be modeled using regMR, we require the
+package mvtnorm to be installed. More information on mvtnorm can be
+found here:
+<https://cran.r-project.org/web/packages/mvtnorm/index.html>. After
+setting the seed to ensure reproducibility of the data, the simulation
+parameters (number of samples, covariates, mixture components, and the
+correlation constant), and defining the true parameters for the
+clusters, we can begin to construct the multivariate normal data (`X`)
+and generate the response (`y`).
+
+`X`: To generate `X`, the correlation matrix must first be initialized.
+This is done using the following structure \[PER GS THESIS\]:
+$\Sigma = \{\rho^{|j - k|}\}^p_{j, k = 1}$. Then, with mean 0 and the
+aforementioned correlation structure, `X` (a matrix of size n x p) is
+generated using the `rmvnorm()` function from mvtnorm.
+
+`y`: To generate `y`, the group responsibilities and mean vector must be
+initialized. For the group responsibilities, we use the `rmultinom()`
+function coupled with the $\pi$ vector. For the mean vector, we
+calculate $\beta_0 + \sum^p_{j = 1}x_{ij}\beta_{gj}$, where i goes from
+1 to n and g is the group that the $i^{th}$ observation belongs to.
+Then, using the mean vector and the true standard deviations, `y` (a
+vector of length n) is generated with `rnorm()`.
 
 ``` r
 # install.packages("mvtnorm")
