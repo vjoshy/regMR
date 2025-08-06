@@ -69,7 +69,7 @@ betas <- matrix(c(
   -3, 0,  2, 0      # component 3
 ), nrow = G, byrow = TRUE)
 pis <- c(0.4, 0.4, 0.2)
-sigmas <- c(3, 1.5, 1)
+sigmas <- c(3, 1.5, 1)/2
 
 # ----Generate correlation matrix----
 cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
