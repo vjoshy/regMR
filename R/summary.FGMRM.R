@@ -14,7 +14,7 @@
 #' @export
 #' @method summary FGMRM
 #'
-#' @examples
+#' @examplesIf rlang::is_installed("mvtnorm")
 #'
 #' set.seed(2025)
 #'

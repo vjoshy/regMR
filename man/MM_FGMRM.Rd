@@ -96,6 +96,7 @@ package, but can be specified in the function call. This function is used
 during model estimation.
 }
 \examples{
+\dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 set.seed(2025)
 
@@ -132,4 +133,5 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
 mod <- MM_FGMRM(X, y, G = 3, lambda = 5, alpha = 1)
+\dontshow{\}) # examplesIf}
 }

@@ -95,6 +95,7 @@ lowest bic. It can be ran sequentially or in parallel. This function is used
 during model estimation.
 }
 \examples{
+\dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 set.seed(2025)
 
@@ -131,4 +132,5 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
 mod <- MM_Grid_FGMRM(g = 3, X, y, verbose = FALSE)
+\dontshow{\}) # examplesIf}
 }

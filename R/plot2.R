@@ -19,7 +19,7 @@
 #'
 #' @import ggplot2
 #'
-#' @examples
+#' @examplesIf rlang::is_installed("mvtnorm")
 #'
 #' set.seed(2025)
 #'

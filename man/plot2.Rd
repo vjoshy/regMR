@@ -29,6 +29,7 @@ class "FGMRM". It plots the specified covariate of x against y, with the
 group assignments highlighted in colour.
 }
 \examples{
+\dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 set.seed(2025)
 
@@ -70,4 +71,5 @@ plot <- plot2(mod, X, y, 1)
 
 # ----Display plot----
 plot
+\dontshow{\}) # examplesIf}
 }

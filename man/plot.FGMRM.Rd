@@ -24,6 +24,7 @@ regression coefficients, and lambdas vs. group norms for all models with the
 same alpha as the optimal alpha.
 }
 \examples{
+\dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 set.seed(2025)
 
@@ -67,4 +68,5 @@ plots <- plot(mod)
 plots[[1]] # ----lambdas vs. bics----
 plots[[2]] # ----lambdas vs. regression coefficients----
 plots[[3]] # ----lambdas vs. group norms----
+\dontshow{\}) # examplesIf}
 }

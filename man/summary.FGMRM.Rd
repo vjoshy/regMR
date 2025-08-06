@@ -23,6 +23,7 @@ optimal lambda-alpha, log-likelihood, bic, mean-squared-error, and
 parameters (pi, sigma, beta) of the model.
 }
 \examples{
+\dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 set.seed(2025)
 
@@ -62,4 +63,5 @@ mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
 
 # ----Display summary----
 summary(mod)
+\dontshow{\}) # examplesIf}
 }

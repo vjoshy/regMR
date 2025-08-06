@@ -100,6 +100,7 @@ function chooses the model with the lowest bic. It can be ran sequentially or
 in parallel. This function is for model estimation.
 }
 \examples{
+\dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
 
 set.seed(2025)
 
@@ -136,4 +137,5 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
 mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
+\dontshow{\}) # examplesIf}
 }
