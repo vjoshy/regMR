@@ -5,17 +5,18 @@
 #' regression distribution. This function is used during model estimation,
 #' specifically within iterations of the MM algorithm.
 #'
-#' @param x Design matrix. A numeric matrix of size n x (p + 1), where the
-#' number of rows is equal to the number of observations n, and the number of
-#' columns is equal to the number of covariates p + 1 (for the intercept term).
+#' @param x Predictor/design matrix. A numeric matrix of size n x (p + 1), where
+#' the number of rows is equal to the number of observations n, and the number
+#' of columns is equal to the number of covariates p + 1 (for the intercept
+#' term).
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
-#' @param pi Mixing proportions for each group. Either a numeric vector, or
+#' @param pi Mixing proportions for each component. Either a numeric vector, or
 #' something coercible to one.
 #' @param beta Regression parameters for each mixture component (group). A
 #' numeric matrix of size G x (p + 1), where the number of rows is equal to the
-#' number of mixture components (groups) G, and the number of columns is equal
-#' to the number of covariates p + 1 (for the intercept term).
+#' number of mixture components G, and the number of columns is equal to the
+#' number of covariates p + 1 (for the intercept term).
 #' @param sigma Standard deviation for each mixture component (group). Either a
 #' numeric vector, or something coercible to one.
 #'

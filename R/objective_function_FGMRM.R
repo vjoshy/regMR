@@ -2,7 +2,7 @@
 #'
 #' Computes the negative penalized log-likelihood objective function for a
 #' finite Gaussian mixture regression distribution. This function is used during
-#' model estimation.
+#' model estimation, specifically within iterations of the MM algorithm.
 #'
 #' @param ll A numeric scalar representing the log-likelihood of the finite
 #' Gaussian mixture regression model.

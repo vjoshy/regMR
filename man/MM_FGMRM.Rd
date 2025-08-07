@@ -22,9 +22,9 @@ MM_FGMRM(
 )
 }
 \arguments{
-\item{x}{Design matrix. A numeric matrix of size n x p where the number of
-rows is equal to the number of observations n, and the number of columns is
-equal to the number of covariates p.}
+\item{x}{Predictor/design matrix. A numeric matrix of size n x p where the
+number of rows is equal to the number of observations n, and the number of
+columns is equal to the number of covariates p.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
@@ -36,7 +36,7 @@ model.}
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the
 objective function being minimized is within tol in two consecutive
-iterations, then the algorithm stops.}
+iterations the algorithm stops.}
 
 \item{max_iter}{An integer greater than or equal to one specifying the
 maximum number of iterations ran within the MM algorithm. Default value is
@@ -46,34 +46,37 @@ maximum number of iterations ran within the MM algorithm. Default value is
 strength of the sparse group lasso penalty. Default value is zero (no penalty
 applied).}
 
-\item{alpha}{A numeric value between zero and one inclusive specifying the
-weight between the lasso penalty and group lasso penalty being applied (GS).
-Alpha = 1 gives the lasso fit and alpha = 0 gives the group lasso fit (GS).}
+\item{alpha}{A numeric value between zero (default value) and one inclusive
+specifying the weight between the lasso penalty and group lasso penalty being
+applied. Alpha = 1 gives the lasso fit and alpha = 0 gives the group lasso
+fit.}
 
 \item{init_pi}{A numeric vector containing an (optional) initial estimate for
-the mixing proportions of the finite Gaussian mixture model being estimated.
-Default value is NULL and if an initial estimate is not provided, one is
-initialized using the Mclust function from the mclust package.}
-
-\item{init_beta}{(Optional) Initial estimate for the regression parameters
-for each mixture component (group) of the finite Gaussian mixture model being
-estimated. Default value is NULL and if an initial estimate is not provided,
-one is initialized using the Mclust function from the mclust package. A
-numeric matrix of size G x (p + 1), where the number of rows is equal to the
-number of mixture components (groups) G, and the number of columns is equal
-to the number of covariates p + 1 (for the intercept term).}
-
-\item{init_sigma}{A numeric vector containing an (optional) initial estimate
-for the standard deviations of the finite Gaussian mixture model being
+the mixing proportions of the finite Gaussian mixture regression model being
 estimated. Default value is NULL and if an initial estimate is not provided,
 one is initialized using the Mclust function from the mclust package.}
 
+\item{init_beta}{(Optional) Initial estimate for the regression parameters
+for each mixture component (group) of the finite Gaussian mixture regression
+model being estimated. Default value is NULL and if an initial estimate is
+not provided, one is initialized using the Mclust function from the mclust
+package. A numeric matrix of size G x (p + 1), where the number of rows is
+equal to the number of mixture components G, and the number of columns is
+equal to the number of covariates p + 1 (for the intercept term).}
+
+\item{init_sigma}{A numeric vector containing an (optional) initial estimate
+for the component-wise standard deviations of the finite Gaussian mixture
+regression model being estimated. Default value is NULL and if an initial
+estimate is not provided, one is initialized using the Mclust function from
+the mclust package.}
+
 \item{init_gamma}{(Optional) Initial estimate for the group responsibilities
-of the finite Gaussian mixture model being estimated. Default value is NULL
-and if an initial estimate is not provided, one is initialized using the
-Mclust function from the mclust package. A numeric matrix of size n x G,
-where the number of rows is equal to the number of observations n, and the
-number of columns is equal to the number of mixture components (groups) G.}
+of the finite Gaussian mixture regression model being estimated. Default
+value is NULL and if an initial estimate is not provided, one is initialized
+using the Mclust function from the mclust package. A numeric matrix of size
+n x G, where the number of rows is equal to the number of observations n, and
+the number of columns is equal to the number of mixture components (groups)
+G.}
 
 \item{verbose}{A logical value which, if true (default value), allows the
 function to print progress updates.}
@@ -93,7 +96,7 @@ the specified parameters to estimate a finite Gaussian mixture regression
 model. Initial estimates for model parameters (pi, beta, sigma, z) are
 provided within the function using the Mclust function from the mclust
 package, but can be specified in the function call. This function is used
-during model estimation.
+for model estimation.
 }
 \examples{
 \dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -102,18 +105,18 @@ set.seed(2025)
 
 # ----Simulate data----
 n <- 500   # total samples
-p <- 3     # number of covariates
+p <- 6     # number of covariates
 G <- 3     # number of mixture components
 rho = 0.2  # correlation
 
 # ----True parameters for 3 clusters----
 betas <- matrix(c(
-  1,  2, -1,  0.5,   # Component 1
-  5, -2,  1,  1.5,   # Component 2
-  -3, 0,  2, -1      # Component 3
+  1,  2, -1,  0.5, 0, 0, 0,  # component 1
+  5, -2,  1,  0, 0, 0, 0,  # component 2
+  -3, 0,  2, 0, 0, 0, 0     # component 3
 ), nrow = G, byrow = TRUE)
 pis <- c(0.4, 0.4, 0.2)
-sigmas <- c(3, 1.5, 1)
+sigmas <- c(3, 1.5, 1)/2
 
 # ----Generate correlation matrix----
 cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))

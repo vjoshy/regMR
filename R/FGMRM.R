@@ -6,9 +6,9 @@
 #' function chooses the model with the lowest bic. It can be ran sequentially or
 #' in parallel. This function is for model estimation.
 #'
-#' @param x Design matrix. A numeric matrix of size n x p where the number of
-#' rows is equal to the number of observations n, and the number of columns is
-#' equal to the number of covariates p.
+#' @param x Predictor/design matrix. A numeric matrix of size n x p where the
+#' number of rows is equal to the number of observations n, and the number of
+#' columns is equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
 #' @param G An integer greater than or equal to two specifying the maximum
@@ -17,26 +17,25 @@
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
-#' iterations, then the algorithm stops.
+#' iterations the algorithm stops.
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
 #' @param lambda A list of length G of numeric vectors containing non-negative
 #' tuning parameters specifying various strengths of the sparse group lasso
-#' penalty. Finite Gaussian mixture models will be estimated using each lambda
-#' value. Default value is NULL as the function will initialize lambdas for each
-#' group count from 2 to G using an algorithm.
+#' penalty. Finite Gaussian mixture regression models will be estimated using
+#' each lambda value. Default value is NULL as the function will initialize
+#' lambdas for each group count using an algorithm.
 #' @param lambda_max A non-negative numeric value specifying the maximum lambda
-#' value (tuning parameter) used in creation of each lambda vector. Default
-#' value is NULL as the function will initialize lambda_max for each group count
-#' from 2 to G using an algorithm.
+#' value (tuning parameter) used in the creation of each lambda vector. Default
+#' value is NULL as the function will initialize lambda_max for each group.
 #' @param n_lambda An integer greater than one (default value 100) specifying
-#' the length of the lambda vector for each group count from 2 to G.
+#' the length of the lambda vector for each group.
 #' @param alpha A numeric vector containing values between zero and one
 #' inclusive specifying different weights between the lasso penalty and group
-#' lasso penalty being applied (GS). Alpha = 1 gives the lasso fit and alpha = 0
-#' gives the group lasso fit (GS). Default value is a numeric vector of length
-#' 11: c(0, 0.1, 0.2, ..., 1).
+#' lasso penalty being applied. Alpha = 1 gives the lasso fit and alpha = 0
+#' gives the group lasso fit. Default value is a numeric vector of length 11:
+#' c(0, 0.1, 0.2, ..., 1).
 #' @param verbose A logical value which, if true (default value), allows the
 #' function to print progress updates.
 #' @param penalty A logical value which, if true (default value), allows the
@@ -44,21 +43,22 @@
 #' updates and objective function within iterations of the MM algorithm.
 #' @param random A logical value which, if true (false is the default value),
 #' allows the function to take a random sample of size n_random_la from the
-#' lambda-alpha pairs and run the MM algorithm over the reduced grid.
+#' lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.
 #' @param n_random_la A non-negative integer (default value 100) specifying the
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
 #' @param automatic_stopping A logical value which, if true (false is the
-#' default value), allows the function to implement BIC automatic stopping over
-#' the group count from 2 to G. When the condition for stopping is met, the
+#' default value), allows the function to implement BIC automatic stopping on
+#' the mixture components (groups). When the condition for stopping is met, the
 #' function stops iterating over the group count.
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
 #'
 #' @returns An object of class FGMRM containing the parameters of the estimated
 #' finite Gaussian mixture regression model (bic, log_likelihood, beta, pi,
-#' sigma, z, z_hard, y_hat, mse, mse_fitted, alpha, lambda), the optimal group
-#' count, and the parameters of models with the same alpha and group count for
-#' plotting purposes.
+#' sigma, z, z_hard, y_hat, mse, mse_fitted, alpha, lambda), number of mixture
+#' components, parameters of models with the same alpha, and a numeric
+#' matrix containing the alpha, lambda, and bic values of all estimated models
+#' for plotting purposes.
 #' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
@@ -68,18 +68,18 @@
 #'
 #' # ----Simulate data----
 #' n <- 500   # total samples
-#' p <- 3     # number of covariates
+#' p <- 6     # number of covariates
 #' G <- 3     # number of mixture components
 #' rho = 0.2  # correlation
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
-#'   1,  2, -1,  0.5,   # Component 1
-#'   5, -2,  1,  1.5,   # Component 2
-#'   -3, 0,  2, -1      # Component 3
+#'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
+#'   5, -2,  1,  0, 0, 0, 0,  # component 2
+#'   -3, 0,  2, 0, 0, 0, 0     # component 3
 #' ), nrow = G, byrow = TRUE)
 #' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(3, 1.5, 1)
+#' sigmas <- c(3, 1.5, 1)/2
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))

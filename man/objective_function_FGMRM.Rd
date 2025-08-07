@@ -20,6 +20,6 @@ objective function used for minimization.
 \description{
 Computes the negative penalized log-likelihood objective function for a
 finite Gaussian mixture regression distribution. This function is used during
-model estimation.
+model estimation, specifically within iterations of the MM algorithm.
 }
 \keyword{internal}

@@ -20,18 +20,18 @@
 #'
 #' # ----Simulate data----
 #' n <- 500   # total samples
-#' p <- 3     # number of covariates
+#' p <- 6     # number of covariates
 #' G <- 3     # number of mixture components
 #' rho = 0.2  # correlation
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
-#'   1,  2, -1,  0.5,   # Component 1
-#'   5, -2,  1,  1.5,   # Component 2
-#'   -3, 0,  2, -1      # Component 3
+#'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
+#'   5, -2,  1,  0, 0, 0, 0,  # component 2
+#'   -3, 0,  2, 0, 0, 0, 0     # component 3
 #' ), nrow = G, byrow = TRUE)
 #' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(3, 1.5, 1)
+#' sigmas <- c(3, 1.5, 1)/2
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))

@@ -6,9 +6,9 @@
 #'
 #' @param mod An object of class "FGMRM", the result of calling FGMRM() or
 #' MM_Grid_FGMRM().
-#' @param x Design matrix. A numeric matrix of size n x p where the number of
-#' rows is equal to the number of observations n, and the number of columns is
-#' equal to the number of covariates p.
+#' @param x Predictor/design matrix. A numeric matrix of size n x p where the
+#' number of rows is equal to the number of observations n, and the number of
+#' columns is equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
 #' @param covariate A numeric value specifying the covariate of x to be plotted.
@@ -25,18 +25,18 @@
 #'
 #' # ----Simulate data----
 #' n <- 500   # total samples
-#' p <- 3     # number of covariates
+#' p <- 6     # number of covariates
 #' G <- 3     # number of mixture components
 #' rho = 0.2  # correlation
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
-#'   1,  2, -1,  0.5,   # Component 1
-#'   5, -2,  1,  1.5,   # Component 2
-#'   -3, 0,  2, -1      # Component 3
+#'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
+#'   5, -2,  1,  0, 0, 0, 0,  # component 2
+#'   -3, 0,  2, 0, 0, 0, 0     # component 3
 #' ), nrow = G, byrow = TRUE)
 #' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(3, 1.5, 1)
+#' sigmas <- c(3, 1.5, 1)/2
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -80,7 +80,8 @@ plot2 <- function(mod, x, y, covariate){
     scale_color_viridis_c(option = "viridis") +
     theme_bw() +
     labs(y = "y", x = paste("Covariate", covariate, "of x")) +
-    theme(text = element_text(family = "serif", face="bold", size=12))
+    theme(text = element_text(family = "serif", face="bold", size=12)) +
+    guides(alpha = "none")
 
   return(plot)
 }
