@@ -63,7 +63,7 @@ summary.FGMRM <- function(object, ...){
   cat(" lambda =", round(object$parameters$lambda, 2),
       "|| alpha =", object$parameters$alpha,
       "|| log-likelihood =", round(object$parameters$loglik, 2),
-      "|| BIC =", round(object$parameters$bic, 2),
+      "|| \n BIC =", round(object$parameters$bic, 2),
       "|| MSE =", round(object$parameters$mse, 2), "\n\n")
   idx <- seq(1, object$g, length.out = object$g)
   cat(" Components")

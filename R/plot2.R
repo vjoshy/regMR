@@ -75,11 +75,11 @@ plot2 <- function(mod, x, y, covariate){
 
   # ----create plot, specified covariate of x vs. y with group assignments as---
   # ----colour----
-  plot <- ggplot(df, aes(y, x[ , covariate], color = Groups)) +
+  plot <- ggplot(df, aes(y, x[ , covariate], color = as.factor(Groups))) +
     geom_point(aes(alpha = 0.5), na.rm = TRUE) +
-    scale_color_viridis_c(option = "viridis") +
+    scale_color_viridis_d(option = "viridis") +
     theme_bw() +
-    labs(y = "y", x = paste("Covariate", covariate, "of x")) +
+    labs(y = "y", x = paste("Covariate", covariate, "of X")) +
     theme(text = element_text(family = "serif", face="bold", size=12)) +
     guides(alpha = "none")
 

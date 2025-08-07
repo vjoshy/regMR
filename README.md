@@ -326,7 +326,8 @@ summary(mod)
 #> 
 #>  G = 3 
 #> 
-#>  lambda = 23.28 || alpha = 1 || log-likelihood = -1037.54 || BIC = 2168.29 || MSE = 0.72 
+#>  lambda = 23.28 || alpha = 1 || log-likelihood = -1037.54 || 
+#>  BIC = 2168.29 || MSE = 0.72 
 #> 
 #>  Components     1      2      3
 #>  Pi           0.233  0.345  0.422

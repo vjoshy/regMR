@@ -281,7 +281,7 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       alpha_vec <- sapply(parameters, function(p) p$alpha)
       lambda_vec <- sapply(parameters, function(p) p$lambda)
       bic_vec <- sapply(parameters, function(p) p$bic)
-      alpha_lambda_beta <- cbind(alpha_vec, lambda_vec, bic_vec)
+      alpha_lambda_bic <- cbind(alpha_vec, lambda_vec, bic_vec)
 
       # ----output progress----
       if (verbose){
@@ -324,12 +324,12 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       chosen_parameters$lambda_max <- lambda_max
       chosen_parameters$lambda_vector <- lambda[[g]]
       parameters_same_alpha <- NA
-      alpha_lambda_beta <- NA
+      alpha_lambda_bic <- NA
     }
 
     results <- list(parameters = chosen_parameters, g = g,
                     parameters_same_alpha = parameters_same_alpha,
-                    alpha_lambda_beta = alpha_lambda_beta)
+                    alpha_lambda_bic = alpha_lambda_bic)
     class(results) <- "FGMRM"
 
     # ----return parameters, compartment number----
@@ -381,7 +381,7 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
     chosen_parameters$lambda_vector <- NA
 
     results <- list(parameters = chosen_parameters, g = g,
-                    parameters_same_alpha = NA, alpha_lambda_beta = NA)
+                    parameters_same_alpha = NA, alpha_lambda_bic = NA)
     class(results) <- "FGMRM"
 
     # ----return parameters, compartment number----

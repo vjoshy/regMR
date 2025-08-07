@@ -70,42 +70,30 @@ plot.FGMRM <- function(x, ...){
 
   # ----plot one----
 
-  # ----extract bics and lambda values from all models with the same alpha as---
-  # ----the optimal alpha----
-  bics <- sapply(x$parameters_same_alpha, function(p) p$bic)
-  lambdas <- sapply(x$parameters_same_alpha, function(p) p$lambda)
+  long <- reshape2::melt(x$alpha_lambda_bic)
+  long[, 1] <- x$alpha_lambda_bic[, 1]
+  long[, 2] <- x$alpha_lambda_bic[, 2]
+  long[, 3] <- x$alpha_lambda_bic[, 3]
+  colnames(long) <- c("alpha", "lambda", "bic")
 
-  # ----combine lambdas, bics into data frame----
-  df <- data.frame(lambdas = lambdas, bics = bics)
-
-  # ----label lambdas, seperate into two groups----
-  df$lambda_Values <- ifelse(df$lambdas == x$parameters$lambda,
-                             paste("Optimal Lambda: BIC =",
-                                   round(x$parameters$bic, 1),
-                                   "|| Lambda =",
-                                   round(x$parameters$lambda, 1)), "Lambda")
-
-  # ----create first plot, a scatterplot of the lambdas vs. the bics for all----
-  # ----models with the same alpha as the optimal alpha----
-  # ----Lambda value that minmizes the bic is highlighted----
-  plot_one <- ggplot(df, aes(x = lambdas, y = bics,
-                             color = .data[["lambda_Values"]])) +
-    geom_point(size = 3, shape = 20, na.rm = TRUE) +
-    scale_alpha_identity() +
+  plot_one <- ggplot(long, aes(x = log(.data[["lambda"]]),
+                                 y = .data[["bic"]],
+                                 group = as.factor(.data[["alpha"]]),
+                                 color = as.factor(.data[["alpha"]]))) +
+    geom_point(na.rm = TRUE) +
     scale_color_viridis_d(option = "viridis") +
     theme_bw() +
-    theme(text = element_text(family = "serif", face="bold", size=12),
-          legend.position = 'top') +
-    labs(y = "BIC", x = expression(paste(lambda)), color = "Lambda Values") +
-    annotate("point", y = bics[which(lambdas == x$parameters$lambda)],
-             x =  x$parameters$lambda, color = "#FDE725FF")
+    labs(y = "BIC", x = expression(log(lambda)),
+         color = "Alpha") +
+    theme(text = element_text(family = "serif", face="bold", size=12))
 
   # ----plot two----
 
   # ----extract each individual regression parameter (excluding the intercept)--
-  # ----for all models with the same alpha as the optimal alpha----
+  # ----and lambdas for all models with the same alpha as the optimal alpha----
   individual_coef <- sapply(x$parameters_same_alpha,
                             function(p) as.vector(p$beta[ , -1]))
+  lambdas <- sapply(x$parameters_same_alpha, function(p) p$lambda)
 
   # ----reshape data for plotting----
   long <- reshape2::melt(individual_coef)
@@ -145,10 +133,10 @@ plot.FGMRM <- function(x, ...){
   # ----optimal alpha----
   plot_three <- ggplot(long, aes(x = log(.data[["lambda"]]),
                                  y = .data[["value"]],
-                                 group = .data[["groups"]],
-                                 color = .data[["groups"]])) +
+                                 group = as.factor(.data[["groups"]]),
+                                 color = as.factor(.data[["groups"]]))) +
     geom_line(na.rm = TRUE) +
-    scale_color_viridis_c(option = "viridis") +
+    scale_color_viridis_d(option = "viridis") +
     theme_bw() +
     labs(y = expression("Group Norms: l"[2]), x = expression(log(lambda)),
          color = "Groups") +

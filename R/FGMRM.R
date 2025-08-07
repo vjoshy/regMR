@@ -211,7 +211,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
 
       results <- list(parameters = selected_parameters,
                       g = selected_compartment,
-                      parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha)
+                      parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
+                      alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
       class(results) <- "FGMRM"
 
       return(results)
@@ -222,7 +223,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
       if (verbose) cat(" no model chosen\n\n")
       if (verbose) cat(strrep("-", getOption("width")), "\n")
 
-      results <- list(parameters = NA, g = NA, parameters_same_alpha = NA)
+      results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
+                      alpha_lambda_bic = NA)
       class(results) <- "FGMRM"
 
       return(results)
@@ -304,7 +306,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
 
     results <- list(parameters = selected_parameters,
                     g = selected_compartment + 1,
-                    parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha)
+                    parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
+                    alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
     class(results) <- "FGMRM"
 
     return(results)
@@ -315,7 +318,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
     if (verbose) cat(" no model chosen\n\n")
     if (verbose) cat(strrep("-", getOption("width")), "\n")
 
-    results <- list(parameters = NA, g = NA, parameters_same_alpha = NA)
+    results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
+                    alpha_lambda_bic = NA)
     class(results) <- "FGMRM"
 
     return(results)
