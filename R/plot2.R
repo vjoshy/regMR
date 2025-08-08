@@ -79,7 +79,7 @@ plot2 <- function(mod, x, y, covariate){
     geom_point(aes(alpha = 0.5), na.rm = TRUE) +
     scale_color_viridis_d(option = "viridis") +
     theme_bw() +
-    labs(y = "y", x = paste("Covariate", covariate, "of X")) +
+    labs(y = "y", x = paste("Covariate", covariate, "of X"), color = "Groups") +
     theme(text = element_text(family = "serif", face="bold", size=12)) +
     guides(alpha = "none")
 
