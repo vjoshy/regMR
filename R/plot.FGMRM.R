@@ -89,7 +89,9 @@ plot.FGMRM <- function(x, ...){
     theme(text = element_text(family = "serif", face="bold", size=12)) +
     guides(alpha = "none") +
     geom_point(data = long[which(long[, 1] == x$parameters$alpha), ],
-               na.rm = TRUE)
+               na.rm = TRUE) +
+    annotate("point", x = log(x$parameters$lambda), y = x$parameters$bic,
+             colour = "red")
 
   # ----plot two----
 
