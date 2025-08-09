@@ -70,6 +70,8 @@ plot.FGMRM <- function(x, ...){
 
   # ----plot one----
 
+  # ----reshape the matrix containing the alpha, lambda, and bic values for----
+  # ----plotting purposes----
   long <- reshape2::melt(x$alpha_lambda_bic)
   long <- long[seq(1, 1100), ]
   long[, 1] <- x$alpha_lambda_bic[, 1]
@@ -77,11 +79,12 @@ plot.FGMRM <- function(x, ...){
   long[, 3] <- x$alpha_lambda_bic[, 3]
   colnames(long) <- c("alpha", "lambda", "bic")
 
+  # ----plot the lambdas vs. the bics for all alpha values----
   plot_one <- ggplot(long, aes(x = log(.data[["lambda"]]),
                                  y = .data[["bic"]],
                                  group = as.factor(.data[["alpha"]]),
                                  color = as.factor(.data[["alpha"]]))) +
-    geom_point(aes(alpha = 0.5), na.rm = TRUE) +
+    geom_point(aes(alpha = 0.2), na.rm = TRUE) +
     scale_color_viridis_d(option = "viridis") +
     theme_bw() +
     labs(y = "BIC", x = expression(log(lambda)),
@@ -89,9 +92,7 @@ plot.FGMRM <- function(x, ...){
     theme(text = element_text(family = "serif", face="bold", size=12)) +
     guides(alpha = "none") +
     geom_point(data = long[which(long[, 1] == x$parameters$alpha), ],
-               na.rm = TRUE) +
-    annotate("point", x = log(x$parameters$lambda), y = x$parameters$bic,
-             colour = "red")
+               na.rm = TRUE)
 
   # ----plot two----
 
