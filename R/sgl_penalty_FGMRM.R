@@ -14,8 +14,7 @@
 #' number of mixture components G, and the number of columns is equal to the
 #' number of covariates p + 1 (for the intercept term).
 #' @param G An integer greater than or equal to one representing the
-#' number of mixture components (groups) in a finite Gaussian mixture regression
-#' model.
+#' number of mixture components in a finite Gaussian mixture regression model.
 #'
 #' @returns A numeric scalar representing the sgl penalty for the given model.
 #'

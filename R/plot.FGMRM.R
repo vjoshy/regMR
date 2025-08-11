@@ -136,7 +136,7 @@ plot.FGMRM <- function(x, ...){
   }
   colnames(long) <- c("groups", "lambda", "value")
 
-  # ----create third plot, tracks the group norms across all lambdas for the ---
+  # ----create third plot, tracks the group norms across all lambdas for the----
   # ----optimal alpha----
   plot_three <- ggplot(long, aes(x = log(.data[["lambda"]]),
                                  y = .data[["value"]],

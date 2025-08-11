@@ -16,10 +16,9 @@ coverage](https://codecov.io/gh/vjoshy/regMR/graph/badge.svg)](https://app.codec
 regMR provides a comprehensive framework for fitting regularized finite
 mixture regression models via the MM algorithm. The sparse-group-lasso
 (sgl) penalty is applied to parameter updates within the MM algorithm
-for variable selection \[CITE?\]. The package provides multiple
-functions for estimation and allows users to fit finite mixture
-regression models over different lambda-alpha penalty combinations and
-group counts. \[SHOULD GAUSSIAN BE SPECIFIED?\]
+for variable selection. The package provides multiple functions for
+estimation and allows users to fit finite mixture regression models over
+different lambda-alpha penalty combinations and group counts.
 
 This readme file provides a brief and basic example on how to use the
 regMR package. It walks through generating clustered data to be modeled,
@@ -30,8 +29,6 @@ package.
 
 The methods implemented are based on research by \[INSERT HERE\].
 
-\[IS THIS ENOUGH?\]
-
 ## Installation
 
 You can install the development version of regMR from
@@ -41,6 +38,12 @@ You can install the development version of regMR from
 # install.packages("devtools")
 library(devtools)
 install_github("vjoshy/regMR")
+```
+
+You can install the released version of regMR from CRAN using:
+
+``` r
+install.packages("regMR")
 ```
 
 ## Example
@@ -109,12 +112,14 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 ```
 
-2.  Call `FGMRM()` to fit finite Gaussian mixture regression model
+2.  Call `FGMRM()` to fit a finite Gaussian mixture regression model to
+    the data
 
 `FGMRM()` fits regularized finite Gaussian mixture regression models via
 the MM algorithm over a range of lambda-alpha pairs (sgl penalty values)
 and group counts. The maximum group count to be tested is specified in
-the function below as `G = 6`.
+the function below as `G = 6`. The function chooses the model with the
+lowest BIC value. EXPAND HERE?
 
 ``` r
 # ----Load the regMR package----
@@ -258,14 +263,13 @@ mod <- FGMRM(x = X, y = y, G = 6)
 ```
 
 3.  Use `plot()`, `plot2()`, and `summary()` on the finite Gaussian
-    mixture regression model
+    mixture regression model from `FGMRM()`
 
 `plot()` is an S3 method for plotting results (class FGMRM) from the
 `FGMRM()` and `MM_Grid_FGMRM()` functions. The function outputs three
 plots:
 
-1.  Lambdas vs. the BICs of models with the same alpha as the optimal
-    alpha.
+1.  Lambdas vs. the BICs of models for all alpha values
 
 2.  Regression parameters over lambdas for all models with the same
     alpha as the optimal alpha.
@@ -290,10 +294,10 @@ plot(mod)
 
 <img src="man/figures/README-example-3-3.png" width="100%" />
 
-`plot2()` plots a specified covariate of the predictor/design matrix (x)
-against the response vector (y). The observations are coloured per the
-group responsibility matrix (`z_hard`) in the finite Gaussian mixture
-regression model of class FGMRM passed to the function.
+`plot2()` plots a specified covariate of the predictor/design matrix
+(`X`) against the response vector (`y`). The observations are coloured
+per the group responsibility matrix (`z_hard`) in the finite Gaussian
+mixture regression model of class FGMRM passed to the function.
 
 ``` r
 plot2(mod, X, y, 1) # covariate one
