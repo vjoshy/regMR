@@ -1,17 +1,17 @@
 #' Plot Method for a Finite Gaussian Mixture Regression Model of class "FGMRM"
 #'
 #' This function creates plots for finite Gaussian mixture regression models of
-#' class "FGMRM". It generates three plots: lambdas vs. bics, lambdas vs.
-#' regression coefficients, and lambdas vs. group norms for all models with the
-#' same alpha as the optimal alpha.
+#' class "FGMRM". It generates three plots: lambdas vs. bics for all alpha
+#' values, lambdas vs. regression coefficients, and lambdas vs. group norms for
+#' all models with the same alpha as the optimal alpha.
 #'
 #' @param x An object of class "FGMRM", the result of calling FGMRM() or
 #' MM_Grid_FGMRM().
 #' @param ... Additional arguments for plotting (currently unused).
 #'
-#' @returns A list of three ggplot objects: lambdas vs. bics, lambdas vs.
-#' regression coefficients, and lambdas vs. group norms for all models with the
-#' same alpha as the optimal alpha.
+#' @returns A list of three ggplot objects: lambdas vs. bics for all alpha
+#' values, lambdas vs. regression coefficients, and lambdas vs. group norms for
+#' all models with the same alpha as the optimal alpha.
 #' @export
 #' @method plot FGMRM
 #'

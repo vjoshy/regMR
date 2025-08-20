@@ -37,7 +37,7 @@ one.}
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the
 objective function being minimized is within tol in two consecutive
-iterations the algorithm stops.}
+iterations, the algorithm stops.}
 
 \item{max_iter}{An integer greater than or equal to one specifying the
 maximum number of iterations ran within the MM algorithm. Default value is
@@ -45,9 +45,9 @@ maximum number of iterations ran within the MM algorithm. Default value is
 
 \item{lambda}{A list of length G of numeric vectors containing non-negative
 tuning parameters specifying various strengths of the sparse group lasso
-penalty. Finite Gaussian mixture regression models will be estimated using
-each lambda value. Default value is NULL as the function will initialize
-lambdas for each group count using an algorithm.}
+penalty to be applied. Finite Gaussian mixture regression models will be
+estimated using each lambda value. Default value is NULL as the function will
+initialize a lambda vector for each group count using an algorithm.}
 
 \item{lambda_max}{A non-negative numeric value specifying the maximum lambda
 value (tuning parameter) used in the creation of each lambda vector. Default

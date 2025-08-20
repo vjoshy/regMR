@@ -23,11 +23,11 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-regMR provides a comprehensive framework for fitting regularized finite mixture regression models via the MM algorithm. The sparse-group-lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection. The package provides multiple functions for estimation and allows users to fit finite mixture regression models over different lambda-alpha penalty combinations and group counts.
+regMR provides a comprehensive framework for fitting regularized finite mixture regression models via the MM algorithm. The sparse-group-lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection. The package provides multiple functions for estimation and allows users to fit finite mixture regression models over different lambda-alpha sgl penalty combinations and group counts.
 
 This readme file provides a brief and basic example on how to use the regMR package. It walks through generating clustered data to be modeled, applying one of the main functions, `FGMRM()`, to fit a finite Gaussian mixture regression model to the data, and how to apply the plotting and summary methods/functions to the model, getting the most use out of the package.
 
-The methods implemented are based on research by [INSERT HERE].
+The methods implemented are based on research by Grace Stelter [INSERT PAPER HERE].
 
 ## Installation
 
@@ -49,9 +49,9 @@ install.packages("regMR")
 
 1.  Generate clustered data to be modeled
 
-To generate the clustered data to be modeled using regMR, we require the package mvtnorm to be installed. More information on mvtnorm can be found here: <https://cran.r-project.org/web/packages/mvtnorm/index.html>. After setting the seed to ensure reproducibility of the data, the simulation parameters (number of samples, covariates, mixture components, and the correlation constant), and defining the true parameters for the clusters, we can begin to construct the multivariate normal data (`X`) and generate the response (`y`).
+To generate the clustered data to be modeled using regMR, we require the package mvtnorm to be installed. More information on mvtnorm can be found here: <https://CRAN.R-project.org/package=mvtnorm>. After setting the seed to ensure reproducibility of the data, initializing the simulation parameters (number of samples (`n`), covariates (`p`), mixture components (`G`), and the correlation constant (`rho`)), and defining the true parameters for the clusters, we can begin to construct the multivariate normal data (`X`) and generate the response (`y`).
 
-`X`: To generate `X`, the correlation matrix must first be initialized. This is done using the following structure [PER GS THESIS]: $\Sigma = \{\rho^{|j - k|}\}^p_{j, k = 1}$. Then, with mean 0 and the aforementioned correlation structure, `X` (a matrix of size n x p) is generated using the `rmvnorm()` function from mvtnorm.
+`X`: To generate `X`, the correlation matrix must first be initialized. This is done using the following structure from [GRACE THESIS]: $\Sigma = \{\rho^{|j - k|}\}^p_{j, k = 1}$. Then, with mean 0 and the aforementioned correlation structure, `X` (a matrix of size n x p) is generated using the `rmvnorm()` function from mvtnorm.
 
 `y`: To generate `y`, the group responsibilities and mean vector must be initialized. For the group responsibilities, we use the `rmultinom()` function coupled with the $\pi$ vector. For the mean vector, we calculate $\beta_0 + \sum^p_{j = 1}x_{ij}\beta_{gj}$, where i goes from 1 to n and g is the group that the $i^{th}$ observation belongs to. Then, using the mean vector and the true standard deviations, `y` (a vector of length n) is generated with `rnorm()`.
 
@@ -73,7 +73,7 @@ betas <- matrix(c(
   -3, 0,  2, 0, 0, 0, 0     # component 3
 ), nrow = G, byrow = TRUE)
 pis <- c(0.4, 0.4, 0.2)
-sigmas <- c(3, 1.5, 1)/2
+sigmas <- c(0.5, 0.4, 0.3)
 
 # ----Generate correlation matrix----
 cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -95,7 +95,7 @@ y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
 2.  Call `FGMRM()` to fit a finite Gaussian mixture regression model to the data
 
-`FGMRM()` fits regularized finite Gaussian mixture regression models via the MM algorithm over a range of lambda-alpha pairs (sgl penalty values) and group counts. The maximum group count to be tested is specified in the function below as `G = 6`. The function chooses the model with the lowest BIC value. EXPAND HERE?
+`FGMRM()` fits regularized finite Gaussian mixture regression models via the MM algorithm over a range of lambda-alpha pairs (sgl penalty values) and group counts. The maximum group count to be tested is specified in the function below as `G = 6`. The function chooses the model with the lowest BIC value. 
 
 ```{r example-2}
 # ----Load the regMR package----
@@ -122,9 +122,7 @@ plot(mod)
 `plot2()` plots a specified covariate of the predictor/design matrix (`X`) against the response vector (`y`). The observations are coloured per the group responsibility matrix (`z_hard`) in the finite Gaussian mixture regression model of class FGMRM passed to the function.
 
 ```{r example-4}
-plot2(mod, X, y, 1) # covariate one
 plot2(mod, X, y, 2) # covariate two
-plot2(mod, X, y, 3) # covariate three
 ```
 
 `summary()` is an S3 method for summarizing results (class FGMRM) from the `FGMRM()` and `MM_Grid_FGMRM()` functions. Outputs the number of mixture components, optimal lambda-alpha, log-likelihood, bic, mean-squared-error, and parameters (pi, sigma, beta) of the model.

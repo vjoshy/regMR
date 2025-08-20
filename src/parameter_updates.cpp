@@ -7,7 +7,7 @@
 // [[Rcpp::export]]
 arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
                       arma::mat V, double lambda, bool penalty) {
-  // Finite Mixture of Gaussian Regression Models EM algorithm beta update
+  // Finite Gaussian Mixture Regression Distribution MM algorithm beta update
   int G = gamma_mat.n_cols;
   int p = X.n_cols;
   arma::vec z, ext_V_row;
@@ -56,7 +56,7 @@ arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
 // [[Rcpp::export]]
 arma::vec sigma_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
                        arma::mat beta, arma::vec N){
-  // Finite Mixture of Gaussian Regression Models EM algorithm sigma update
+  // Finite Gaussian Mixture Regression Distribution MM algorithm sigma update
   int G = gamma_mat.n_cols;
   arma::vec sigma(G);
   arma::vec res;
@@ -73,7 +73,7 @@ arma::vec sigma_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
 
 // [[Rcpp::export]]
 double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat){
-  // Finite Mixture of Gaussian Regression Models EM algorithm lambda_max
+  // Finite Gaussian Mixture Regression Distribution MM algorithm lambda_max
   // calculation
   int G = gamma_mat.n_cols;
   int p = X.n_cols;
@@ -83,7 +83,6 @@ double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat){
 
   for (int g = 0; g < G; g++){
     z = gamma_mat.col(g); // Z_g matrix in column form
-    // Calculation based on Grace's Thesis
     result.row(g) = 3.0 * arma::abs((X.t() * (y % z)).t());
   }
 

@@ -9,7 +9,7 @@ compute_N_FGMRM(gamma_mat)
 \arguments{
 \item{gamma_mat}{Group responsibility matrix. A numeric matrix of size n x G,
 where the number of rows is equal to the number of observations n, and the
-number of columns is equal to the number of mixture components (groups) G.}
+number of columns is equal to the number of mixture components G.}
 }
 \value{
 A numeric vector containing the column sums of gamma_mat.

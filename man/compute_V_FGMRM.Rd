@@ -11,10 +11,10 @@ compute_V_FGMRM(G, beta, alpha)
 number of mixture components (groups) in a finite Gaussian mixture regression
 model.}
 
-\item{beta}{Regression parameters for each mixture component (group). A
-numeric matrix of size G x (p + 1), where the number of rows is equal to the
-number of mixture components G, and the number of columns is equal to the
-number of covariates p + 1 (for the intercept term).}
+\item{beta}{Regression parameters for each mixture component. A numeric
+matrix of size G x (p + 1), where the number of rows is equal to the number
+of mixture components G, and the number of columns is equal to the number of
+covariates p + 1 (for the intercept term).}
 
 \item{alpha}{A numeric value between zero and one inclusive specifying the
 weight between the lasso penalty and group lasso penalty being applied.
@@ -22,9 +22,9 @@ Alpha = 1 gives the lasso fit and alpha = 0 gives the group lasso fit.}
 }
 \value{
 A numeric matrix of size G x (p + 1), where the number of
-rows is equal to the number of mixture components (groups) G, and the number
-of columns is equal to the number of covariates p + 1 (for the intercept
-term), representing the sgl penalty majorization matrix.
+rows is equal to the number of mixture components G, and the number of
+columns is equal to the number of covariates p + 1 (for the intercept term),
+representing the sgl penalty majorization matrix.
 }
 \description{
 Compute sparse group lasso (sgl) penalty majorization matrix for application

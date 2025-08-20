@@ -24,8 +24,8 @@ numeric matrix of size G x (p + 1), where the number of rows is equal to the
 number of mixture components G, and the number of columns is equal to the
 number of covariates p + 1 (for the intercept term).}
 
-\item{sigma}{Standard deviation for each mixture component (group). Either a
-numeric vector, or something coercible to one.}
+\item{sigma}{Standard deviation for each mixture component. Either a numeric
+vector, or something coercible to one.}
 }
 \value{
 A numeric scalar representing the incomplete data log-likelihood

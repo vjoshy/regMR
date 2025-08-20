@@ -13,15 +13,15 @@ MM_Grid_FGMRM().}
 \item{...}{Additional arguments for plotting (currently unused).}
 }
 \value{
-A list of three ggplot objects: lambdas vs. bics, lambdas vs.
-regression coefficients, and lambdas vs. group norms for all models with the
-same alpha as the optimal alpha.
+A list of three ggplot objects: lambdas vs. bics for all alpha
+values, lambdas vs. regression coefficients, and lambdas vs. group norms for
+all models with the same alpha as the optimal alpha.
 }
 \description{
 This function creates plots for finite Gaussian mixture regression models of
-class "FGMRM". It generates three plots: lambdas vs. bics, lambdas vs.
-regression coefficients, and lambdas vs. group norms for all models with the
-same alpha as the optimal alpha.
+class "FGMRM". It generates three plots: lambdas vs. bics for all alpha
+values, lambdas vs. regression coefficients, and lambdas vs. group norms for
+all models with the same alpha as the optimal alpha.
 }
 \examples{
 \dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

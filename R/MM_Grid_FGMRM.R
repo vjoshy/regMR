@@ -18,15 +18,15 @@
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
-#' iterations the algorithm stops.
+#' iterations, the algorithm stops.
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
 #' @param lambda A list of length G of numeric vectors containing non-negative
 #' tuning parameters specifying various strengths of the sparse group lasso
-#' penalty. Finite Gaussian mixture regression models will be estimated using
-#' each lambda value. Default value is NULL as the function will initialize
-#' lambdas for each group count using an algorithm.
+#' penalty to be applied. Finite Gaussian mixture regression models will be
+#' estimated using each lambda value. Default value is NULL as the function will
+#' initialize a lambda vector for each group count using an algorithm.
 #' @param lambda_max A non-negative numeric value specifying the maximum lambda
 #' value (tuning parameter) used in the creation of each lambda vector. Default
 #' value is NULL as the function will initialize lambda_max for each group.
@@ -277,7 +277,7 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
                           function(p) isTRUE(all.equal(p$alpha, chosen_alpha))))
       parameters_same_alpha <- parameters[idx]
 
-      # ----get alpha, lamba, and bic for all models for plotting purposes----
+      # ----get alpha, lambda, and bic for all models for plotting purposes----
       alpha_vec <- sapply(parameters, function(p) p$alpha)
       lambda_vec <- sapply(parameters, function(p) p$lambda)
       bic_vec <- sapply(parameters, function(p) p$bic)

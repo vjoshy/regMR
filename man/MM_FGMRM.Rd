@@ -36,7 +36,7 @@ model.}
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the
 objective function being minimized is within tol in two consecutive
-iterations the algorithm stops.}
+iterations, the algorithm stops.}
 
 \item{max_iter}{An integer greater than or equal to one specifying the
 maximum number of iterations ran within the MM algorithm. Default value is
@@ -57,9 +57,9 @@ estimated. Default value is NULL and if an initial estimate is not provided,
 one is initialized using the Mclust function from the mclust package.}
 
 \item{init_beta}{(Optional) Initial estimate for the regression parameters
-for each mixture component (group) of the finite Gaussian mixture regression
-model being estimated. Default value is NULL and if an initial estimate is
-not provided, one is initialized using the Mclust function from the mclust
+for each mixture component of the finite Gaussian mixture regression model
+being estimated. Default value is NULL and if an initial estimate is not
+provided, one is initialized using the Mclust function from the mclust
 package. A numeric matrix of size G x (p + 1), where the number of rows is
 equal to the number of mixture components G, and the number of columns is
 equal to the number of covariates p + 1 (for the intercept term).}
@@ -75,8 +75,7 @@ of the finite Gaussian mixture regression model being estimated. Default
 value is NULL and if an initial estimate is not provided, one is initialized
 using the Mclust function from the mclust package. A numeric matrix of size
 n x G, where the number of rows is equal to the number of observations n, and
-the number of columns is equal to the number of mixture components (groups)
-G.}
+the number of columns is equal to the number of mixture components G.}
 
 \item{verbose}{A logical value which, if true (default value), allows the
 function to print progress updates.}
