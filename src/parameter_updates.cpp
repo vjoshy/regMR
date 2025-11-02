@@ -5,7 +5,7 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 
 // [[Rcpp::export]]
-arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
+arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat, arma::vec sigma,
                       arma::mat V, double lambda, bool penalty) {
   // Finite Gaussian Mixture Regression Distribution MM algorithm beta update
   int G = gamma_mat.n_cols;
@@ -66,6 +66,27 @@ arma::vec sigma_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
     res = arma::pow(res, 2);
     // Calculate sigma for each compartment
     sigma(g) = sqrt(sum(gamma_mat.col(g) % res)/N(g));
+  }
+
+  return sigma;
+}
+
+// [[Rcpp::export]]
+arma::vec sigma_update_pen(arma::mat X, arma::mat y, double iqr_var, double n, arma::mat gamma_mat,
+                       arma::mat beta, arma::vec N){
+
+  int G = gamma_mat.n_cols;
+  arma::vec sigma(G);
+
+  for (int g = 0; g < G; g++) {
+    arma::vec res = y - X * beta.row(g).t();
+    arma::vec res2 = arma::pow(res, 2);
+    double S_g = arma::sum(gamma_mat.col(g) % res2);
+    double a_n = 1/n;
+
+    // Chen et al. penalty: stabilizes small variances
+    double var_pen = (S_g + (a_n * iqr_var)) / (N(g) + a_n);
+    sigma(g) = std::sqrt(var_pen);
   }
 
   return sigma;
