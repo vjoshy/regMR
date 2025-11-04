@@ -5,7 +5,8 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 
 // [[Rcpp::export]]
-arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat, arma::vec sigma,
+arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
+                      arma::vec pi, arma::vec sigma,
                       arma::mat V, double lambda, bool penalty) {
   // Finite Gaussian Mixture Regression Distribution MM algorithm beta update
   int G = gamma_mat.n_cols;
@@ -30,7 +31,7 @@ arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat, arma::vec s
 
     // Regularize
     if (penalty){
-      XtZX += lambda * Vg;
+      XtZX += 2 * lambda * sigma(g) * sigma(g) * pi(g) * pi(g) * Vg;
     }
     else{
       XtZX += 0.01 * arma::eye<arma::mat>(XtZX.n_rows, XtZX.n_cols);
@@ -85,7 +86,7 @@ arma::vec sigma_update_pen(arma::mat X, arma::mat y, double iqr_var, double n, a
     double a_n = 1/n;
 
     // Chen et al. penalty: stabilizes small variances
-    double var_pen = (S_g + (a_n * iqr_var)) / (N(g) + a_n);
+    double var_pen = (S_g + ( 2* a_n * iqr_var)) / (N(g) + 2 * a_n);
     sigma(g) = std::sqrt(var_pen);
   }
 
@@ -93,7 +94,8 @@ arma::vec sigma_update_pen(arma::mat X, arma::mat y, double iqr_var, double n, a
 }
 
 // [[Rcpp::export]]
-double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat){
+double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat,
+                          arma::vec pi, arma::vec sigma){
   // Finite Gaussian Mixture Regression Distribution MM algorithm lambda_max
   // calculation
   int G = gamma_mat.n_cols;
@@ -102,12 +104,15 @@ double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat){
   arma::mat result(G, p, arma::fill::zeros);
   arma::vec z, value;
 
+  double pi_min = pi.min();
+  double sigma_min = sigma.min() * sigma.min();
+
   for (int g = 0; g < G; g++){
     z = gamma_mat.col(g); // Z_g matrix in column form
-    result.row(g) = 3.0 * arma::abs((X.t() * (y % z)).t());
+    result.row(g) =  arma::abs((X.t() * (y % z)).t());
   }
 
-  lambda_max = result.max();// Take lambda max as the max value over G and p
+  lambda_max = (1.0 / (pi_min * sigma_min)) * result.max();// Take lambda max as the max value over G and p
 
   return lambda_max;
 }

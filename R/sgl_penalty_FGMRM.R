@@ -19,9 +19,16 @@
 #' @returns A numeric scalar representing the sgl penalty for the given model.
 #'
 #' @keywords internal
-sgl_penalty_FGMRM <- function(lambda, alpha, beta, G){
-  pen = lambda * ((alpha * (sum(rowSums(abs(beta[, -1]))))) +
-                    (1 - alpha) * (sum(sqrt(G) * sqrt(rowSums(beta[ , -1]^2)))))
+sgl_penalty_FGMRM <- function(lambda, alpha, beta, pi){
 
+  beta_noint <- beta[, -1, drop = FALSE]  # G x p
+
+  # Lasso term
+  lasso_term <- sum(abs(pi * beta_noint))
+
+  # Group lasso term
+  group_lasso_term <- sum(sqrt(colSums((pi * beta_noint)^2)))
+
+  pen <- lambda * (alpha * lasso_term + (1 - alpha) * group_lasso_term)
   return(pen)
 }

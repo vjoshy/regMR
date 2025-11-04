@@ -201,17 +201,17 @@ MM_FGMRM <- function(x, y, G, tol = 1e-04, max_iter = 500, lambda = 0,
 
     # ----if penalty is true, calculate V matrix for penalty----
     if (penalty) {
-      V <- compute_V_FGMRM(G, beta, alpha)
-    }
-
-    # ----UPDATE BETA PARAMETER----
-    beta <- beta_update(x, y, gamma_mat, sigma, V, lambda, penalty)
-    if (penalty){
-      beta <- ifelse(abs(beta) < 1e-10, 1e-10, beta)
+      V <- compute_V_FGMRM(G, beta, alpha, pi)
     }
 
     # ----UPDATE PI PARAMETER----
     pi <- pi_update_FGMRM(n, gamma_mat)
+
+    # ----UPDATE BETA PARAMETER----
+    beta <- beta_update(x, y, gamma_mat, pi, sigma, V, lambda, penalty)
+    if (penalty){
+      beta <- ifelse(abs(beta) < 1e-10, 1e-10, beta)
+    }
 
     # ----UPDATE SIGMA PARAMETER----
     if (common_sigma) {
@@ -224,23 +224,26 @@ MM_FGMRM <- function(x, y, G, tol = 1e-04, max_iter = 500, lambda = 0,
       q1 <- quantile(y, 0.25)
       q3 <- quantile(y, 0.75)
       iqr_var <- var(y[y >= q1 & y <= q3])
-    sigma <- sigma_update(x, y, gamma_mat, beta, N)
-    #sigma <- sigma_update_pen(x, y, iqr_var = iqr_var, n = n, gamma_mat, beta, N)
+    #sigma <- sigma_update(x, y, gamma_mat, beta, N)
+    sigma <- sigma_update_pen(x, y, iqr_var = iqr_var, n = n, gamma_mat, beta, N)
     }
 
     # ----LOG LIKELIHOOD----
     ll <- log_likelihood_FGMRM(x, y, pi, beta, sigma)
 
-    # ----PENALTY----
+    # ---- SGL PENALTY----
     if (penalty){
-      pen <- sgl_penalty_FGMRM(lambda, alpha, beta, G)
+      pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi)
     } else {
       pen <- 0
     }
 
+    # ---- Variance Penalty ----
+    pen_var <- sigma_penalty_FGMRM(sigma, iqr_var, a_n = 1/n)
+
     # ----OBJECTIVE FUNCTION----
     objective_fun_old <- objective_fun_new
-    objective_fun_new <- objective_function_FGMRM(ll, pen)
+    objective_fun_new <- objective_function_FGMRM(ll, pen + pen_var)
 
     if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol){
       break
@@ -250,15 +253,14 @@ MM_FGMRM <- function(x, y, G, tol = 1e-04, max_iter = 500, lambda = 0,
   }
 
   # ----check for error----
-  if (is.na(objective_fun_new) || is.na(objective_fun_old) || any(is.na(N)) ||
-      any(sigma < 0.01)){
+  if (is.na(objective_fun_new) || is.na(objective_fun_old) || any(is.na(N))){
     return(list(bic = NA, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
                 z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
                 lambda = NA))
   }
 
   # ----compute bic----
-  active_betas <- sum(abs(beta) != 1.000000e-10)
+  active_betas <- sum(abs(beta) != 1.0e-10)
   num_params <- active_betas + (if (common_sigma) 1 else G) + (G - 1)
   bic <-  (-2 * ll) + (num_params * log(n))
 

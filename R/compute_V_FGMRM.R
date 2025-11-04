@@ -22,14 +22,16 @@
 #' representing the sgl penalty majorization matrix.
 #'
 #' @keywords internal
-compute_V_FGMRM <- function(G, beta, alpha){
+compute_V_FGMRM <- function(G, beta, alpha, pi){
   # ----get beta with no intercept----
   beta_noint <- beta[ , -1, drop=FALSE]
 
   # ----calculate V matrix for penalty----
   V <- t(sapply(1:G, function(g) {
-    alpha / (2 * abs(beta_noint[g, ])) +
-      ((1 - alpha) * sqrt(G)) / (2 * sqrt(colSums(beta_noint^2)))
+
+    alpha / (2 * pi[g] * abs(beta_noint[g, ])) +
+
+      ((1 - alpha) * sqrt(G)) / (2 * sqrt(colSums((pi * beta_noint)^2)))
   }))
 
   return(V)

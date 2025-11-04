@@ -190,7 +190,7 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       lambda <- list()
 
       # ----calculate lambda_max for g, log the value----
-      lambda_max <- lambda_max_compute(x, y, init_gamma[[g]])
+      lambda_max <- lambda_max_compute(x, y, init_gamma[[g]], init_pi[[g]], init_sigma[[g]])
 
       # ----calculate lambda_min based on lambda_max for g, log the value----
       lambda_min <- 0.001 * lambda_max
@@ -206,8 +206,12 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
     else if (is.null(lambda) && !is.null(lambda_max)){
       lambda <- list()
 
-      lambda[[g]] <- exp(seq(0.001 * lambda_max, lambda_max,
-                             by = ((lambda_max - 0.001 * lambda_max)/(n_lambda - 1))))
+      lambda_min <- 0.001 * lambda_max
+      log_lambda_max <- log(lambda_max)
+      log_lambda_min <- log(lambda_min)
+
+      lambda[[g]] <- exp(seq(log_lambda_min, log_lambda_max,
+                             by = ((log_lambda_max - log_lambda_min)/(n_lambda - 1))))
     }
 
     param_grid <- expand.grid(alpha = alpha, lambda = lambda[[g]])
@@ -242,20 +246,21 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       future::plan(future::sequential)
     }
     else{
+      param_grid <- expand.grid(lambda = rev(lambda[[g]]), alpha = alpha)
       # ---- fit models----
-      for (i in nrow(param_grid):1){
-        parameters[[i]] <- MM_FGMRM(x, y, g, tol, max_iter, param_grid[i, 2],
-                                    param_grid[i, 1], init_pi[[g]],
+      for (i in 1:nrow(param_grid)){
+        parameters[[i]] <- MM_FGMRM(x, y, g, tol, max_iter, param_grid[i, 1],
+                                    param_grid[i, 2], init_pi[[g]],
                                     init_beta[[g]], init_sigma[[g]],
                                     init_gamma[[g]], verbose, penalty)
 
-        # ----use parameters (beta, sigma, z) from previous lambda and same
-        # ----alpha as initial estimate for next lambda-alpha
-        if (i <= nrow(param_grid) - (length(alpha) - 1) &&
-            !is.na(parameters[[i + length(alpha) - 1]]$bic)){
-          init_beta[[g]][ , 1] <- parameters[[i + length(alpha) - 1]]$beta[ , 1]
-          init_sigma[[g]] <- parameters[[i + length(alpha) - 1]]$sigma
-          init_gamma[[g]] <- parameters[[i + length(alpha) - 1]]$z
+        # Warm start: use solution from previous lambda 
+        if (i < nrow(param_grid) &&
+            param_grid[i, 2] == param_grid[i+1, 2] &&  
+            !is.na(parameters[[i]]$bic)){
+          init_beta[[g]] <- parameters[[i]]$beta        
+          init_sigma[[g]] <- parameters[[i]]$sigma
+          init_gamma[[g]] <- parameters[[i]]$z
         }
       }
     }
