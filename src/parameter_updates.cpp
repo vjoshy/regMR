@@ -117,3 +117,4 @@ double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat,
   return lambda_max;
 }
 
+

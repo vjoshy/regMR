@@ -254,11 +254,11 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
                                     init_beta[[g]], init_sigma[[g]],
                                     init_gamma[[g]], verbose, penalty)
 
-        # Warm start: use solution from previous lambda 
+        # Warm start: use solution from previous lambda
         if (i < nrow(param_grid) &&
-            param_grid[i, 2] == param_grid[i+1, 2] &&  
+            param_grid[i, 2] == param_grid[i+1, 2] &&
             !is.na(parameters[[i]]$bic)){
-          init_beta[[g]] <- parameters[[i]]$beta        
+          init_beta[[g]] <- parameters[[i]]$beta
           init_sigma[[g]] <- parameters[[i]]$sigma
           init_gamma[[g]] <- parameters[[i]]$z
         }
