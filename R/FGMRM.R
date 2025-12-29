@@ -28,7 +28,8 @@
 #' initialize a lambda vector for each group count using an algorithm.
 #' @param lambda_max A non-negative numeric value specifying the maximum lambda
 #' value (tuning parameter) used in the creation of each lambda vector. Default
-#' value is NULL as the function will initialize lambda_max for each group.
+#' value is NULL as the function will initialize lambda_max for each group
+#' using an algorithm.
 #' @param n_lambda An integer greater than one (default value 100) specifying
 #' the length of the lambda vector for each group.
 #' @param alpha A numeric vector containing values between zero and one
@@ -74,12 +75,12 @@
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
-#'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
-#'   5, -2,  1,  0, 0, 0, 0,  # component 2
-#'   -3, 0,  2, 0, 0, 0, 0     # component 3
-#' ), nrow = G, byrow = TRUE)
+#'  1,  2, -1,  0.5, 0, 0, 0,  # component 1
+#'  5, -2,  1,  0, 0, 0, 0,  # component 2
+#'  -3, 0,  2, 0, 0, 0, 0     # component 3
+#' ), nrow = G, byrow = TRUE) / 2
 #' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(3, 1.5, 1)/2
+#' sigmas <- c(0.5, 0.4, 0.3)
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -98,6 +99,7 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
+#' # ----Call FGMRM to fit model----
 #' mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
 FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
                   lambda = NULL, lambda_max = NULL, n_lambda = 100,

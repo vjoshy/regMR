@@ -1,4 +1,4 @@
-#' Objective Function for Finite Gaussian Mixture Regression Distribution
+#' Objective Function for a Finite Gaussian Mixture Regression Distribution
 #'
 #' Computes the negative penalized log-likelihood objective function for a
 #' finite Gaussian mixture regression distribution. This function is used during

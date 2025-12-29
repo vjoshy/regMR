@@ -29,12 +29,12 @@
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
-#'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
-#'   5, -2,  1,  0, 0, 0, 0,  # component 2
-#'   -3, 0,  2, 0, 0, 0, 0     # component 3
-#' ), nrow = G, byrow = TRUE)
+#'  1,  2, -1,  0.5, 0, 0, 0,  # component 1
+#'  5, -2,  1,  0, 0, 0, 0,  # component 2
+#'  -3, 0,  2, 0, 0, 0, 0     # component 3
+#' ), nrow = G, byrow = TRUE) / 2
 #' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(3, 1.5, 1)/2
+#' sigmas <- c(0.5, 0.4, 0.3)
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -53,8 +53,10 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
+#' # ----Fit model----
 #' mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
 #'
+#' ----Call plot----
 #' plots <- plot(mod)
 #'
 #' # ----Display plots----
@@ -84,7 +86,7 @@ plot.FGMRM <- function(x, ...){
                                  y = .data[["bic"]],
                                  group = as.factor(.data[["alpha"]]),
                                  color = as.factor(.data[["alpha"]]))) +
-    geom_point(aes(alpha = 0.2), na.rm = TRUE) +
+    geom_point(size = 1, aes(alpha = 0.2), na.rm = TRUE) +
     scale_color_viridis_d(option = "viridis") +
     theme_bw() +
     labs(y = "BIC", x = expression(log(lambda)),

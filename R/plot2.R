@@ -1,23 +1,25 @@
-#' Plot Covariate of X Against Y With Group Assignments
+#' Plot Covariates of X Against Y With Group Assignments
 #'
-#' This function creates a plot for finite Gaussian mixture regression models of
-#' class "FGMRM". It plots the specified covariate of x against y, with the
-#' group assignments highlighted in colour.
+#' This function creates a 3-D plot for finite Gaussian mixture regression
+#' models of class "FGMRM". It plots the specified covariates of x against y,
+#' with the group assignments highlighted in colour.
 #'
 #' @param mod An object of class "FGMRM", the result of calling FGMRM() or
 #' MM_Grid_FGMRM().
-#' @param x Predictor/design matrix. A numeric matrix of size n x p where the
+#' @param x Predictor/design matrix. A numeric matrix of size n x p, where the
 #' number of rows is equal to the number of observations n, and the number of
 #' columns is equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
-#' @param covariate A numeric value specifying the covariate of x to be plotted.
+#' @param covariate_one A numeric value specifying the first covariate of x to
+#' be plotted.
+#' @param covariate_two A numeric value specifying the second covariate of x to
+#' be plotted.
+#' @param ... Additional arguments for plotting (currently unused).
 #'
-#' @returns A ggplot object containing a plot of the specified covariate of x
-#' against y, with the group assignments highlighted in colour.
+#' @returns A 3-D plot of the specified covariates of x against y, with the
+#' group assignments highlighted in colour.
 #' @export
-#'
-#' @import ggplot2
 #'
 #' @examplesIf rlang::is_installed("mvtnorm")
 #'
@@ -31,12 +33,12 @@
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
-#'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
-#'   5, -2,  1,  0, 0, 0, 0,  # component 2
-#'   -3, 0,  2, 0, 0, 0, 0     # component 3
-#' ), nrow = G, byrow = TRUE)
+#'  1,  2, -1,  0.5, 0, 0, 0,  # component 1
+#'  5, -2,  1,  0, 0, 0, 0,  # component 2
+#'  -3, 0,  2, 0, 0, 0, 0     # component 3
+#' ), nrow = G, byrow = TRUE) / 2
 #' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(3, 1.5, 1)/2
+#' sigmas <- c(0.5, 0.4, 0.3)
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -55,33 +57,39 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
+#' # ----Fit model----
 #' mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
 #'
-#' plot <- plot2(mod, X, y, 1)
+#' # ----Call plot2----
+#' plot <- plot2(mod, X, y, 1, 2)
 #'
 #' # ----Display plot----
 #' plot
-plot2 <- function(mod, x, y, covariate){
+plot2 <- function(mod, x, y, covariate_one, covariate_two, ...){
   # ----error check----
-  if (ncol(x) < covariate){
+  if (ncol(x) < covariate_one || ncol(x) < covariate_two){
     stop("Covariate does not exist\n")
   }
 
-  # ----extract the hard group assignments from the model, create a data frame--
-  # ----with y and x----
+  # ----extract the hard group assignments from the model----
   df <- as.data.frame(mod$parameters$z_hard)
   Groups <- max.col(df)
   df <- data.frame(y = y, x = x)
 
-  # ----create plot, specified covariate of x vs. y with group assignments as---
+  # ----create plot, specified covariates of x vs. y with group assignments as--
   # ----colour----
-  plot <- ggplot(df, aes(y, x[ , covariate], color = as.factor(Groups))) +
-    geom_point(aes(alpha = 0.5), na.rm = TRUE) +
-    scale_color_viridis_d(option = "viridis") +
-    theme_bw() +
-    labs(y = "y", x = paste("Covariate", covariate, "of X"), color = "Groups") +
-    theme(text = element_text(family = "serif", face="bold", size=12)) +
-    guides(alpha = "none")
+  plot <- scatterplot3d::scatterplot3d(x = x[ , covariate_one],
+                                       y = x[ , covariate_two], z = y,
+                                       xlab = paste("Covariate ", covariate_one),
+                                       ylab = paste("Covariate ", covariate_two),
+                                       zlab = "y", , pch = 16,
+                                       color = as.factor(Groups))
+  fit <- stats::lm(y ~ x[ , covariate_one] + x[ , covariate_two])
+  plot$plane3d(fit)
+  for (i in 1:nrow(x)) {
+    coords <- plot$xyz.convert(x[i , covariate_one], x[i , covariate_two], y[i])
+    text(coords$x, coords$y, labels = Groups[i], pos = 3, cex = 0.7)
+  }
 
   return(plot)
 }

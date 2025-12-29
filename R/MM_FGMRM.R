@@ -1,8 +1,8 @@
 #' Majorization-Minimization Algorithm for Finite Gaussian Mixture Regression
 #' Models
 #'
-#' Applies the Majorization-Minimization Algorithm to the inputted data given
-#' the specified parameters to estimate a finite Gaussian mixture regression
+#' Applies the Majorization-Minimization Algorithm to the inputted data, given
+#' the specified parameters, to estimate a finite Gaussian mixture regression
 #' model. Initial estimates for model parameters (pi, beta, sigma, z) are
 #' provided within the function using the Mclust function from the mclust
 #' package, but can be specified in the function call. This function is used
@@ -76,12 +76,12 @@
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
-#'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
-#'   5, -2,  1,  0, 0, 0, 0,  # component 2
-#'   -3, 0,  2, 0, 0, 0, 0     # component 3
-#' ), nrow = G, byrow = TRUE)
+#'  1,  2, -1,  0.5, 0, 0, 0,  # component 1
+#'  5, -2,  1,  0, 0, 0, 0,  # component 2
+#'  -3, 0,  2, 0, 0, 0, 0     # component 3
+#' ), nrow = G, byrow = TRUE) / 2
 #' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(3, 1.5, 1)/2
+#' sigmas <- c(0.5, 0.4, 0.3)
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -100,7 +100,8 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' mod <- MM_FGMRM(X, y, G = 3, lambda = 5, alpha = 1)
+#' # ----Call MM_FGMRM to fit model----
+#' mod <- MM_FGMRM(X, y, G = 3, lambda = 8, alpha = 1)
 MM_FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500, lambda = 0,
                      alpha = 0, init_pi = NULL, init_beta = NULL,
                      init_sigma = NULL, init_gamma = NULL, verbose = TRUE,
@@ -185,7 +186,7 @@ MM_FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500, lambda = 0,
 
   # ----MM algorithm iterated until stopping criteria is met----
   while (iter < max_iter){
-    # ----Zig----
+    # ----Z_ig----
     gamma_mat <- compute_gamma_FGMRM(x, y, pi, beta, sigma)
 
     # ----N (column sums of gamma_mat)----
