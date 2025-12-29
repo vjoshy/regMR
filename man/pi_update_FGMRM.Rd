@@ -2,12 +2,12 @@
 % Please edit documentation in R/pi_update_FGMRM.R
 \name{pi_update_FGMRM}
 \alias{pi_update_FGMRM}
-\title{Mixing Proportions for Finite Gaussian Mixture Regression Distribution}
+\title{Mixing Proportions for a Finite Gaussian Mixture Regression Distribution}
 \usage{
 pi_update_FGMRM(n, gamma_mat)
 }
 \arguments{
-\item{n}{A numeric value representing the number of observations.}
+\item{n}{A numeric value representing the number of observations in the data.}
 
 \item{gamma_mat}{Group responsibility matrix. A numeric matrix of size n x G,
 where the number of rows is equal to the number of observations n, and the

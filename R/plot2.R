@@ -19,6 +19,7 @@
 #'
 #' @returns A 3-D plot of the specified covariates of x against y, with the
 #' group assignments highlighted in colour.
+#' @importFrom graphics text
 #' @export
 #'
 #' @examplesIf rlang::is_installed("mvtnorm")
@@ -88,7 +89,7 @@ plot2 <- function(mod, x, y, covariate_one, covariate_two, ...){
   plot$plane3d(fit)
   for (i in 1:nrow(x)) {
     coords <- plot$xyz.convert(x[i , covariate_one], x[i , covariate_two], y[i])
-    text(coords$x, coords$y, labels = Groups[i], pos = 3, cex = 0.7)
+    graphics::text(coords$x, coords$y, labels = Groups[i], pos = 3, cex = 0.7)
   }
 
   return(plot)

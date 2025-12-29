@@ -56,7 +56,7 @@
 #' # ----Fit model----
 #' mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
 #'
-#' ----Call plot----
+#' # ----Call plot----
 #' plots <- plot(mod)
 #'
 #' # ----Display plots----

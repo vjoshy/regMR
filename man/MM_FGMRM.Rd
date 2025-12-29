@@ -90,8 +90,8 @@ mixture regression model (bic, log_likelihood, beta, pi, sigma, z, z_hard,
 y_hat, mse, mse_fitted, alpha, lambda).
 }
 \description{
-Applies the Majorization-Minimization Algorithm to the inputted data given
-the specified parameters to estimate a finite Gaussian mixture regression
+Applies the Majorization-Minimization Algorithm to the inputted data, given
+the specified parameters, to estimate a finite Gaussian mixture regression
 model. Initial estimates for model parameters (pi, beta, sigma, z) are
 provided within the function using the Mclust function from the mclust
 package, but can be specified in the function call. This function is used
@@ -110,12 +110,12 @@ rho = 0.2  # correlation
 
 # ----True parameters for 3 clusters----
 betas <- matrix(c(
-  1,  2, -1,  0.5, 0, 0, 0,  # component 1
-  5, -2,  1,  0, 0, 0, 0,  # component 2
-  -3, 0,  2, 0, 0, 0, 0     # component 3
-), nrow = G, byrow = TRUE)
+ 1,  2, -1,  0.5, 0, 0, 0,  # component 1
+ 5, -2,  1,  0, 0, 0, 0,  # component 2
+ -3, 0,  2, 0, 0, 0, 0     # component 3
+), nrow = G, byrow = TRUE) / 2
 pis <- c(0.4, 0.4, 0.2)
-sigmas <- c(3, 1.5, 1)/2
+sigmas <- c(0.5, 0.4, 0.3)
 
 # ----Generate correlation matrix----
 cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -134,6 +134,7 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
-mod <- MM_FGMRM(X, y, G = 3, lambda = 5, alpha = 1)
+# ----Call MM_FGMRM to fit model----
+mod <- MM_FGMRM(X, y, G = 3, lambda = 8, alpha = 1)
 \dontshow{\}) # examplesIf}
 }

@@ -36,12 +36,12 @@ rho = 0.2  # correlation
 
 # ----True parameters for 3 clusters----
 betas <- matrix(c(
-  1,  2, -1,  0.5, 0, 0, 0,  # component 1
-  5, -2,  1,  0, 0, 0, 0,  # component 2
-  -3, 0,  2, 0, 0, 0, 0     # component 3
-), nrow = G, byrow = TRUE)
+ 1,  2, -1,  0.5, 0, 0, 0,  # component 1
+ 5, -2,  1,  0, 0, 0, 0,  # component 2
+ -3, 0,  2, 0, 0, 0, 0     # component 3
+), nrow = G, byrow = TRUE) / 2
 pis <- c(0.4, 0.4, 0.2)
-sigmas <- c(3, 1.5, 1)/2
+sigmas <- c(0.5, 0.4, 0.3)
 
 # ----Generate correlation matrix----
 cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -60,8 +60,10 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
+# ----Fit model----
 mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
 
+# ----Call plot----
 plots <- plot(mod)
 
 # ----Display plots----

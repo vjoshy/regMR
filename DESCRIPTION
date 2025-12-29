@@ -18,6 +18,7 @@ Imports:
     furrr,
     future,
     ggplot2,
+    graphics,
     mclust,
     purrr,
     Rcpp,

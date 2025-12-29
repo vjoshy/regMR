@@ -2,7 +2,7 @@
 % Please edit documentation in R/objective_function_FGMRM.R
 \name{objective_function_FGMRM}
 \alias{objective_function_FGMRM}
-\title{Objective Function for Finite Gaussian Mixture Regression Distribution}
+\title{Objective Function for a Finite Gaussian Mixture Regression Distribution}
 \usage{
 objective_function_FGMRM(ll, pen)
 }

@@ -2,31 +2,37 @@
 % Please edit documentation in R/plot2.R
 \name{plot2}
 \alias{plot2}
-\title{Plot Covariate of X Against Y With Group Assignments}
+\title{Plot Covariates of X Against Y With Group Assignments}
 \usage{
-plot2(mod, x, y, covariate)
+plot2(mod, x, y, covariate_one, covariate_two, ...)
 }
 \arguments{
 \item{mod}{An object of class "FGMRM", the result of calling FGMRM() or
 MM_Grid_FGMRM().}
 
-\item{x}{Predictor/design matrix. A numeric matrix of size n x p where the
+\item{x}{Predictor/design matrix. A numeric matrix of size n x p, where the
 number of rows is equal to the number of observations n, and the number of
 columns is equal to the number of covariates p.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
 
-\item{covariate}{A numeric value specifying the covariate of x to be plotted.}
+\item{covariate_one}{A numeric value specifying the first covariate of x to
+be plotted.}
+
+\item{covariate_two}{A numeric value specifying the second covariate of x to
+be plotted.}
+
+\item{...}{Additional arguments for plotting (currently unused).}
 }
 \value{
-A ggplot object containing a plot of the specified covariate of x
-against y, with the group assignments highlighted in colour.
+A 3-D plot of the specified covariates of x against y, with the
+group assignments highlighted in colour.
 }
 \description{
-This function creates a plot for finite Gaussian mixture regression models of
-class "FGMRM". It plots the specified covariate of x against y, with the
-group assignments highlighted in colour.
+This function creates a 3-D plot for finite Gaussian mixture regression
+models of class "FGMRM". It plots the specified covariates of x against y,
+with the group assignments highlighted in colour.
 }
 \examples{
 \dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -41,12 +47,12 @@ rho = 0.2  # correlation
 
 # ----True parameters for 3 clusters----
 betas <- matrix(c(
-  1,  2, -1,  0.5, 0, 0, 0,  # component 1
-  5, -2,  1,  0, 0, 0, 0,  # component 2
-  -3, 0,  2, 0, 0, 0, 0     # component 3
-), nrow = G, byrow = TRUE)
+ 1,  2, -1,  0.5, 0, 0, 0,  # component 1
+ 5, -2,  1,  0, 0, 0, 0,  # component 2
+ -3, 0,  2, 0, 0, 0, 0     # component 3
+), nrow = G, byrow = TRUE) / 2
 pis <- c(0.4, 0.4, 0.2)
-sigmas <- c(3, 1.5, 1)/2
+sigmas <- c(0.5, 0.4, 0.3)
 
 # ----Generate correlation matrix----
 cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -65,9 +71,11 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
+# ----Fit model----
 mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
 
-plot <- plot2(mod, X, y, 1)
+# ----Call plot2----
+plot <- plot2(mod, X, y, 1, 2)
 
 # ----Display plot----
 plot

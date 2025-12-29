@@ -24,10 +24,10 @@ Alpha = 1 gives the lasso fit and alpha = 0 gives the group lasso fit.}
 A numeric matrix of size G x (p + 1), where the number of
 rows is equal to the number of mixture components G, and the number of
 columns is equal to the number of covariates p + 1 (for the intercept term),
-representing the sgl penalty majorization matrix.
+representing the SGL penalty majorization matrix.
 }
 \description{
-Compute sparse group lasso (sgl) penalty majorization matrix for application
+Computes sparse group lasso (SGL) penalty majorization matrix for application
 when updating regression parameters for finite Gaussian mixture regression
 models. This function is used during model estimation, specifically within
 iterations of the MM algorithm.
