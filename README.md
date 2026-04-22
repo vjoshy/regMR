@@ -17,8 +17,8 @@ regMR provides a comprehensive framework for fitting regularized finite
 mixture regression models via the MM algorithm. The sparse-group-lasso
 (sgl) penalty is applied to parameter updates within the MM algorithm
 for variable selection. The package provides multiple functions for
-estimation and allows users to fit finite mixture regression models over
-different lambda-alpha sgl penalty combinations and group counts.
+estimation and allows users to fit models over different lambda-alpha
+sgl penalty combinations and group counts.
 
 This readme file provides a brief and basic example on how to use the
 regMR package. It walks through generating clustered data to be modeled,
@@ -26,9 +26,6 @@ applying one of the main functions, `FGMRM()`, to fit a finite Gaussian
 mixture regression model to the data, and how to apply the plotting and
 summary methods/functions to the model, getting the most use out of the
 package.
-
-The methods implemented are based on research by Grace Stelter \[INSERT
-PAPER HERE\].
 
 ## Installation
 
@@ -61,10 +58,10 @@ defining the true parameters for the clusters, we can begin to construct
 the multivariate normal data (`X`) and generate the response (`y`).
 
 `X`: To generate `X`, the correlation matrix must first be initialized.
-This is done using the following structure from \[GRACE THESIS\]:
+This is done using the following structure:
 $\Sigma = \{\rho^{|j - k|}\}^p_{j, k = 1}$. Then, with mean 0 and the
 aforementioned correlation structure, `X` (a matrix of size n x p) is
-generated using the `rmvnorm()` function from mvtnorm.
+generated using the `rmvnorm()` function from `mvtnorm`.
 
 `y`: To generate `y`, the group responsibilities and mean vector must be
 initialized. For the group responsibilities, we use the `rmultinom()`
@@ -76,6 +73,7 @@ vector of length n) is generated with `rnorm()`.
 
 ``` r
 # install.packages("mvtnorm")
+library(mvtnorm)
 
 set.seed(2025)
 
@@ -124,6 +122,11 @@ lowest BIC value.
 ``` r
 # ----Load the regMR package----
 library(regMR)
+#> 
+#> ── regMR ───────────────────────────────
+#> Version: 0.0.0.9000
+#> Type ?regMR for help
+#> ────────────────────────────────────────
 
 # ----Fit model----
 mod <- FGMRM(x = X, y = y, G = 6)
@@ -294,16 +297,186 @@ plot(mod)
 
 <img src="man/figures/README-example-3-3.png" width="100%" />
 
-`plot2()` plots a specified covariate of the predictor/design matrix
+`plot2()` plots two specified covariates of the predictor/design matrix
 (`X`) against the response vector (`y`). The observations are coloured
 per the group responsibility matrix (`z_hard`) in the finite Gaussian
 mixture regression model of class FGMRM passed to the function.
 
 ``` r
-plot2(mod, X, y, 2) # covariate two
+plot2(mod, X, y, 1, 2)
 ```
 
 <img src="man/figures/README-example-4-1.png" width="100%" />
+
+    #> $xyz.convert
+    #> function (x, y = NULL, z = NULL) 
+    #> {
+    #>     xyz <- xyz.coords(x, y, z)
+    #>     if (angle > 2) {
+    #>         temp <- xyz$x
+    #>         xyz$x <- xyz$y
+    #>         xyz$y <- temp
+    #>     }
+    #>     y <- (xyz$y - y.add)/y.scal
+    #>     return(list(x = xyz$x/x.scal + yx.f * y, y = xyz$z/z.scal + 
+    #>         yz.f * y))
+    #> }
+    #> <bytecode: 0x10dd1fb30>
+    #> <environment: 0x10dce6940>
+    #> 
+    #> $points3d
+    #> function (x, y = NULL, z = NULL, type = "p", ...) 
+    #> {
+    #>     xyz <- xyz.coords(x, y, z)
+    #>     if (angle > 2) {
+    #>         temp <- xyz$x
+    #>         xyz$x <- xyz$y
+    #>         xyz$y <- temp
+    #>     }
+    #>     y2 <- (xyz$y - y.add)/y.scal
+    #>     x <- xyz$x/x.scal + yx.f * y2
+    #>     y <- xyz$z/z.scal + yz.f * y2
+    #>     mem.par <- par(mar = mar, usr = usr)
+    #>     if (type == "h") {
+    #>         y2 <- z.min + yz.f * y2
+    #>         segments(x, y, x, y2, ...)
+    #>         points(x, y, type = "p", ...)
+    #>     }
+    #>     else points(x, y, type = type, ...)
+    #> }
+    #> <bytecode: 0x10dd1bba0>
+    #> <environment: 0x10dce6940>
+    #> 
+    #> $plane3d
+    #> function (Intercept, x.coef = NULL, y.coef = NULL, lty = "dashed", 
+    #>     lty.box = NULL, draw_lines = TRUE, draw_polygon = FALSE, 
+    #>     polygon_args = list(border = NA, col = rgb(0, 0, 0, 0.2)), 
+    #>     ...) 
+    #> {
+    #>     if (!is.atomic(Intercept) && !is.null(coef(Intercept))) {
+    #>         Intercept <- coef(Intercept)
+    #>         if (!("(Intercept)" %in% names(Intercept))) 
+    #>             Intercept <- c(0, Intercept)
+    #>     }
+    #>     if (is.null(lty.box)) 
+    #>         lty.box <- lty
+    #>     if (is.null(x.coef) && length(Intercept) == 3) {
+    #>         x.coef <- Intercept[if (angle > 2) 
+    #>             3
+    #>         else 2]
+    #>         y.coef <- Intercept[if (angle > 2) 
+    #>             2
+    #>         else 3]
+    #>         Intercept <- Intercept[1]
+    #>     }
+    #>     mem.par <- par(mar = mar, usr = usr)
+    #>     x <- x.min:x.max
+    #>     y <- 0:y.max
+    #>     ltya <- c(lty.box, rep(lty, length(x) - 2), lty.box)
+    #>     x.coef <- x.coef * x.scal
+    #>     z1 <- (Intercept + x * x.coef + y.add * y.coef)/z.scal
+    #>     z2 <- (Intercept + x * x.coef + (y.max * y.scal + y.add) * 
+    #>         y.coef)/z.scal
+    #>     if (draw_polygon) 
+    #>         do.call("polygon", c(list(c(x.min, x.min + y.max * yx.f, 
+    #>             x.max + y.max * yx.f, x.max), c(z1[1], z2[1] + yz.f * 
+    #>             y.max, z2[length(z2)] + yz.f * y.max, z1[length(z1)])), 
+    #>             polygon_args))
+    #>     if (draw_lines) 
+    #>         segments(x, z1, x + y.max * yx.f, z2 + yz.f * y.max, 
+    #>             lty = ltya, ...)
+    #>     ltya <- c(lty.box, rep(lty, length(y) - 2), lty.box)
+    #>     y.coef <- (y * y.scal + y.add) * y.coef
+    #>     z1 <- (Intercept + x.min * x.coef + y.coef)/z.scal
+    #>     z2 <- (Intercept + x.max * x.coef + y.coef)/z.scal
+    #>     if (draw_lines) 
+    #>         segments(x.min + y * yx.f, z1 + y * yz.f, x.max + y * 
+    #>             yx.f, z2 + y * yz.f, lty = ltya, ...)
+    #> }
+    #> <bytecode: 0x10dd17040>
+    #> <environment: 0x10dce6940>
+    #> 
+    #> $box3d
+    #> function (...) 
+    #> {
+    #>     mem.par <- par(mar = mar, usr = usr)
+    #>     lines(c(x.min, x.max), c(z.max, z.max), ...)
+    #>     lines(c(0, y.max * yx.f) + x.max, c(0, y.max * yz.f) + z.max, 
+    #>         ...)
+    #>     lines(c(0, y.max * yx.f) + x.min, c(0, y.max * yz.f) + z.max, 
+    #>         ...)
+    #>     lines(c(x.max, x.max), c(z.min, z.max), ...)
+    #>     lines(c(x.min, x.min), c(z.min, z.max), ...)
+    #>     lines(c(x.min, x.max), c(z.min, z.min), ...)
+    #> }
+    #> <bytecode: 0x10dcfaa20>
+    #> <environment: 0x10dce6940>
+    #> 
+    #> $contour3d
+    #> function (f, x.count = 10, y.count = 10, type = "l", lty = "24", 
+    #>     x.resolution = 50, y.resolution = 50, ...) 
+    #> {
+    #>     if (inherits(f, "lm")) {
+    #>         vars <- all.vars(formula(f))
+    #>     }
+    #>     else vars <- c("z", "x", "y")
+    #>     for (x1 in seq(x.range.fix[1], x.range.fix[2], length = x.count)) {
+    #>         d <- data.frame(x1, seq(y.range.fix[1], y.range.fix[2], 
+    #>             length = y.resolution))
+    #>         names(d) <- vars[-1]
+    #>         if (inherits(f, "lm")) {
+    #>             d[vars[1]] <- predict(f, newdata = d)
+    #>         }
+    #>         else d[vars[1]] <- f(d[[1]], d[[2]])
+    #>         xyz <- xyz.coords(d)
+    #>         if (angle > 2) {
+    #>             temp <- xyz$x
+    #>             xyz$x <- xyz$y
+    #>             xyz$y <- temp
+    #>         }
+    #>         y2 <- (xyz$y - y.add)/y.scal
+    #>         x <- xyz$x/x.scal + yx.f * y2
+    #>         y <- xyz$z/z.scal + yz.f * y2
+    #>         mem.par <- par(mar = mar, usr = usr)
+    #>         if (type == "h") {
+    #>             y2 <- z.min + yz.f * y2
+    #>             segments(x, y, x, y2, ...)
+    #>             points(x, y, type = "p", ...)
+    #>         }
+    #>         else points(x, y, type = type, lty = lty, ...)
+    #>     }
+    #>     for (x2 in seq(y.range.fix[1], y.range.fix[2], length = y.count)) {
+    #>         d <- data.frame(seq(x.range.fix[1], x.range.fix[2], length = x.resolution), 
+    #>             x2)
+    #>         names(d) <- vars[-1]
+    #>         if (inherits(f, "lm")) {
+    #>             d[vars[1]] <- predict(f, newdata = d)
+    #>         }
+    #>         else d[vars[1]] <- f(d[[1]], d[[2]])
+    #>         xyz <- xyz.coords(d)
+    #>         if (angle > 2) {
+    #>             temp <- xyz$x
+    #>             xyz$x <- xyz$y
+    #>             xyz$y <- temp
+    #>         }
+    #>         y2 <- (xyz$y - y.add)/y.scal
+    #>         x <- xyz$x/x.scal + yx.f * y2
+    #>         y <- xyz$z/z.scal + yz.f * y2
+    #>         mem.par <- par(mar = mar, usr = usr)
+    #>         if (type == "h") {
+    #>             y2 <- z.min + yz.f * y2
+    #>             segments(x, y, x, y2, ...)
+    #>             points(x, y, type = "p", ...)
+    #>         }
+    #>         else points(x, y, type = type, lty = lty, ...)
+    #>     }
+    #> }
+    #> <bytecode: 0x10dcf8ba8>
+    #> <environment: 0x10dce6940>
+    #> 
+    #> $par.mar
+    #> $par.mar$mar
+    #> [1] 5.1 4.1 4.1 2.1
 
 `summary()` is an S3 method for summarizing results (class FGMRM) from
 the `FGMRM()` and `MM_Grid_FGMRM()` functions. Outputs the number of
