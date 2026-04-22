@@ -14,6 +14,7 @@ RoxygenNote: 7.3.2
 LinkingTo: 
     Rcpp,
     RcppArmadillo
+SystemRequirements: C++14
 Imports: 
     furrr,
     future,
