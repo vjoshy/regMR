@@ -105,14 +105,14 @@ double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat,
   arma::vec z, value;
 
   double pi_min = pi.min();
-  double sigma_min = sigma.min() * sigma.min();
+  //double sigma_min = sigma.min() * sigma.min();
 
   for (int g = 0; g < G; g++){
     z = gamma_mat.col(g); // Z_g matrix in column form
     result.row(g) =  arma::abs((X.t() * (y % z)).t());
   }
 
-  lambda_max = (1.0 / (pi_min * sigma_min)) * result.max();// Take lambda max as the max value over G and p
+  lambda_max = (1.0 / (pi_min )) * result.max();// Take lambda max as the max value over G and p
 
   return lambda_max;
 }

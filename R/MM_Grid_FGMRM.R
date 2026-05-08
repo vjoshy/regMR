@@ -100,7 +100,8 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
                           lambda_max = NULL, n_lambda = 100,
                           alpha = seq(0, 1, by = 0.1), verbose = TRUE,
                           penalty = TRUE, random = FALSE, n_random_la = 100,
-                          parallel = TRUE){
+                          parallel = TRUE, common_sigma = FALSE,
+                          sigma_penalty = TRUE, pi_penalty){
   #----input validation/error check----
   if(!is.numeric(x)){
     stop("Invalid x\n")
@@ -190,7 +191,12 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
       lambda <- list()
 
       # ----calculate lambda_max for g, log the value----
-      lambda_max <- lambda_max_compute(x, y, init_gamma[[g]], init_pi[[g]], init_sigma[[g]])
+      if (pi_penalty){
+        lambda_max <- lambda_max_compute(x, y, init_gamma[[g]], init_pi[[g]], init_sigma[[g]])
+      } else {
+        lambda_max <- lambda_max_compute(x, y, init_gamma[[g]], rep(1, g), init_sigma[[g]])
+      }
+      
 
       # ----calculate lambda_min based on lambda_max for g, log the value----
       lambda_min <- 0.001 * lambda_max
@@ -235,7 +241,7 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
         function(alpha, lambda) {
           MM_FGMRM(x, y, g, tol, max_iter, lambda, alpha, init_pi[[g]],
                    init_beta[[g]], init_sigma[[g]], init_gamma[[g]], verbose,
-                   penalty)
+                   penalty, common_sigma, sigma_penalty, pi_penalty)
         },
         .options = furrr::furrr_options(
           seed = TRUE,
@@ -252,7 +258,8 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
         parameters[[i]] <- MM_FGMRM(x, y, g, tol, max_iter, param_grid[i, 1],
                                     param_grid[i, 2], init_pi[[g]],
                                     init_beta[[g]], init_sigma[[g]],
-                                    init_gamma[[g]], verbose, penalty)
+                                    init_gamma[[g]], verbose, penalty, common_sigma,
+                                    sigma_penalty, pi_penalty)
 
         # Warm start: use solution from previous lambda
         if (i < nrow(param_grid) &&
@@ -344,7 +351,8 @@ MM_Grid_FGMRM <- function(g, x, y, tol = 10e-04, max_iter = 500, lambda = NULL,
     # ----if penalty is false, call MM once with lambda, alpha = 0----
     chosen_parameters <- MM_FGMRM(x, y, g, tol, max_iter, 0, 0, init_pi[[g]],
                                   init_beta[[g]], init_sigma[[g]],
-                                  init_gamma[[g]], verbose, penalty)
+                                  init_gamma[[g]], verbose, penalty, 
+                                  sigma_penalty, pi_penalty)
 
     if (!is.na(chosen_parameters$bic)){
       # ----output progress----

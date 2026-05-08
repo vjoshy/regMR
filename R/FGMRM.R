@@ -103,7 +103,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
                   lambda = NULL, lambda_max = NULL, n_lambda = 100,
                   alpha = seq(0, 1, by = 0.1), verbose = TRUE, penalty = TRUE,
                   random = FALSE, n_random_la = 100, automatic_stopping = FALSE,
-                  parallel = TRUE){
+                  parallel = TRUE, common_sigma = FALSE, sigma_penalty = TRUE,
+                  pi_penalty = TRUE){
   #----input validation/error check----
   if(!is.numeric(x)){
     stop("Invalid x\n")
@@ -155,7 +156,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
     for (g in 2:G){
       models[[g]] <- MM_Grid_FGMRM(g, x, y, tol, max_iter, lambda, lambda_max,
                                    n_lambda, alpha, verbose, penalty, random,
-                                   n_random_la, parallel)
+                                   n_random_la, parallel, common_sigma,
+                                   sigma_penalty, pi_penalty)
 
       # ----get model selection criteria----
       bic[g] <- models[[g]]$parameters$bic
@@ -244,7 +246,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
                                   lambda_max = lambda_max, n_lambda = n_lambda,
                                   alpha = alpha, verbose = verbose,
                                   penalty = penalty, random = random,
-                                  n_random_la = n_random_la,
+                                  n_random_la = n_random_la, common_sigma = common_sigma,
+                                  sigma_penalty = sigma_penalty, pi_penalty = pi_penalty,
                                   parallel = parallel, .progress = FALSE,
                                   .options = furrr::furrr_options(seed = TRUE))
 
@@ -257,7 +260,8 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
                            lambda_max = lambda_max, n_lambda = n_lambda,
                            alpha = alpha, verbose = verbose, penalty = penalty,
                            random = random, n_random_la = n_random_la,
-                           parallel = parallel)
+                           sigma_penalty = sigma_penalty, pi_penalty = pi_penalty,
+                           parallel = parallel, common_sigma = common_sigma)
 
     }
   }

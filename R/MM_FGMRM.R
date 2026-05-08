@@ -104,7 +104,8 @@
 MM_FGMRM <- function(x, y, G, tol = 1e-04, max_iter = 500, lambda = 0,
                      alpha = 0, init_pi = NULL, init_beta = NULL,
                      init_sigma = NULL, init_gamma = NULL, verbose = TRUE,
-                     penalty = TRUE, common_sigma = FALSE){
+                     penalty = TRUE, common_sigma = FALSE, sigma_penalty = TRUE,
+                     pi_penalty = TRUE){
   #----input validation/error check----
   if(!is.numeric(x)){
     stop("Invalid x\n")
@@ -208,7 +209,12 @@ MM_FGMRM <- function(x, y, G, tol = 1e-04, max_iter = 500, lambda = 0,
     pi <- pi_update_FGMRM(n, gamma_mat)
 
     # ----UPDATE BETA PARAMETER----
-    beta <- beta_update(x, y, gamma_mat, pi, sigma, V, lambda, penalty)
+    if (pi_penalty){
+      beta <- beta_update(x, y, gamma_mat, pi, sigma, V, lambda, penalty)  
+    } else {
+      beta <- beta_update(x, y, gamma_mat, rep(1, G), sigma, V, lambda, penalty)
+    }
+    
     if (penalty){
       beta <- ifelse(abs(beta) < 1e-10, 1e-10, beta)
     }
@@ -220,12 +226,13 @@ MM_FGMRM <- function(x, y, G, tol = 1e-04, max_iter = 500, lambda = 0,
       resid2 <- (matrix(y, nrow = n, ncol = G) - y_ik)^2
       num <- sum(gamma_mat * resid2)
       sigma <- rep(sqrt(num / n), G)                  # store sigma as sd
-    } else {
+    } else if (sigma_penalty) {
       q1 <- quantile(y, 0.25)
       q3 <- quantile(y, 0.75)
       iqr_var <- var(y[y >= q1 & y <= q3])
-    #sigma <- sigma_update(x, y, gamma_mat, beta, N)
     sigma <- sigma_update_pen(x, y, iqr_var = iqr_var, n = n, gamma_mat, beta, N)
+    } else {
+      sigma <- sigma_update(x, y, gamma_mat, beta, N)
     }
 
     # ----LOG LIKELIHOOD----
@@ -233,13 +240,22 @@ MM_FGMRM <- function(x, y, G, tol = 1e-04, max_iter = 500, lambda = 0,
 
     # ---- SGL PENALTY----
     if (penalty){
-      pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi)
+      if (pi_penalty){
+        pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi, G)
+      } else {
+        pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi = rep(1, G), G)
+      }
+      
     } else {
       pen <- 0
     }
 
-    # ---- Variance Penalty ----
-    pen_var <- sigma_penalty_FGMRM(sigma, iqr_var, a_n = 1/n)
+    if(common_sigma || !sigma_penalty){
+      pen_var <- 0
+    } else {
+      # ---- Variance Penalty ----
+      pen_var <- sigma_penalty_FGMRM(sigma, iqr_var, a_n = 1/n)
+    }
 
     # ----OBJECTIVE FUNCTION----
     objective_fun_old <- objective_fun_new
