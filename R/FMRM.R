@@ -1,8 +1,8 @@
-#' Regularized Finite Gaussian Mixture Regression Model Using MM Algorithm
+#' Regularized Finite Mixture Regression Model Using MM Algorithm
 #'
 #' Applies the Majorization-Minimization Algorithm to the inputted data over all
 #' group counts from 2 to G and all lambda-alpha pairs given the specified
-#' parameters to estimate a finite Gaussian mixture regression model. The
+#' parameters and distribution to estimate a finite mixture regression model. The
 #' function chooses the model with the lowest bic. It can be ran sequentially or
 #' in parallel. This function is for model estimation.
 #'
@@ -14,6 +14,7 @@
 #' @param G An integer greater than or equal to two specifying the maximum
 #' number of mixture components (groups) in the estimated model that the
 #' function will attempt to fit the data to.
+#' @param family description
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -22,14 +23,13 @@
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
 #' @param lambda A list of length G of numeric vectors containing non-negative
-#' tuning parameters specifying various strengths of the sparse group lasso
-#' penalty to be applied. Finite Gaussian mixture regression models will be
+#' tuning parameters specifying various strengths of the sparse group lasso (sgl)
+#' penalty to be applied. Finite mixture regression models will be
 #' estimated using each lambda value. Default value is NULL as the function will
 #' initialize a lambda vector for each group count using an algorithm.
 #' @param lambda_max A non-negative numeric value specifying the maximum lambda
 #' value (tuning parameter) used in the creation of each lambda vector. Default
-#' value is NULL as the function will initialize lambda_max for each group
-#' using an algorithm.
+#' value is NULL as the function will initialize lambda_max for each group.
 #' @param n_lambda An integer greater than one (default value 100) specifying
 #' the length of the lambda vector for each group.
 #' @param alpha A numeric vector containing values between zero and one
@@ -40,7 +40,7 @@
 #' @param verbose A logical value which, if true (default value), allows the
 #' function to print progress updates.
 #' @param penalty A logical value which, if true (default value), allows the
-#' function to apply the sparse group lasso penalty to the regression parameter
+#' function to apply the sgl penalty to the regression parameter
 #' updates and objective function within iterations of the MM algorithm.
 #' @param random A logical value which, if true (false is the default value),
 #' allows the function to take a random sample of size n_random_la from the
@@ -53,11 +53,13 @@
 #' stops iterating over the group count.
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
+#' @param common_sigma description
+#' @param sigma_penalty description
+#' @param pi_penalty description
 #'
 #' @returns An object of class FGMRM containing the parameters of the estimated
-#' finite Gaussian mixture regression model (bic, log_likelihood, beta, pi,
-#' sigma, z, z_hard, y_hat, mse, mse_fitted, alpha, lambda), number of mixture
-#' components, parameters of models with the same alpha, and a numeric
+#' finite mixture regression model (parameters depend on inputted family),
+#' number of mixture components, parameters of models with the same alpha, and a numeric
 #' matrix containing the alpha, lambda, and bic values of all estimated models
 #' for plotting purposes.
 #' @importFrom mclust Mclust mclustBIC
@@ -75,12 +77,12 @@
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
-#'  1,  2, -1,  0.5, 0, 0, 0,  # component 1
-#'  5, -2,  1,  0, 0, 0, 0,  # component 2
-#'  -3, 0,  2, 0, 0, 0, 0     # component 3
-#' ), nrow = G, byrow = TRUE) / 2
+#'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
+#'   5, -2,  1,  0, 0, 0, 0,  # component 2
+#'   -3, 0,  2, 0, 0, 0, 0     # component 3
+#' ), nrow = G, byrow = TRUE)
 #' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(0.5, 0.4, 0.3)
+#' sigmas <- c(3, 1.5, 1)/2
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -99,13 +101,26 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' # ----Call FGMRM to fit model----
-#' mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
-FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
-                  lambda = NULL, lambda_max = NULL, n_lambda = 100,
-                  alpha = seq(0, 1, by = 0.1), verbose = TRUE, penalty = TRUE,
-                  random = FALSE, n_random_la = 100, automatic_stopping = FALSE,
-                  parallel = TRUE){
+#' mod <- FMRM(x = X, y = y, G = 6, family = gaussian(), verbose = FALSE)
+FMRM <- function(x,
+                 y,
+                 G,
+                 family = c("gaussian", "poisson"),
+                 tol = 10e-04,
+                 max_iter = 500,
+                 lambda = NULL,
+                 lambda_max = NULL,
+                 n_lambda = 100,
+                 alpha = seq(0, 1, by = 0.1),
+                 verbose = TRUE,
+                 penalty = TRUE,
+                 random = FALSE,
+                 n_random_la = 100,
+                 automatic_stopping = FALSE,
+                 parallel = TRUE,
+                 common_sigma = FALSE,
+                 sigma_penalty = TRUE,
+                 pi_penalty = TRUE){
   #----input validation/error check----
   if(!is.numeric(x)){
     stop("Invalid x\n")
@@ -129,7 +144,9 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
     stop("Invalid alpha\n")
   }
   if (!is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
-      !is.logical(automatic_stopping) || !is.logical(parallel)){
+      !is.logical(automatic_stopping) || !is.logical(parallel) ||
+      !is.logical(common_sigma) || !is.logical(sigma_penalty) ||
+      !is.logical(pi_penalty)){
     stop("Invalid input\n")
   }
   if (!is.numeric(n_random_la) || n_random_la <= 0){
@@ -137,6 +154,11 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
   }
   if (length(alpha) * n_lambda < n_random_la && random){
     stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
+  }
+
+  family <- if (inherits(family, "family")) family$family else as.character(family)
+  if (family != "gaussian"){
+    stop("Invalid distribution, currently not supported\n")
   }
 
   y <- as.matrix(y)
@@ -155,9 +177,10 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
 
   if (automatic_stopping){
     for (g in 2:G){
-      models[[g]] <- MM_Grid_FGMRM(g, x, y, tol, max_iter, lambda, lambda_max,
+      models[[g]] <- MM_Grid(g, x, y, family, tol, max_iter, lambda, lambda_max,
                                    n_lambda, alpha, verbose, penalty, random,
-                                   n_random_la, parallel)
+                                   n_random_la, parallel, common_sigma,
+                                   sigma_penalty, pi_penalty)
 
       # ----get model selection criteria----
       bic[g] <- models[[g]]$parameters$bic
@@ -182,13 +205,117 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
       if (verbose){
         cat(strrep("-", getOption("width")), "\n\n")
         cat(" overall model chosen ->\n\n")
-        cat(" G =", selected_compartment, "\n\n")
+        if (family == "gaussian"){
+          cat(" G =", selected_compartment, "\n\n")
+          cat(" lambda =", round(selected_parameters$lambda, 2),
+              "|| alpha =", selected_parameters$alpha,
+              "|| log-likelihood =", round(selected_parameters$loglik, 2),
+              "|| BIC =", round(selected_parameters$bic, 2),
+              "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+          idx <- seq(1, selected_compartment, length.out = selected_compartment)
+          cat(" Components")
+          cat(paste(sprintf("%6.0f", idx), collapse = " "))
+          cat("\n Pi          ")
+          cat(paste(sprintf("%6.3f", selected_parameters$pi), collapse = " "))
+          cat("\n Sigma       ")
+          cat(paste(sprintf("%6.3f", selected_parameters$sigma),
+                    collapse = " "))
+          cat("\n\n Beta (Regression Parameters)\n")
+          cat("  Components")
+          cat(paste(sprintf("%6.0f", idx), collapse = " "))
+          cat("\n  Intercept   ")
+          cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
+                    collapse = " "))
+          for (k in 2:ncol(selected_parameters$beta)){
+            cat("\n  Beta", k - 1, "     ")
+            cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
+                      collapse = " "))
+          }
+          cat("\n\n")
+          cat(strrep("-", getOption("width")), "\n")
+        }
+      }
+
+      results <- list(parameters = selected_parameters,
+                      g = selected_compartment,
+                      parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
+                      alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
+      if (family == "gaussian"){
+        class(results) <- "FGMRM"
+      }
+
+      return(results)
+    }
+    else{
+      # ----if error, return NA for each item----
+      if (verbose) cat(strrep("-", getOption("width")), "\n\n")
+      if (verbose) cat(" no model chosen\n\n")
+      if (verbose) cat(strrep("-", getOption("width")), "\n")
+
+      results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
+                      alpha_lambda_bic = NA)
+      if (family == "gaussian"){
+        class(results) <- "FGMRM"
+      }
+
+      return(results)
+    }
+  }
+  else{
+    if (parallel){
+      # ----initialize workers and session----
+      if (!inherits(future::plan(), "multisession")) {
+        future::plan(future::multisession,
+                     workers = max(1, floor(future::availableCores()/2)))
+      }
+
+      # ----parallelize MM algorithm over 2 -> G----
+      models <- furrr::future_map(2:G, MM_Grid, x = x, y = y, family = family, tol = tol,
+                                  max_iter = max_iter, lambda = lambda,
+                                  lambda_max = lambda_max, n_lambda = n_lambda,
+                                  alpha = alpha, verbose = verbose,
+                                  penalty = penalty, random = random,
+                                  n_random_la = n_random_la, common_sigma = common_sigma,
+                                  sigma_penalty = sigma_penalty, pi_penalty = pi_penalty,
+                                  parallel = parallel, .progress = FALSE,
+                                  .options = furrr::furrr_options(seed = TRUE))
+
+      future::plan(future::sequential)
+    }
+    else{
+      # ----MM algorithm over 2 -> G----
+      models <- purrr::map(2:G, MM_Grid, x = x, y = y, family = family, tol = tol,
+                           max_iter = max_iter, lambda = lambda,
+                           lambda_max = lambda_max, n_lambda = n_lambda,
+                           alpha = alpha, verbose = verbose, penalty = penalty,
+                           random = random, n_random_la = n_random_la,
+                           sigma_penalty = sigma_penalty, pi_penalty = pi_penalty,
+                           parallel = parallel, common_sigma = common_sigma)
+
+    }
+  }
+
+  # ----get model selection criteria----
+  bic <- sapply(models, function(m) m$parameters$bic)
+
+  # ----find compartment -> parameters which minimize model selection criteria--
+  # ----and return model----
+  if (!all(is.na(bic))){
+    selected_compartment <- which.min(bic)
+    selected_parameters <- models[[selected_compartment]]$parameters
+
+    if (verbose){
+      cat(strrep("-", getOption("width")), "\n\n")
+      cat(" overall model chosen ->\n\n")
+      if (family == "gaussian"){
+        cat(" G =", selected_compartment + 1, "\n\n")
         cat(" lambda =", round(selected_parameters$lambda, 2),
             "|| alpha =", selected_parameters$alpha,
             "|| log-likelihood =", round(selected_parameters$loglik, 2),
             "|| BIC =", round(selected_parameters$bic, 2),
             "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-        idx <- seq(1, selected_compartment, length.out = selected_compartment)
+        idx <- seq(1, selected_compartment + 1,
+                   length.out = selected_compartment + 1)
         cat(" Components")
         cat(paste(sprintf("%6.0f", idx), collapse = " "))
         cat("\n Pi          ")
@@ -210,107 +337,16 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
         cat("\n\n")
         cat(strrep("-", getOption("width")), "\n")
       }
-
-      results <- list(parameters = selected_parameters,
-                      g = selected_compartment,
-                      parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
-                      alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
-      class(results) <- "FGMRM"
-
-      return(results)
-    }
-    else{
-      # ----if error, return NA for each item----
-      if (verbose) cat(strrep("-", getOption("width")), "\n\n")
-      if (verbose) cat(" no model chosen\n\n")
-      if (verbose) cat(strrep("-", getOption("width")), "\n")
-
-      results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
-                      alpha_lambda_bic = NA)
-      class(results) <- "FGMRM"
-
-      return(results)
-    }
-  }
-  else{
-    if (parallel){
-      # ----initialize workers and session----
-      if (!inherits(future::plan(), "multisession")) {
-        future::plan(future::multisession,
-                     workers = max(1, floor(future::availableCores()/2)))
-      }
-
-      # ----parallelize MM algorithm over 2 -> G----
-      models <- furrr::future_map(2:G, MM_Grid_FGMRM, x = x, y = y, tol = tol,
-                                  max_iter = max_iter, lambda = lambda,
-                                  lambda_max = lambda_max, n_lambda = n_lambda,
-                                  alpha = alpha, verbose = verbose,
-                                  penalty = penalty, random = random,
-                                  n_random_la = n_random_la,
-                                  parallel = parallel, .progress = FALSE,
-                                  .options = furrr::furrr_options(seed = TRUE))
-
-      future::plan(future::sequential)
-    }
-    else{
-      # ----MM algorithm over 2 -> G----
-      models <- purrr::map(2:G, MM_Grid_FGMRM, x = x, y = y, tol = tol,
-                           max_iter = max_iter, lambda = lambda,
-                           lambda_max = lambda_max, n_lambda = n_lambda,
-                           alpha = alpha, verbose = verbose, penalty = penalty,
-                           random = random, n_random_la = n_random_la,
-                           parallel = parallel)
-
-    }
-  }
-
-  # ----get model selection criteria----
-  bic <- sapply(models, function(m) m$parameters$bic)
-
-  # ----find compartment -> parameters which minimize model selection criteria--
-  # ----and return model----
-  if (!all(is.na(bic))){
-    selected_compartment <- which.min(bic)
-    selected_parameters <- models[[selected_compartment]]$parameters
-
-    if (verbose){
-      cat(strrep("-", getOption("width")), "\n\n")
-      cat(" overall model chosen ->\n\n")
-      cat(" G =", selected_compartment + 1, "\n\n")
-      cat(" lambda =", round(selected_parameters$lambda, 2),
-          "|| alpha =", selected_parameters$alpha,
-          "|| log-likelihood =", round(selected_parameters$loglik, 2),
-          "|| BIC =", round(selected_parameters$bic, 2),
-          "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-      idx <- seq(1, selected_compartment + 1,
-                 length.out = selected_compartment + 1)
-      cat(" Components")
-      cat(paste(sprintf("%6.0f", idx), collapse = " "))
-      cat("\n Pi          ")
-      cat(paste(sprintf("%6.3f", selected_parameters$pi), collapse = " "))
-      cat("\n Sigma       ")
-      cat(paste(sprintf("%6.3f", selected_parameters$sigma),
-                collapse = " "))
-      cat("\n\n Beta (Regression Parameters)\n")
-      cat("  Components")
-      cat(paste(sprintf("%6.0f", idx), collapse = " "))
-      cat("\n  Intercept   ")
-      cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
-                collapse = " "))
-      for (k in 2:ncol(selected_parameters$beta)){
-        cat("\n  Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
-                  collapse = " "))
-      }
-      cat("\n\n")
-      cat(strrep("-", getOption("width")), "\n")
     }
 
     results <- list(parameters = selected_parameters,
                     g = selected_compartment + 1,
                     parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
                     alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
-    class(results) <- "FGMRM"
+
+    if (family == "gaussian"){
+      class(results) <- "FGMRM"
+    }
 
     return(results)
   }
@@ -322,7 +358,9 @@ FGMRM <- function(x, y, G, tol = 10e-04, max_iter = 500,
 
     results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
                     alpha_lambda_bic = NA)
-    class(results) <- "FGMRM"
+    if (family == "gaussian"){
+      class(results) <- "FGMRM"
+    }
 
     return(results)
   }

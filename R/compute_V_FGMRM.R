@@ -1,6 +1,6 @@
 #' Sparse Group Lasso Penalty Majorization Matrix
 #'
-#' Computes sparse group lasso (SGL) penalty majorization matrix for application
+#' Compute sparse group lasso (sgl) penalty majorization matrix for application
 #' when updating regression parameters for finite Gaussian mixture regression
 #' models. This function is used during model estimation, specifically within
 #' iterations of the MM algorithm.
@@ -19,17 +19,19 @@
 #' @returns A numeric matrix of size G x (p + 1), where the number of
 #' rows is equal to the number of mixture components G, and the number of
 #' columns is equal to the number of covariates p + 1 (for the intercept term),
-#' representing the SGL penalty majorization matrix.
+#' representing the sgl penalty majorization matrix.
 #'
 #' @keywords internal
-compute_V_FGMRM <- function(G, beta, alpha){
+compute_V_FGMRM <- function(G, beta, alpha, pi){
   # ----get beta with no intercept----
-  beta_noint <- beta[ , -1, drop = FALSE]
+  beta_noint <- beta[ , -1, drop=FALSE]
 
-  # ----calculate V matrix for SGL penalty----
+  # ----calculate V matrix for penalty----
   V <- t(sapply(1:G, function(g) {
-    alpha / (2 * abs(beta_noint[g, ])) +
-      ((1 - alpha) * sqrt(G)) / (2 * sqrt(colSums(beta_noint^2)))
+
+    alpha / (2 * pi[g] * abs(beta_noint[g, ])) +
+
+      ((1 - alpha) * sqrt(G)) / (2 * sqrt(colSums((pi * beta_noint)^2)))
   }))
 
   return(V)
