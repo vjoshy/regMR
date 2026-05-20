@@ -7,19 +7,16 @@
 sigma_penalty_FGMRM(sigma, S_x, a_n)
 }
 \arguments{
-\item{sigma}{idk}
+\item{sigma}{description}
 
-\item{S_x}{idk}
+\item{S_x}{description}
 
-\item{a_n}{idk}
+\item{a_n}{description}
 }
 \value{
-idk
+description
 }
 \description{
-Title
+Description
 }
-\examples{
-
-idk
-}
+\keyword{internal}

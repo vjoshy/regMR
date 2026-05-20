@@ -5,7 +5,7 @@
 // [[Rcpp::depends(RcppArmadillo)]]
 
 // [[Rcpp::export]]
-arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
+arma::mat beta_update_FGMRM(arma::mat X, arma::mat y, arma::mat gamma_mat,
                       arma::vec pi, arma::vec sigma,
                       arma::mat V, double lambda, bool penalty) {
   // Finite Gaussian Mixture Regression Distribution MM algorithm beta update
@@ -75,7 +75,7 @@ arma::vec sigma_update(arma::mat X, arma::mat y, arma::mat gamma_mat,
 // [[Rcpp::export]]
 arma::vec sigma_update_pen(arma::mat X, arma::mat y, double iqr_var, double n, arma::mat gamma_mat,
                            arma::mat beta, arma::vec N){
-
+  // Finite Gaussian Mixture Regression Distribution MM algorithm sigma penalty
   int G = gamma_mat.n_cols;
   arma::vec sigma(G);
 
@@ -94,7 +94,7 @@ arma::vec sigma_update_pen(arma::mat X, arma::mat y, double iqr_var, double n, a
 }
 
 // [[Rcpp::export]]
-double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat,
+double lambda_max_compute_FGMRM(arma::mat X, arma::mat y, arma::mat gamma_mat,
                           arma::vec pi, arma::vec sigma){
   // Finite Gaussian Mixture Regression Distribution MM algorithm lambda_max
   // calculation
@@ -105,7 +105,6 @@ double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat,
   arma::vec z, value;
 
   double pi_min = pi.min();
-  //double sigma_min = sigma.min() * sigma.min();
 
   for (int g = 0; g < G; g++){
     z = gamma_mat.col(g); // Z_g matrix in column form
@@ -115,5 +114,120 @@ double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat,
   lambda_max = (1.0 / (pi_min )) * result.max();// Take lambda max as the max value over G and p
 
   return lambda_max;
+}
+
+arma::vec update_beta_irls_single(arma::mat x, arma::vec y, arma::vec z_g,
+                                  arma::vec beta_g_old, arma::vec v_g,
+                                  double lambda, bool penalty = false,
+                                  int max_iter = 500, double tol = 1e-8) {
+
+  arma::vec beta_g = beta_g_old;
+  int iter = 0;
+  bool converged = false;
+
+  // Prepare penalty vector if needed
+  arma::vec penalty_vec;
+  if (penalty) {
+    penalty_vec = arma::join_cols(arma::vec(1, arma::fill::zeros), v_g);
+  }
+
+  while (!converged && iter < max_iter) {
+    iter++;
+
+    // Linear predictor
+    arma::vec eta_g = x * beta_g;
+    arma::vec mu_g = arma::exp(eta_g);
+
+    // Working response and weights
+    arma::vec working_response = eta_g + (y - mu_g) / mu_g;
+    arma::vec weights = mu_g % z_g;
+
+    // Weighted least squares matrices (avoiding diagonal matrix creation)
+    arma::mat x_weighted = x.each_col() % arma::sqrt(weights);
+    arma::mat XtWX = x_weighted.t() * x_weighted;
+
+    arma::vec XtWz = x.t() * (weights % working_response);
+
+    // Add penalty if needed
+    if (penalty) {
+      XtWX.diag() += lambda * penalty_vec;
+    }
+
+    // Regularization to avoid singularity
+    double reg_param = 1e-20;
+    XtWX.diag() += reg_param;
+
+    // Solve for new beta
+    arma::vec beta_g_new;
+    try {
+      beta_g_new = arma::solve(XtWX, XtWz);
+    }
+    catch (const std::runtime_error& e) {
+      beta_g_new = arma::pinv(XtWX) * XtWz;
+    }
+
+    // Check convergence
+    double max_diff = arma::max(arma::abs(beta_g_new - beta_g));
+    if (max_diff < tol) {
+      converged = true;
+    }
+
+    beta_g = beta_g_new;
+  }
+
+  return beta_g;
+}
+
+// [[Rcpp::export]]
+arma::mat beta_update_FPMRM(arma::mat x, arma::vec y, arma::mat z_mat,
+                              arma::mat beta_old, arma::mat V,
+                              double lambda, bool penalty = false,
+                              int max_iter = 500, double tol = 1e-8,
+                              bool verbose = false) {
+
+  arma::uword G = z_mat.n_cols;
+  arma::uword p = beta_old.n_cols;
+  arma::mat beta_new(G, p);
+
+  // Update all components
+  for (arma::uword g = 0; g < G; g++) {
+    arma::vec z_g = z_mat.col(g);
+    arma::vec beta_g_old = beta_old.row(g).t();
+    arma::vec v_g;
+
+    if (penalty) {
+      v_g = V.row(g).t();
+    }
+
+    arma::vec beta_g_new = update_beta_irls_single(x, y, z_g, beta_g_old, v_g,
+                                                   lambda, penalty, max_iter, tol);
+
+    beta_new.row(g) = beta_g_new.t();
+  }
+
+  return beta_new;
+}
+
+// [[Rcpp::export]]
+double sgl_penalty_FPMRM(double lambda, double alpha, arma::mat beta, int G) {
+
+  // Get beta with no intercept (remove first column)
+  arma::mat beta_noint = beta.cols(1, beta.n_cols - 1);
+
+  // L1 penalty term: sum(colSums(abs(beta[, -1])))
+  // This is sum of all absolute values of non-intercept coefficients
+  double l1_term = arma::accu(arma::abs(beta_noint));
+
+  // L2 penalty term: sum(sqrt(G) * sqrt(colSums(beta[, -1]^2)))
+  // First get column sums of squared coefficients
+  arma::rowvec col_sums_sq = arma::sum(arma::square(beta_noint), 0);
+
+  // Then sqrt each column sum and multiply by sqrt(G), then sum
+  double l2_term = std::sqrt(G) * arma::accu(arma::sqrt(col_sums_sq));
+
+  // Combine terms
+  double pen = lambda * ((alpha * l1_term) + ((1.0 - alpha) * l2_term));
+
+  return pen;
 }
 

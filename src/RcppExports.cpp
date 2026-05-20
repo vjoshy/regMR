@@ -11,9 +11,9 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// beta_update
-arma::mat beta_update(arma::mat X, arma::mat y, arma::mat gamma_mat, arma::vec pi, arma::vec sigma, arma::mat V, double lambda, bool penalty);
-RcppExport SEXP _regMR_beta_update(SEXP XSEXP, SEXP ySEXP, SEXP gamma_matSEXP, SEXP piSEXP, SEXP sigmaSEXP, SEXP VSEXP, SEXP lambdaSEXP, SEXP penaltySEXP) {
+// beta_update_FGMRM
+arma::mat beta_update_FGMRM(arma::mat X, arma::mat y, arma::mat gamma_mat, arma::vec pi, arma::vec sigma, arma::mat V, double lambda, bool penalty);
+RcppExport SEXP _regMR_beta_update_FGMRM(SEXP XSEXP, SEXP ySEXP, SEXP gamma_matSEXP, SEXP piSEXP, SEXP sigmaSEXP, SEXP VSEXP, SEXP lambdaSEXP, SEXP penaltySEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -25,7 +25,7 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type V(VSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< bool >::type penalty(penaltySEXP);
-    rcpp_result_gen = Rcpp::wrap(beta_update(X, y, gamma_mat, pi, sigma, V, lambda, penalty));
+    rcpp_result_gen = Rcpp::wrap(beta_update_FGMRM(X, y, gamma_mat, pi, sigma, V, lambda, penalty));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -61,9 +61,9 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// lambda_max_compute
-double lambda_max_compute(arma::mat X, arma::mat y, arma::mat gamma_mat, arma::vec pi, arma::vec sigma);
-RcppExport SEXP _regMR_lambda_max_compute(SEXP XSEXP, SEXP ySEXP, SEXP gamma_matSEXP, SEXP piSEXP, SEXP sigmaSEXP) {
+// lambda_max_compute_FGMRM
+double lambda_max_compute_FGMRM(arma::mat X, arma::mat y, arma::mat gamma_mat, arma::vec pi, arma::vec sigma);
+RcppExport SEXP _regMR_lambda_max_compute_FGMRM(SEXP XSEXP, SEXP ySEXP, SEXP gamma_matSEXP, SEXP piSEXP, SEXP sigmaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -72,16 +72,52 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< arma::mat >::type gamma_mat(gamma_matSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type pi(piSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type sigma(sigmaSEXP);
-    rcpp_result_gen = Rcpp::wrap(lambda_max_compute(X, y, gamma_mat, pi, sigma));
+    rcpp_result_gen = Rcpp::wrap(lambda_max_compute_FGMRM(X, y, gamma_mat, pi, sigma));
+    return rcpp_result_gen;
+END_RCPP
+}
+// beta_update_FPMRM
+arma::mat beta_update_FPMRM(arma::mat x, arma::vec y, arma::mat z_mat, arma::mat beta_old, arma::mat V, double lambda, bool penalty, int max_iter, double tol, bool verbose);
+RcppExport SEXP _regMR_beta_update_FPMRM(SEXP xSEXP, SEXP ySEXP, SEXP z_matSEXP, SEXP beta_oldSEXP, SEXP VSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP max_iterSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type z_mat(z_matSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type beta_old(beta_oldSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type V(VSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< bool >::type penalty(penaltySEXP);
+    Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
+    Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
+    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
+    rcpp_result_gen = Rcpp::wrap(beta_update_FPMRM(x, y, z_mat, beta_old, V, lambda, penalty, max_iter, tol, verbose));
+    return rcpp_result_gen;
+END_RCPP
+}
+// sgl_penalty_FPMRM
+double sgl_penalty_FPMRM(double lambda, double alpha, arma::mat beta, int G);
+RcppExport SEXP _regMR_sgl_penalty_FPMRM(SEXP lambdaSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP GSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type beta(betaSEXP);
+    Rcpp::traits::input_parameter< int >::type G(GSEXP);
+    rcpp_result_gen = Rcpp::wrap(sgl_penalty_FPMRM(lambda, alpha, beta, G));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_regMR_beta_update", (DL_FUNC) &_regMR_beta_update, 8},
+    {"_regMR_beta_update_FGMRM", (DL_FUNC) &_regMR_beta_update_FGMRM, 8},
     {"_regMR_sigma_update", (DL_FUNC) &_regMR_sigma_update, 5},
     {"_regMR_sigma_update_pen", (DL_FUNC) &_regMR_sigma_update_pen, 7},
-    {"_regMR_lambda_max_compute", (DL_FUNC) &_regMR_lambda_max_compute, 5},
+    {"_regMR_lambda_max_compute_FGMRM", (DL_FUNC) &_regMR_lambda_max_compute_FGMRM, 5},
+    {"_regMR_beta_update_FPMRM", (DL_FUNC) &_regMR_beta_update_FPMRM, 10},
+    {"_regMR_sgl_penalty_FPMRM", (DL_FUNC) &_regMR_sgl_penalty_FPMRM, 4},
     {NULL, NULL, 0}
 };
 

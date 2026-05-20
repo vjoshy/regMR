@@ -22,6 +22,7 @@
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
+#' @param reps description
 #' @param lambda A list of length G of numeric vectors containing non-negative
 #' tuning parameters specifying various strengths of the sparse group lasso (sgl)
 #' penalty to be applied. Finite mixture regression models will be
@@ -108,6 +109,7 @@ FMRM <- function(x,
                  family = c("gaussian", "poisson"),
                  tol = 10e-04,
                  max_iter = 500,
+                 reps = 1,
                  lambda = NULL,
                  lambda_max = NULL,
                  n_lambda = 100,
@@ -156,8 +158,12 @@ FMRM <- function(x,
     stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
   }
 
-  family <- if (inherits(family, "family")) family$family else as.character(family)
-  if (family != "gaussian"){
+  if (inherits(family, "family")) {
+    family <- family$family
+  } else {
+    family <- match.arg(family)
+  }
+  if (family != "gaussian" && family != "poisson"){
     stop("Invalid distribution, currently not supported\n")
   }
 
@@ -177,7 +183,7 @@ FMRM <- function(x,
 
   if (automatic_stopping){
     for (g in 2:G){
-      models[[g]] <- MM_Grid(g, x, y, family, tol, max_iter, lambda, lambda_max,
+      models[[g]] <- MM_Grid(g, x, y, family, tol, max_iter, reps, lambda, lambda_max,
                                    n_lambda, alpha, verbose, penalty, random,
                                    n_random_la, parallel, common_sigma,
                                    sigma_penalty, pi_penalty)
@@ -205,35 +211,35 @@ FMRM <- function(x,
       if (verbose){
         cat(strrep("-", getOption("width")), "\n\n")
         cat(" overall model chosen ->\n\n")
+        cat(" G =", selected_compartment, "\n\n")
+        cat(" lambda =", round(selected_parameters$lambda, 2),
+            "|| alpha =", selected_parameters$alpha,
+            "|| log-likelihood =", round(selected_parameters$loglik, 2),
+            "|| BIC =", round(selected_parameters$bic, 2),
+            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+        idx <- seq(1, selected_compartment, length.out = selected_compartment)
+        cat(" Components")
+        cat(paste(sprintf("%6.0f", idx), collapse = " "))
+        cat("\n Pi          ")
+        cat(paste(sprintf("%6.3f", selected_parameters$pi), collapse = " "))
         if (family == "gaussian"){
-          cat(" G =", selected_compartment, "\n\n")
-          cat(" lambda =", round(selected_parameters$lambda, 2),
-              "|| alpha =", selected_parameters$alpha,
-              "|| log-likelihood =", round(selected_parameters$loglik, 2),
-              "|| BIC =", round(selected_parameters$bic, 2),
-              "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-          idx <- seq(1, selected_compartment, length.out = selected_compartment)
-          cat(" Components")
-          cat(paste(sprintf("%6.0f", idx), collapse = " "))
-          cat("\n Pi          ")
-          cat(paste(sprintf("%6.3f", selected_parameters$pi), collapse = " "))
           cat("\n Sigma       ")
           cat(paste(sprintf("%6.3f", selected_parameters$sigma),
                     collapse = " "))
-          cat("\n\n Beta (Regression Parameters)\n")
-          cat("  Components")
-          cat(paste(sprintf("%6.0f", idx), collapse = " "))
-          cat("\n  Intercept   ")
-          cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
-                    collapse = " "))
-          for (k in 2:ncol(selected_parameters$beta)){
-            cat("\n  Beta", k - 1, "     ")
-            cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
-                      collapse = " "))
-          }
-          cat("\n\n")
-          cat(strrep("-", getOption("width")), "\n")
         }
+        cat("\n\n Beta (Regression Parameters)\n")
+        cat("  Components")
+        cat(paste(sprintf("%6.0f", idx), collapse = " "))
+        cat("\n  Intercept   ")
+        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
+                  collapse = " "))
+        for (k in 2:ncol(selected_parameters$beta)){
+          cat("\n  Beta", k - 1, "     ")
+          cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
+                    collapse = " "))
+        }
+        cat("\n\n")
+        cat(strrep("-", getOption("width")), "\n")
       }
 
       results <- list(parameters = selected_parameters,
@@ -242,6 +248,9 @@ FMRM <- function(x,
                       alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
       if (family == "gaussian"){
         class(results) <- "FGMRM"
+      }
+      else if (family == "poisson"){
+        class(results) <- "FPMRM"
       }
 
       return(results)
@@ -257,6 +266,9 @@ FMRM <- function(x,
       if (family == "gaussian"){
         class(results) <- "FGMRM"
       }
+      else if (family == "poisson"){
+        class(results) <- "FPMRM"
+      }
 
       return(results)
     }
@@ -271,7 +283,7 @@ FMRM <- function(x,
 
       # ----parallelize MM algorithm over 2 -> G----
       models <- furrr::future_map(2:G, MM_Grid, x = x, y = y, family = family, tol = tol,
-                                  max_iter = max_iter, lambda = lambda,
+                                  max_iter = max_iter, reps = reps, lambda = lambda,
                                   lambda_max = lambda_max, n_lambda = n_lambda,
                                   alpha = alpha, verbose = verbose,
                                   penalty = penalty, random = random,
@@ -285,7 +297,7 @@ FMRM <- function(x,
     else{
       # ----MM algorithm over 2 -> G----
       models <- purrr::map(2:G, MM_Grid, x = x, y = y, family = family, tol = tol,
-                           max_iter = max_iter, lambda = lambda,
+                           max_iter = max_iter, reps = reps, lambda = lambda,
                            lambda_max = lambda_max, n_lambda = n_lambda,
                            alpha = alpha, verbose = verbose, penalty = penalty,
                            random = random, n_random_la = n_random_la,
@@ -303,49 +315,52 @@ FMRM <- function(x,
   if (!all(is.na(bic))){
     selected_compartment <- which.min(bic)
     selected_parameters <- models[[selected_compartment]]$parameters
+    selected_compartment <- selected_compartment + 1
 
     if (verbose){
       cat(strrep("-", getOption("width")), "\n\n")
       cat(" overall model chosen ->\n\n")
+      cat(" G =", selected_compartment, "\n\n")
+      cat(" lambda =", round(selected_parameters$lambda, 2),
+          "|| alpha =", selected_parameters$alpha,
+          "|| log-likelihood =", round(selected_parameters$loglik, 2),
+          "|| BIC =", round(selected_parameters$bic, 2),
+          "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+      idx <- seq(1, selected_compartment, length.out = selected_compartment)
+      cat(" Components")
+      cat(paste(sprintf("%6.0f", idx), collapse = " "))
+      cat("\n Pi          ")
+      cat(paste(sprintf("%6.3f", selected_parameters$pi), collapse = " "))
       if (family == "gaussian"){
-        cat(" G =", selected_compartment + 1, "\n\n")
-        cat(" lambda =", round(selected_parameters$lambda, 2),
-            "|| alpha =", selected_parameters$alpha,
-            "|| log-likelihood =", round(selected_parameters$loglik, 2),
-            "|| BIC =", round(selected_parameters$bic, 2),
-            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-        idx <- seq(1, selected_compartment + 1,
-                   length.out = selected_compartment + 1)
-        cat(" Components")
-        cat(paste(sprintf("%6.0f", idx), collapse = " "))
-        cat("\n Pi          ")
-        cat(paste(sprintf("%6.3f", selected_parameters$pi), collapse = " "))
         cat("\n Sigma       ")
         cat(paste(sprintf("%6.3f", selected_parameters$sigma),
                   collapse = " "))
-        cat("\n\n Beta (Regression Parameters)\n")
-        cat("  Components")
-        cat(paste(sprintf("%6.0f", idx), collapse = " "))
-        cat("\n  Intercept   ")
-        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
-                  collapse = " "))
-        for (k in 2:ncol(selected_parameters$beta)){
-          cat("\n  Beta", k - 1, "     ")
-          cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
-                    collapse = " "))
-        }
-        cat("\n\n")
-        cat(strrep("-", getOption("width")), "\n")
       }
+      cat("\n\n Beta (Regression Parameters)\n")
+      cat("  Components")
+      cat(paste(sprintf("%6.0f", idx), collapse = " "))
+      cat("\n  Intercept   ")
+      cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
+                collapse = " "))
+      for (k in 2:ncol(selected_parameters$beta)){
+        cat("\n  Beta", k - 1, "     ")
+        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
+                  collapse = " "))
+      }
+      cat("\n\n")
+      cat(strrep("-", getOption("width")), "\n")
     }
 
     results <- list(parameters = selected_parameters,
-                    g = selected_compartment + 1,
+                    g = selected_compartment,
                     parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
                     alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
 
     if (family == "gaussian"){
       class(results) <- "FGMRM"
+    }
+    else if (family == "poisson"){
+      class(results) <- "FPMRM"
     }
 
     return(results)
@@ -360,6 +375,9 @@ FMRM <- function(x,
                     alpha_lambda_bic = NA)
     if (family == "gaussian"){
       class(results) <- "FGMRM"
+    }
+    else if (family == "poisson"){
+      class(results) <- "FPMRM"
     }
 
     return(results)

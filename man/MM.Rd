@@ -12,6 +12,7 @@ MM(
   family = c("gaussian", "poisson"),
   tol = 1e-04,
   max_iter = 500,
+  reps = 1,
   lambda = 0,
   alpha = 0,
   init_parameters = NULL,
@@ -44,6 +45,8 @@ iterations, the algorithm stops.}
 \item{max_iter}{An integer greater than or equal to one specifying the
 maximum number of iterations ran within the MM algorithm. Default value is
 500.}
+
+\item{reps}{description}
 
 \item{lambda}{A non-negative numeric value (tuning parameter) specifying the
 strength of the sparse group lasso (sgl) penalty. Default value is zero (no penalty

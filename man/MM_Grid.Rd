@@ -12,6 +12,7 @@ MM_Grid(
   family = c("gaussian", "poisson"),
   tol = 0.001,
   max_iter = 500,
+  reps = 1,
   lambda = NULL,
   lambda_max = NULL,
   n_lambda = 100,
@@ -48,6 +49,8 @@ iterations, the algorithm stops.}
 \item{max_iter}{An integer greater than or equal to one specifying the
 maximum number of iterations ran within the MM algorithm. Default value is
 500.}
+
+\item{reps}{description}
 
 \item{lambda}{A list of length G of numeric vectors containing non-negative
 tuning parameters specifying various strengths of the sparse group lasso (sgl)

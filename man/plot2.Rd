@@ -7,8 +7,8 @@
 plot2(mod, x, y, covariate_one, covariate_two, ...)
 }
 \arguments{
-\item{mod}{An object of class "FGMRM", the result of calling FGMRM() or
-MM_Grid_FGMRM().}
+\item{mod}{An object of class {"FGMRM", "FPMRM"}, the result of calling FMRM() or
+MM_Grid().}
 
 \item{x}{Predictor/design matrix. A numeric matrix of size n x p, where the
 number of rows is equal to the number of observations n, and the number of
@@ -30,8 +30,8 @@ A 3-D plot of the specified covariates of x against y, with the
 group assignments highlighted in colour.
 }
 \description{
-This function creates a 3-D plot for finite Gaussian mixture regression
-models of class "FGMRM". It plots the specified covariates of x against y,
+This function creates a 3-D plot for finite mixture regression
+models of class {"FGMRM", "FPMRM"}. It plots the specified covariates of x against y,
 with the group assignments highlighted in colour.
 }
 \examples{
@@ -72,7 +72,7 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
 # ----Fit model----
-mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
+mod <- FMRM(x = X, y = y, G = 6, family = gaussian(), verbose = FALSE)
 
 # ----Call plot2----
 plot <- plot2(mod, X, y, 1, 2)

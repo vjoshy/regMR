@@ -21,14 +21,16 @@
 #' @keywords internal
 sgl_penalty_FGMRM <- function(lambda, alpha, beta, pi, G){
 
-  beta_noint <- beta[, -1, drop = FALSE]  # G x p
+  beta_noint <- beta[, -1, drop = FALSE]  # ----G x p----
 
-  # Lasso term
+  # ---lasso term----
   lasso_term <- sum(abs(pi * beta_noint))
 
-  # Group lasso term
+  # ---group lasso term----
   group_lasso_term <- sqrt(G) * sum(sqrt(colSums((pi * beta_noint)^2)))
 
+  # ----compute sgl penalty----
   pen <- lambda * (alpha * lasso_term + (1 - alpha) * group_lasso_term)
+
   return(pen)
 }

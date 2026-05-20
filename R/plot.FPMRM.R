@@ -1,19 +1,19 @@
-#' Plot Method for a Finite Gaussian Mixture Regression Model of class "FGMRM"
+#' Plot Method for a Finite Poisson Mixture Regression Model of class "FPMRM"
 #'
-#' This function creates plots for finite Gaussian mixture regression models of
-#' class "FGMRM". It generates three plots: lambdas vs. bics for all alpha
+#' This function creates plots for finite Poisson mixture regression models of
+#' class "FPMRM". It generates three plots: lambdas vs. bics for all alpha
 #' values, lambdas vs. regression coefficients, and lambdas vs. group norms for
 #' all models with the same alpha as the optimal alpha.
 #'
-#' @param x An object of class "FGMRM", the result of calling FMRM() or
-#' MM_Grid() with family = gaussian().
+#' @param x An object of class "FPMRM", the result of calling FMRM() or
+#' MM_Grid() with family = poisson().
 #' @param ... Additional arguments for plotting (currently unused).
 #'
 #' @returns A list of three ggplot objects: lambdas vs. bics for all alpha
 #' values, lambdas vs. regression coefficients, and lambdas vs. group norms for
 #' all models with the same alpha as the optimal alpha.
 #' @export
-#' @method plot FGMRM
+#' @method plot FPMRM
 #'
 #' @import ggplot2
 #'
@@ -22,38 +22,40 @@
 #' set.seed(2025)
 #'
 #' # ----Simulate data----
-#' n <- 500   # total samples
-#' p <- 6     # number of covariates
-#' G <- 3     # number of mixture components
-#' rho = 0.2  # correlation
+#' n <- 500  # total samples
+#' p <- 6    # number of covariates
+#' G <- 3    # number of mixture components
+#' rho <- 0.2  # correlation
 #'
 #' # ----True parameters for 3 clusters----
 #' betas <- matrix(c(
 #'   1,  2, -1,  0.5, 0, 0, 0,  # component 1
-#'   5, -2,  1,  0, 0, 0, 0,  # component 2
-#'   -3, 0,  2, 0, 0, 0, 0     # component 3
-#' ), nrow = G, byrow = TRUE)
-#' pis <- c(0.4, 0.4, 0.2)
-#' sigmas <- c(3, 1.5, 1)/2
+#'   5, -2,  1,  0,   0, 0, 0,  # component 2
+#'   -3,  0,  2,  0,   0, 0, 0   # component 3
+#'   ), nrow = G, byrow = TRUE) / 2
+#'   pis <- c(0.4, 0.4, 0.2)
 #'
 #' # ----Generate correlation matrix----
 #' cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
 #' Sigma <- cor_mat
 #'
-#' # ----Simulate design matrix X (n × p)----
+#' # ----Simulate design matrix X (n x p)----
 #' X <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
 #'
 #' # ----Generate responsibilities----
 #' z <- rmultinom(n, size = 1, prob = pis)
 #' groups <- apply(z, 2, which.max)
 #'
-#' # ----b0 + b1x1 + b2x2 + ... + bkxp----
-#' mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
+#' # ----b0 + b1x1 + b2x2 + ... + bkxp (log-linear predictor)----
+#' eta_vec <- rowSums(cbind(1, X) * betas[groups, ])
 #'
-#' # ----Simulate response y----
-#' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
+#' # ----Apply inverse link (exp) to get Poisson means----
+#' mu_vec <- exp(eta_vec)
 #'
-#' mod <- FMRM(x = X, y = y, G = 6, family = gaussian(), verbose = FALSE)
+#' # ----Simulate response y (count data)----
+#' y <- rpois(n, lambda = mu_vec)
+#'
+#' mod <- FMRM(x = X, y = y, G = 6, family = poisson(), verbose = FALSE)
 #'
 #' # ----Call plot----
 #' plots <- plot(mod)
@@ -62,10 +64,10 @@
 #' plots[[1]] # ----lambdas vs. bics----
 #' plots[[2]] # ----lambdas vs. regression coefficients----
 #' plots[[3]] # ----lambdas vs. group norms----
-plot.FGMRM <- function(x, ...){
+plot.FPMRM <- function(x, ...){
   # ----error check----
   if (all(is.na(x$parameters_same_alpha))){
-    stop("plot() on an object of class FGMRM is invalid if model was estimated
+    stop("plot() on an object of class FPMRM is invalid if model was estimated
          with penalty = FALSE\n")
   }
 
@@ -82,9 +84,9 @@ plot.FGMRM <- function(x, ...){
 
   # ----plot the lambdas vs. the bics for all alpha values----
   plot_one <- ggplot(long, aes(x = log(.data[["lambda"]]),
-                                 y = .data[["bic"]],
-                                 group = as.factor(.data[["alpha"]]),
-                                 color = as.factor(.data[["alpha"]]))) +
+                               y = .data[["bic"]],
+                               group = as.factor(.data[["alpha"]]),
+                               color = as.factor(.data[["alpha"]]))) +
     geom_point(size = 1, aes(alpha = 0.2), na.rm = TRUE) +
     scale_color_viridis_d(option = "viridis") +
     theme_bw() +

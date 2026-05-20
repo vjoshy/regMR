@@ -23,6 +23,7 @@
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
+#' @param reps description
 #' @param lambda A list of length G of numeric vectors containing non-negative
 #' tuning parameters specifying various strengths of the sparse group lasso (sgl)
 #' penalty to be applied. Finite mixture regression models will be
@@ -105,6 +106,7 @@ MM_Grid <- function(g,
                     family = c("gaussian", "poisson"),
                     tol = 10e-04,
                     max_iter = 500,
+                    reps = 1,
                     lambda = NULL,
                     lambda_max = NULL,
                     n_lambda = 100,
@@ -151,8 +153,12 @@ MM_Grid <- function(g,
     stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
   }
 
-  family <- if (inherits(family, "family")) family$family else as.character(family)
-  if (family != "gaussian"){
+  if (inherits(family, "family")) {
+    family <- family$family
+  } else {
+    family <- match.arg(family)
+  }
+  if (family != "gaussian" && family != "poisson"){
     stop("Invalid distribution, currently not supported\n")
   }
 
@@ -161,7 +167,10 @@ MM_Grid <- function(g,
   if (verbose) cat("\n-- g =", g, "--\n")
 
   # ----get covariates----
-  p = ncol(x)
+  p <- ncol(x)
+
+  # ----get observations----
+  n <- nrow(x)
 
   # ----vector for lambda-alpha selection process----
   bic <- numeric(n_lambda * length(alpha))
@@ -187,7 +196,7 @@ MM_Grid <- function(g,
       gamma_g <- compute_gamma_FGMRM(x, y, pi_g, beta_g, sigma_g)
       params_g <- list(pi_g, beta_g, sigma_g, gamma_g)
 
-      init_mod <- MM(x, y, g, family, tol, max_iter, 0, 0, params_g, 0, verbose, FALSE)
+      init_mod <- MM(x, y, g, family, tol, max_iter, 10, 0, 0, params_g, 0, verbose, FALSE)
 
       init_pi[[g]] <- init_mod$pi
 
@@ -212,6 +221,58 @@ MM_Grid <- function(g,
     init_parameters[[g]] <- list(init_pi[[g]], init_beta[[g]],
                                  init_sigma[[g]], init_gamma[[g]])
   }
+  else if (family == "poisson"){
+    # ----initialize default values----
+    init_mod <- NULL
+    init_pi <- list()
+    init_pi[[g]] <- rep(1/g, g)
+
+    init_beta <- list()
+    base_intercept <- log(mean(y))
+    init_beta[[g]] <- matrix(0, nrow = g, ncol = p + 1)
+    for(comp in 1:g) {
+      init_beta[[g]][comp, 1] <- base_intercept + rnorm(1, 0, 0.1)  # Small variation
+      if(p > 0) {
+        init_beta[[g]][comp, 2:(p+1)] <- rnorm(p, 0, 0.1)  # Even smaller slopes
+      }
+    }
+
+    init_z <- list()
+    init_z[[g]] <- matrix(0, nrow = n, ncol = g)
+
+    # ---Random assignment to clusters----
+    assignments <- sample(1:g, n, replace = TRUE)
+    for (i in 1:n) {
+      init_z[[g]][i, assignments[i]] <- 1
+    }
+
+    init_parameters[[g]] <- list(init_pi[[g]], init_beta[[g]],
+                                 init_z[[g]])
+
+    # ----call MM once with lambda, alpha = 0----
+    noreg_chosen_parameters <- MM(x, y, g, family, tol, max_iter, 10, 0, 0,
+                                  init_parameters[[g]], verbose, penalty)
+
+    # ----Check if unregularized model succeeded----
+    if (is.na(noreg_chosen_parameters$bic)){
+      # ----Fallback to original initialization if unregularized model fails----
+      if (verbose) cat("Unregularized model failed, using original initialization\n")
+    } else {
+      # ----Use successful unregularized model results----
+      init_pi[[g]] <- noreg_chosen_parameters$pi
+      init_z[[g]] <- noreg_chosen_parameters$z
+      init_beta[[g]] <- noreg_chosen_parameters$beta
+    }
+
+    init_parameters[[g]] <- list(init_pi[[g]], init_beta[[g]],
+                                 init_z[[g]])
+  }
+
+  if(n >= p){
+    lambda_factor <- 0.001
+  } else {
+    lambda_factor <- 0.1
+  }
 
   # ----if penalty is being applied (is true), call MM over lambda-alpha pairs--
   if (penalty){
@@ -220,18 +281,24 @@ MM_Grid <- function(g,
       lambda <- list()
 
       # ----calculate lambda_max for g, log the value----
-      if (pi_penalty){
-        lambda_max <- lambda_max_compute(x, y, init_parameters[[g]][[4]],
-                                         init_parameters[[g]][[1]],
-                                         init_parameters[[g]][[3]])
-      } else {
-        lambda_max <- lambda_max_compute(x, y, init_parameters[[g]][[4]],
-                                         rep(1, g), init_parameters[[g]][[3]])
+      if (family == "gaussian"){
+        if (pi_penalty){
+          lambda_max <- lambda_max_compute_FGMRM(x, y, init_parameters[[g]][[4]],
+                                           init_parameters[[g]][[1]],
+                                           init_parameters[[g]][[3]])
+        } else {
+          lambda_max <- lambda_max_compute_FGMRM(x, y, init_parameters[[g]][[4]],
+                                           rep(1, g), init_parameters[[g]][[3]])
+        }
+      }
+      else if (family == "poisson"){
+        lambda_max <- lambda_max_compute_FPMRM(x, y, init_parameters[[g]][[3]],
+                                               init_parameters[[g]][[2]])
       }
 
 
       # ----calculate lambda_min based on lambda_max for g, log the value----
-      lambda_min <- 0.001 * lambda_max
+      lambda_min <- lambda_factor * lambda_max
 
       log_lambda_max <- log(lambda_max)
       log_lambda_min <- log(lambda_min)
@@ -244,7 +311,7 @@ MM_Grid <- function(g,
     else if (is.null(lambda) && !is.null(lambda_max)){
       lambda <- list()
 
-      lambda_min <- 0.001 * lambda_max
+      lambda_min <- lambda_factor * lambda_max
       log_lambda_max <- log(lambda_max)
       log_lambda_min <- log(lambda_min)
 
@@ -271,7 +338,7 @@ MM_Grid <- function(g,
       parameters <- furrr::future_pmap(
         param_grid,
         function(alpha, lambda) {
-          MM(x, y, g, family, tol, max_iter, lambda, alpha, init_parameters[[g]],
+          MM(x, y, g, family, tol, max_iter, reps, lambda, alpha, init_parameters[[g]],
              verbose, penalty, common_sigma, sigma_penalty, pi_penalty)
         },
         .options = furrr::furrr_options(
@@ -286,18 +353,24 @@ MM_Grid <- function(g,
       param_grid <- expand.grid(lambda = rev(lambda[[g]]), alpha = alpha)
       # ---- fit models----
       for (i in 1:nrow(param_grid)){
-        parameters[[i]] <- MM(x, y, g, family, tol, max_iter, param_grid[i, 1],
+        parameters[[i]] <- MM(x, y, g, family, tol, max_iter, reps, param_grid[i, 1],
                               param_grid[i, 2], init_parameters[[g]],
                               verbose, penalty, common_sigma, sigma_penalty,
                               pi_penalty)
 
-        # Warm start: use solution from previous lambda
+        # ---- Warm start: use solution from previous lambda ----
         if (i < nrow(param_grid) &&
             param_grid[i, 2] == param_grid[i+1, 2] &&
             !is.na(parameters[[i]]$bic)){
-          init_parameters[[g]][[2]] <- parameters[[i]]$beta
-          init_parameters[[g]][[3]] <- parameters[[i]]$sigma
-          init_parameters[[g]][[4]] <- parameters[[i]]$z
+          if (family == "gaussian"){
+            init_parameters[[g]][[2]] <- parameters[[i]]$beta
+            init_parameters[[g]][[3]] <- parameters[[i]]$sigma
+            init_parameters[[g]][[4]] <- parameters[[i]]$z
+          }
+          else if (family == "poisson"){
+            init_parameters[[g]][[2]] <- parameters[[i]]$beta
+            init_parameters[[g]][[3]] <- parameters[[i]]$z
+          }
         }
       }
     }
@@ -329,33 +402,32 @@ MM_Grid <- function(g,
       if (verbose){
         cat(strrep("=", getOption("width")), "\n\n")
         cat(" selected model for g =", g, "\n\n")
-
+        cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
+            round(chosen_parameters$alpha, 2), "|| BIC =",
+            round(chosen_parameters$bic, 2), "\n\n")
+        idx <- seq(1, g, length.out = g)
+        cat(" Components")
+        cat(paste(sprintf("%6.0f", idx), collapse = " "))
+        cat("\n Pi          ")
+        cat(paste(sprintf("%6.3f", chosen_parameters$pi),
+                  collapse = " "))
         if (family == "gaussian"){
-          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
-              round(chosen_parameters$alpha, 2), "|| BIC =",
-              round(chosen_parameters$bic, 2), "\n\n")
-          idx <- seq(1, g, length.out = g)
-          cat(" Components")
-          cat(paste(sprintf("%6.0f", idx), collapse = " "))
-          cat("\n Pi          ")
-          cat(paste(sprintf("%6.3f", chosen_parameters$pi),
-                    collapse = " "))
           cat("\n Sigma       ")
           cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
                     collapse = " "))
-          cat("\n\n Beta (Regression Parameters)\n")
-          cat("  Components")
-          cat(paste(sprintf("%6.0f", idx), collapse = " "))
-          cat("\n  Intercept   ")
-          cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
-                    collapse = " "))
-          for (k in 2:ncol(chosen_parameters$beta)){
-            cat("\n  Beta", k - 1, "     ")
-            cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
-                      collapse = " "))
-          }
-          cat("\n\n")
         }
+        cat("\n\n Beta (Regression Parameters)\n")
+        cat("  Components")
+        cat(paste(sprintf("%6.0f", idx), collapse = " "))
+        cat("\n  Intercept   ")
+        cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
+                  collapse = " "))
+        for (k in 2:ncol(chosen_parameters$beta)){
+          cat("\n  Beta", k - 1, "     ")
+          cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
+                    collapse = " "))
+        }
+        cat("\n\n")
       }
 
       chosen_parameters$lambda_max <- lambda_max
@@ -378,13 +450,16 @@ MM_Grid <- function(g,
     if (family == "gaussian"){
       class(results) <- "FGMRM"
     }
+    else if (family == "poisson"){
+      class(results) <- "FPMRM"
+    }
 
     # ----return parameters, compartment number----
     return(results)
   }
   else{
     # ----if penalty is false, call MM once with lambda, alpha = 0----
-    chosen_parameters <- MM(x, y, g, family, tol, max_iter, 0, 0, init_parameters[[g]],
+    chosen_parameters <- MM(x, y, g, family, tol, max_iter, reps, 0, 0, init_parameters[[g]],
                             verbose, penalty, sigma_penalty, pi_penalty)
 
     if (!is.na(chosen_parameters$bic)){
@@ -392,33 +467,32 @@ MM_Grid <- function(g,
       if (verbose){
         cat(strrep("=", getOption("width")), "\n\n")
         cat(" selected model for g =", g, "\n\n")
-
+        cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
+            round(chosen_parameters$alpha, 2), "|| BIC =",
+            round(chosen_parameters$bic, 2), "\n\n")
+        idx <- seq(1, g, length.out = g)
+        cat(" Components")
+        cat(paste(sprintf("%6.0f", idx), collapse = " "))
+        cat("\n Pi          ")
+        cat(paste(sprintf("%6.3f", chosen_parameters$pi),
+                  collapse = " "))
         if (family == "gaussian"){
-          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
-              round(chosen_parameters$alpha, 2), "|| BIC =",
-              round(chosen_parameters$bic, 2), "\n\n")
-          idx <- seq(1, g, length.out = g)
-          cat(" Components")
-          cat(paste(sprintf("%6.0f", idx), collapse = " "))
-          cat("\n Pi          ")
-          cat(paste(sprintf("%6.3f", chosen_parameters$pi),
-                    collapse = " "))
           cat("\n Sigma       ")
           cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
                     collapse = " "))
-          cat("\n\n Beta (Regression Parameters)\n")
-          cat("  Components")
-          cat(paste(sprintf("%6.0f", idx), collapse = " "))
-          cat("\n  Intercept   ")
-          cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
-                    collapse = " "))
-          for (k in 2:ncol(chosen_parameters$beta)){
-            cat("\n  Beta", k - 1, "     ")
-            cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
-                      collapse = " "))
-          }
-          cat("\n\n")
         }
+        cat("\n\n Beta (Regression Parameters)\n")
+        cat("  Components")
+        cat(paste(sprintf("%6.0f", idx), collapse = " "))
+        cat("\n  Intercept   ")
+        cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , 1]),
+                  collapse = " "))
+        for (k in 2:ncol(chosen_parameters$beta)){
+          cat("\n  Beta", k - 1, "     ")
+          cat(paste(sprintf("%6.3f", chosen_parameters$beta[ , k]),
+                    collapse = " "))
+        }
+        cat("\n\n")
       }
     }
     else{
@@ -433,6 +507,9 @@ MM_Grid <- function(g,
                     parameters_same_alpha = NA, alpha_lambda_bic = NA)
     if (family == "gaussian"){
       class(results) <- "FGMRM"
+    }
+    else if (family == "poisson"){
+      class(results) <- "FPMRM"
     }
 
     # ----return parameters, compartment number----

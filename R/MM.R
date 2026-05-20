@@ -23,6 +23,7 @@
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
+#' @param reps description
 #' @param lambda A non-negative numeric value (tuning parameter) specifying the
 #' strength of the sparse group lasso (sgl) penalty. Default value is zero (no penalty
 #' applied).
@@ -88,6 +89,7 @@ MM <- function(x,
                family = c("gaussian", "poisson"),
                tol = 1e-04,
                max_iter = 500,
+               reps = 1,
                lambda = 0,
                alpha = 0,
                init_parameters = NULL,
@@ -124,8 +126,12 @@ MM <- function(x,
     stop("Invalid input\n")
   }
 
-  family <- if (inherits(family, "family")) family$family else as.character(family)
-  if (family != "gaussian"){
+  if (inherits(family, "family")) {
+    family <- family$family
+  } else {
+    family <- match.arg(family)
+  }
+  if (family != "gaussian" && family != "poisson"){
     stop("Invalid distribution, currently not supported\n")
   }
 
@@ -136,15 +142,15 @@ MM <- function(x,
   y <- as.matrix(y)
 
   # ----parameters----
+  pi <- numeric(G)
+  beta <- matrix(0, G, p+1)
+  N <- numeric(G)
   if (family == "gaussian"){
-    pi <- numeric(G)
-    beta <- matrix(0, G, p+1)
     sigma <- numeric(G)
-    N <- numeric(G)
-
-    # ----penalty term----
-    V <- matrix(0, G, p+1)
   }
+
+  # ----penalty term----
+  V <- matrix(0, G, p+1)
 
   # ----if lambda is zero, set penalty false----
   if (lambda == 0){
@@ -172,162 +178,307 @@ MM <- function(x,
 
         init_parameters <- list(init_pi, init_beta, init_sigma, init_gamma)
     }
+    else if (family == "poisson"){
+      init_pi <- rep(1/G, G)
+
+      init_beta <- matrix(0, nrow = G, ncol = p + 1)
+      for(g in 1:G) {
+        init_beta[g, 1] <- log(mean(y)) + rnorm(1, 0, 0.1)
+        init_beta[g, 2:(p+1)] <- rnorm(p, 0, 0.05)
+      }
+
+      init_z <- matrix(0, nrow = n, ncol = G)
+      assignments <- sample(1:G, n, replace = TRUE)
+      for (i in 1:n) {
+        init_z[i, assignments[i]] <- 1
+      }
+
+      init_parameters <- list(init_pi, init_beta, init_z)
+    }
   }
 
-  if (family == "gaussian"){
-    pi <- init_parameters[[1]]
-    beta <- init_parameters[[2]]
-    sigma <- init_parameters[[3]]
-    gamma_mat <- init_parameters[[4]]
-  }
+  # ----history----
+  pis <- vector("list", reps)
+  betas <- vector("list", reps)
+  sigmas <- vector("list", reps)
+  z_list <- vector("list", reps)
+  logliks <- numeric(reps)
+  bics<- numeric(reps)
 
-  # ----loop controls----
-  objective_fun_old <- 0
-  objective_fun_new <- 0
-  iter <- 1
-
-  # ----MM algorithm iterated until stopping criteria is met----
-  while (iter < max_iter){
+  for(k in 1:reps){
     if (family == "gaussian"){
+      pi <- init_parameters[[1]]
+      beta <- init_parameters[[2]]
+      sigma <- init_parameters[[3]]
+      gamma_mat <- init_parameters[[4]]
+    }
+    else if (family == "poisson"){
+      pi <- init_parameters[[1]]
+      beta <- init_parameters[[2]]
+      gamma_mat <- init_parameters[[3]]
+    }
+
+    # ----loop controls----
+    objective_fun_old <- 0
+    objective_fun_new <- 0
+    iter <- 1
+
+    # ----MM algorithm iterated until stopping criteria is met----
+    while (iter < max_iter){
       # ----Zig----
-      gamma_mat <- compute_gamma_FGMRM(x, y, pi, beta, sigma)
+      if (family == "gaussian"){
+        gamma_mat <- compute_gamma_FGMRM(x, y, pi, beta, sigma)
+      }
+      else if (family == "poisson"){
+        gamma_mat <- compute_gamma_FPMRM(x, y, pi, beta)
+      }
 
       # ----N (column sums of gamma_mat)----
-      N <- compute_N_FGMRM(gamma_mat)
+      N <- colSums(gamma_mat)
       if (any(is.na(N))){
         break
       }
 
       # ----if penalty is true, calculate V matrix for penalty----
       if (penalty) {
-        V <- compute_V_FGMRM(G, beta, alpha, pi)
+        V <- compute_V(G, beta, alpha, pi)
       }
 
       # ----UPDATE PI PARAMETER----
-      pi <- pi_update_FGMRM(n, gamma_mat)
+      pi <- pi_update(n, gamma_mat)
 
       # ----UPDATE BETA PARAMETER----
-      if (pi_penalty){
-        beta <- beta_update(x, y, gamma_mat, pi, sigma, V, lambda, penalty)
-      } else {
-        beta <- beta_update(x, y, gamma_mat, rep(1, G), sigma, V, lambda, penalty)
+      if (family == "gaussian"){
+        if (pi_penalty){
+          beta <- beta_update_FGMRM(x, y, gamma_mat, pi, sigma, V, lambda, penalty)
+        } else {
+          beta <- beta_update_FGMRM(x, y, gamma_mat, rep(1, G), sigma, V, lambda, penalty)
+        }
+      }
+      else if (family == "poisson"){
+        beta <- beta_update_FPMRM(x, y, gamma_mat, beta, V, lambda, penalty)
       }
 
       if (penalty){
         beta <- ifelse(abs(beta) < 1e-10, 1e-10, beta)
       }
 
-      # ----UPDATE SIGMA PARAMETER----
-      if (common_sigma) {
-        # pooled variance: (1/n) * sum_{n,g} tau_{ng} * residual^2
-        y_ik <- x %*% t(beta)                   # n x G fitted values
-        resid2 <- (matrix(y, nrow = n, ncol = G) - y_ik)^2
-        num <- sum(gamma_mat * resid2)
-        sigma <- rep(sqrt(num / n), G)                  # store sigma as sd
-      } else if (sigma_penalty) {
-        q1 <- quantile(y, 0.25)
-        q3 <- quantile(y, 0.75)
-        iqr_var <- var(y[y >= q1 & y <= q3])
-        sigma <- sigma_update_pen(x, y, iqr_var = iqr_var, n = n, gamma_mat, beta, N)
-      } else {
-        sigma <- sigma_update(x, y, gamma_mat, beta, N)
+      if (family == "gaussian"){
+        # ----UPDATE SIGMA PARAMETER----
+        if (common_sigma) {
+          # ----pooled variance: (1/n) * sum_{n,g} tau_{ng} * residual^2----
+          y_ik <- x %*% t(beta)
+          resid2 <- (matrix(y, nrow = n, ncol = G) - y_ik)^2
+          num <- sum(gamma_mat * resid2)
+          sigma <- rep(sqrt(num / n), G)
+        } else if (sigma_penalty) {
+          q1 <- quantile(y, 0.25)
+          q3 <- quantile(y, 0.75)
+          iqr_var <- var(y[y >= q1 & y <= q3])
+          sigma <- sigma_update_pen(x, y, iqr_var = iqr_var, n = n, gamma_mat, beta, N)
+        } else {
+          sigma <- sigma_update(x, y, gamma_mat, beta, N)
+        }
       }
 
       # ----LOG LIKELIHOOD----
-      ll <- log_likelihood_FGMRM(x, y, pi, beta, sigma)
+      if (family == "gaussian"){
+        ll <- log_likelihood_FGMRM(x, y, pi, beta, sigma)
+      }
+      else if (family == "poisson"){
+        ll <- log_likelihood_FPMRM(x, y, pi, beta)
+      }
 
       # ---- SGL PENALTY----
       if (penalty){
-        if (pi_penalty){
-          pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi, G)
-        } else {
-          pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi = rep(1, G), G)
+        if (family == "gaussian"){
+          if (pi_penalty){
+            pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi, G)
+          } else {
+            pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi = rep(1, G), G)
+          }
         }
-
+        else if (family == "poisson"){
+          pen <- sgl_penalty_FPMRM(lambda, alpha, beta, G)
+        }
       } else {
         pen <- 0
       }
 
-      if(common_sigma || !sigma_penalty){
-        pen_var <- 0
-      } else {
-        # ---- Variance Penalty ----
-        pen_var <- sigma_penalty_FGMRM(sigma, iqr_var, a_n = 1/n)
+      if (family == "gaussian"){
+        if(common_sigma || !sigma_penalty){
+          pen_var <- 0
+        } else {
+          # ----Variance Penalty----
+          pen_var <- sigma_penalty_FGMRM(sigma, iqr_var, a_n = 1/n)
+        }
       }
 
       # ----OBJECTIVE FUNCTION----
       objective_fun_old <- objective_fun_new
-      objective_fun_new <- objective_function_FGMRM(ll, pen + pen_var)
+      if (family == "gaussian"){
+        objective_fun_new <- objective_function_FGMRM(ll, pen + pen_var)
+      }
+      else if (family == "poisson"){
+        objective_fun_new <- objective_function_FPMRM(ll, pen, n)
+      }
+
+      if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol){
+        break
+      }
+
+      iter <- iter + 1
     }
 
-    if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol){
-      break
+    if (is.na(objective_fun_new) || is.na(objective_fun_old) || any(is.na(N))){
+      pis[[k]] <- betas[[k]] <- sigmas[[k]] <- logliks[k] <- bics[k] <- NA
     }
+    else{
+      # ----compute bic----
+      if (family == "gaussian"){
+        active_betas <- sum(abs(beta) != 1.0e-10)
+        num_params <- active_betas + (if (common_sigma) 1 else G) + (G - 1)
+        bics[k] <-  (-2 * ll) + (num_params * log(n))
+      }
+      else if (family == "poisson"){
+        if(penalty){
+          active_betas_per_component <- numeric(G)
+          total_active_betas <- 0
 
-    iter <- iter + 1
+          for(g in 1:G) {
+            # ----Count non-zero covariates in component g (D_g)----
+            active_betas_per_component[g] <- sum(abs(beta[g, -1]) > 1e-10)
+            total_active_betas <- total_active_betas + active_betas_per_component[g]
+          }
+
+          # ----Determine j: number of covariates selected by group lasso----
+          # ----A covariate is selected if it's active in ANY component----
+          covariates_selected <- logical(p)
+          for(j_covar in 1:p) {
+            # ----Check if covariate j_covar is active in any component----
+            # ----+1 for intercept----
+            covariates_selected[j_covar] <- any(abs(beta[, j_covar + 1]) > 1e-10)
+          }
+
+          # ----Total number of selected covariates----
+          j_group_lasso <- sum(covariates_selected)
+
+          gamma <- 1.0
+          p_total <- p
+
+          # ----Calculate the double sum----
+          total_combinatorial_sum <- 0
+          if(j_group_lasso > 0) {
+            num_ways_to_choose_j <- choose(p_total, j_group_lasso)
+            for(g in 1:G) {
+              D_g <- active_betas_per_component[g]
+              if(D_g <= G && D_g <= p_total) {
+                total_combinatorial_sum <- total_combinatorial_sum + choose(G, D_g)
+              }
+            }
+          }
+
+          # ----EBIC penalty: 2* gamma * log(total_combinatorial_sum)----
+          if(total_combinatorial_sum > 0) {
+            ebic_penalty <- 2 * gamma * log(num_ways_to_choose_j * total_combinatorial_sum)
+          } else {
+            ebic_penalty <- 0
+          }
+
+          # ----Total parameters: active betas + intercepts + mixing proportions----
+          total_params <- total_active_betas + G + (G - 1)
+
+          # ----Final EBIC----
+          bics[k] <- (-2 * ll) + (total_params * log(n)) + ebic_penalty
+        }
+        else {
+          num_params <- G * (p + 1) + (G - 1)
+          bics[k] <- (-2 * ll) + (num_params * log(n))
+        }
+      }
+
+      pis[[k]] <- pi
+      betas[[k]] <- beta
+      if (family == "gaussian"){
+        sigmas[[k]] <- sigma
+      }
+      z_list[[k]] <- gamma_mat
+      logliks[k] <- ll
+    }
   }
 
-  # ----check for error----
-  if (is.na(objective_fun_new) || is.na(objective_fun_old) || any(is.na(N))){
+  if (!all(is.na(bics))){
+    # ----get run that minimized the selection criteria----
+
+    valid_indices <- which(!is.na(bics) & !sapply(betas, is.null))
+
+    if(length(valid_indices) == 0) {
+      if (family == "gaussian"){
+        return(list(bic = NA, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
+                    z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
+                    lambda = NA))
+      }
+      else if (family == "poisson"){
+        return(list(bic = NA, loglik = NA, beta = NA, pi = NA, z = NA,
+                    z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
+                    lambda = NA))
+      }
+    }
+
+    # ----Find minimum among valid entries only----
+    valid_bics <- bics[valid_indices]
+    min_valid_idx <- which.min(valid_bics)
+    min_index <- valid_indices[min_valid_idx]
+
+    # ----expected predicted y and mean squared error----
+    y_ik <- x %*% t(betas[[min_index]])
+    if (family == "gaussian"){
+      y_hat <- rowSums(z_list[[min_index]] * y_ik)
+    }
+    else if (family == "poisson"){
+      y_hat <- rowSums(z_list[[min_index]] * exp(y_ik))
+    }
+    mse <- mean((y_hat - y)^2)
+
+    # ----initialize hard version of z_mat----
+    z_mat_hard <- matrix(nrow = nrow(z_list[[min_index]]),
+                         ncol = ncol(z_list[[min_index]]))
+    for (i in 1:nrow(z_list[[min_index]])){
+      max <- max(z_list[[min_index]][i,])
+      for(j in 1:ncol(z_list[[min_index]])){
+        if(max == z_list[[min_index]][i,j]){
+          z_mat_hard[i,j] = 1
+        }else {
+          z_mat_hard[i, j] = 0
+        }
+      }
+    }
+
+    # ----return parameters----
+    if (family == "gaussian"){
+      return(list(bic = bics[min_index], loglik = logliks[min_index],
+                  beta = betas[[min_index]], pi = pis[[min_index]], sigma = sigmas[[min_index]],
+                  z = z_list[[min_index]], z_hard = z_mat_hard, y_hat = y_hat, mse = mse,
+                  alpha = alpha, lambda = lambda))
+    }
+    else if (family == "poisson"){
+      return(list(bic = bics[min_index], loglik = logliks[min_index],
+                  beta = betas[[min_index]], pi = pis[[min_index]],
+                  z = z_list[[min_index]], z_hard = z_mat_hard, y_hat = y_hat, mse = mse,
+                  alpha = alpha, lambda = lambda))
+    }
+  }
+  else{
+    # ----if all stopping criteria are NA, return NA for each parameter----
     if (family == "gaussian"){
       return(list(bic = NA, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
                   z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
                   lambda = NA))
     }
-  }
-
-  # ----compute bic----
-  if (family == "gaussian"){
-    active_betas <- sum(abs(beta) != 1.0e-10)
-    num_params <- active_betas + (if (common_sigma) 1 else G) + (G - 1)
-    bic <-  (-2 * ll) + (num_params * log(n))
-  }
-
-  # --- compute ebic ---
-  gamma = 0.5
-  beta_slopes <- beta[, -1, drop = FALSE]         # G x p
-  if (ncol(beta_slopes) == 0) {
-    # no covariates beyond intercept
-    q  <- 0
-    lj <- integer(0)
-    ebic_extra <- 0
-  } else {
-    # l_j = # nonzero component-specific slopes for covariate j
-    lj <- colSums(abs(beta_slopes) > 1e-10) # length p
-    q  <- sum(lj > 0)
-
-    # log combinatorics: log(choose(p, q)) + sum_j log(choose(G, l_j))
-    # lchoose handles l_j=0 (returns 0)
-    ebic_extra <- 2 * gamma * (lchoose(ncol(beta_slopes), q) + sum(lchoose(G, lj)))
-  }
-  ebic <- (-2 * ll) + num_params * log(n) + ebic_extra
-
-  # ----expected predicted y and mean squared error----
-  y_ik <- x %*% t(beta)
-  y_hat <- rowSums(gamma_mat * y_ik)
-  mse <- mean((y_hat - y)^2)
-
-  # ----calculate hard version of gamma_mat----
-  gamma_mat_hard <- matrix(nrow = nrow(gamma_mat), ncol = ncol(gamma_mat))
-  for (i in 1:nrow(gamma_mat)){
-    max <- max(gamma_mat[i,])
-    for(j in 1:ncol(gamma_mat)){
-      if(max == gamma_mat[i,j]){
-        gamma_mat_hard[i,j] = 1
-      }else {
-        gamma_mat_hard[i, j] = 0
-      }
+    else if (family == "poisson"){
+      return(list(bic = NA, loglik = NA, beta = NA, pi = NA, z = NA,
+                  z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
+                  lambda = NA))
     }
-  }
-
-  # ----mean squared error fitted response----
-  y_hat_hard <- rowSums(gamma_mat * y_ik)
-  mse_fitted_response <- mean((y_hat_hard - y)^2)
-
-  # ----return parameters----
-  if (family == "gaussian"){
-    return(list(bic = bic, loglik = ll, beta = beta, pi = pi, sigma = sigma,
-                z = gamma_mat, z_hard = gamma_mat_hard, y_hat = y_hat, mse = mse,
-                mse_fitted = mse_fitted_response, alpha = alpha, lambda = lambda))
   }
 }

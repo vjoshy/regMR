@@ -8,8 +8,8 @@
 \method{summary}{FGMRM}(object, ...)
 }
 \arguments{
-\item{object}{An object of class "FGMRM", the result of calling FGMRM() or
-MM_Grid_FGMRM().}
+\item{object}{An object of class "FGMRM", the result of calling FMRM() or
+MM_Grid() with family = gaussian().}
 
 \item{...}{Additional arguments for summary (currently unused).}
 }
@@ -35,12 +35,12 @@ rho = 0.2  # correlation
 
 # ----True parameters for 3 clusters----
 betas <- matrix(c(
- 1,  2, -1,  0.5, 0, 0, 0,  # component 1
- 5, -2,  1,  0, 0, 0, 0,  # component 2
- -3, 0,  2, 0, 0, 0, 0     # component 3
-), nrow = G, byrow = TRUE) / 2
+  1,  2, -1,  0.5, 0, 0, 0,  # component 1
+  5, -2,  1,  0, 0, 0, 0,  # component 2
+  -3, 0,  2, 0, 0, 0, 0     # component 3
+), nrow = G, byrow = TRUE)
 pis <- c(0.4, 0.4, 0.2)
-sigmas <- c(0.5, 0.4, 0.3)
+sigmas <- c(3, 1.5, 1)/2
 
 # ----Generate correlation matrix----
 cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
@@ -59,8 +59,7 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
-# ----Fit model----
-mod <- FGMRM(x = X, y = y, G = 6, verbose = FALSE)
+mod <- FMRM(x = X, y = y, G = 6, family = gaussian(), verbose = FALSE)
 
 # ----Display summary----
 summary(mod)
