@@ -193,7 +193,7 @@ MM_Grid <- function(g,
       pi_g <- vec/sum(vec)
       beta_g <- matrix(stats::rnorm((p + 1) * g), ncol = p + 1, nrow = g)
       sigma_g <- abs(stats::rnorm(g, mean = stats::sd(y), sd = stats::sd(y)/2))
-      gamma_g <- compute_gamma_FGMRM(x, y, pi_g, beta_g, sigma_g)
+      gamma_g <- compute_gamma(x, y, family, pi_g, beta_g, sigma = sigma_g)
       params_g <- list(pi_g, beta_g, sigma_g, gamma_g)
 
       init_mod <- MM(x, y, g, family, tol, max_iter, 10, 0, 0, params_g, 0, verbose, FALSE)

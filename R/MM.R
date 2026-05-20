@@ -216,6 +216,9 @@ MM <- function(x,
       pi <- init_parameters[[1]]
       beta <- init_parameters[[2]]
       gamma_mat <- init_parameters[[3]]
+
+      # ----placeholders----
+      sigma <- 0
     }
 
     # ----loop controls----
@@ -226,12 +229,7 @@ MM <- function(x,
     # ----MM algorithm iterated until stopping criteria is met----
     while (iter < max_iter){
       # ----Zig----
-      if (family == "gaussian"){
-        gamma_mat <- compute_gamma_FGMRM(x, y, pi, beta, sigma)
-      }
-      else if (family == "poisson"){
-        gamma_mat <- compute_gamma_FPMRM(x, y, pi, beta)
-      }
+      gamma_mat <- compute_gamma(x, y, family, pi, beta, sigma = sigma)
 
       # ----N (column sums of gamma_mat)----
       N <- colSums(gamma_mat)
