@@ -96,20 +96,6 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// sgl_penalty_FPMRM
-double sgl_penalty_FPMRM(double lambda, double alpha, arma::mat beta, int G);
-RcppExport SEXP _regMR_sgl_penalty_FPMRM(SEXP lambdaSEXP, SEXP alphaSEXP, SEXP betaSEXP, SEXP GSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< double >::type alpha(alphaSEXP);
-    Rcpp::traits::input_parameter< arma::mat >::type beta(betaSEXP);
-    Rcpp::traits::input_parameter< int >::type G(GSEXP);
-    rcpp_result_gen = Rcpp::wrap(sgl_penalty_FPMRM(lambda, alpha, beta, G));
-    return rcpp_result_gen;
-END_RCPP
-}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_regMR_beta_update_FGMRM", (DL_FUNC) &_regMR_beta_update_FGMRM, 8},
@@ -117,7 +103,6 @@ static const R_CallMethodDef CallEntries[] = {
     {"_regMR_sigma_update_pen", (DL_FUNC) &_regMR_sigma_update_pen, 7},
     {"_regMR_lambda_max_compute_FGMRM", (DL_FUNC) &_regMR_lambda_max_compute_FGMRM, 5},
     {"_regMR_beta_update_FPMRM", (DL_FUNC) &_regMR_beta_update_FPMRM, 10},
-    {"_regMR_sgl_penalty_FPMRM", (DL_FUNC) &_regMR_sgl_penalty_FPMRM, 4},
     {NULL, NULL, 0}
 };
 

@@ -1,7 +1,7 @@
 #' Sparse Group Lasso Penalty
 #'
 #' Compute sparse group lasso (sgl) penalty for variable selection in finite
-#' Gaussian mixture regression models. This function is used during model
+#' mixture regression models. This function is used during model
 #' estimation, specifically within iterations of the MM algorithm.
 #'
 #' @param lambda A non-negative numeric value (tuning parameter) specifying the
@@ -13,13 +13,15 @@
 #' numeric matrix of size G x (p + 1), where the number of rows is equal to the
 #' number of mixture components G, and the number of columns is equal to the
 #' number of covariates p + 1 (for the intercept term).
+#' @param pi Mixing proportions for each component. Either a numeric vector, or
+#' something coercible to one.
 #' @param G An integer greater than or equal to one representing the
-#' number of mixture components in a finite Gaussian mixture regression model.
+#' number of mixture components in a finite mixture regression model.
 #'
 #' @returns A numeric scalar representing the sgl penalty for the given model.
 #'
 #' @keywords internal
-sgl_penalty_FGMRM <- function(lambda, alpha, beta, pi, G){
+sgl_penalty <- function(lambda, alpha, beta, pi, G){
 
   beta_noint <- beta[, -1, drop = FALSE]  # ----G x p----
 

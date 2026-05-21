@@ -282,39 +282,32 @@ MM <- function(x,
       # ----LOG LIKELIHOOD----
       ll <- log_likelihood(x, y, family, pi, beta, sigma = sigma)
 
-      # ---- SGL PENALTY----
+      # ----SGL PENALTY----
       if (penalty){
-        if (family == "gaussian"){
-          if (pi_penalty){
-            pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi, G)
-          } else {
-            pen <- sgl_penalty_FGMRM(lambda, alpha, beta, pi = rep(1, G), G)
-          }
+        if (pi_penalty){
+          pen <- sgl_penalty(lambda, alpha, beta, pi, G)
+        } else {
+          pen <- sgl_penalty(lambda, alpha, beta, pi = rep(1, G), G)
         }
-        else if (family == "poisson"){
-          pen <- sgl_penalty_FPMRM(lambda, alpha, beta, G)
-        }
-      } else {
+      }
+      else {
         pen <- 0
       }
 
+      # ----Variance Penalty----
       if (family == "gaussian"){
         if(common_sigma || !sigma_penalty){
           pen_var <- 0
         } else {
-          # ----Variance Penalty----
           pen_var <- sigma_penalty_FGMRM(sigma, iqr_var, a_n = 1/n)
         }
+
+        pen <- pen + pen_var
       }
 
       # ----OBJECTIVE FUNCTION----
       objective_fun_old <- objective_fun_new
-      if (family == "gaussian"){
-        objective_fun_new <- objective_function_FGMRM(ll, pen + pen_var)
-      }
-      else if (family == "poisson"){
-        objective_fun_new <- objective_function_FPMRM(ll, pen, n)
-      }
+      objective_fun_new <- objective_function(family, ll, pen, n)
 
       if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol){
         break

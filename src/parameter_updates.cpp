@@ -208,26 +208,3 @@ arma::mat beta_update_FPMRM(arma::mat x, arma::vec y, arma::mat z_mat,
   return beta_new;
 }
 
-// [[Rcpp::export]]
-double sgl_penalty_FPMRM(double lambda, double alpha, arma::mat beta, int G) {
-
-  // Get beta with no intercept (remove first column)
-  arma::mat beta_noint = beta.cols(1, beta.n_cols - 1);
-
-  // L1 penalty term: sum(colSums(abs(beta[, -1])))
-  // This is sum of all absolute values of non-intercept coefficients
-  double l1_term = arma::accu(arma::abs(beta_noint));
-
-  // L2 penalty term: sum(sqrt(G) * sqrt(colSums(beta[, -1]^2)))
-  // First get column sums of squared coefficients
-  arma::rowvec col_sums_sq = arma::sum(arma::square(beta_noint), 0);
-
-  // Then sqrt each column sum and multiply by sqrt(G), then sum
-  double l2_term = std::sqrt(G) * arma::accu(arma::sqrt(col_sums_sq));
-
-  // Combine terms
-  double pen = lambda * ((alpha * l1_term) + ((1.0 - alpha) * l2_term));
-
-  return pen;
-}
-

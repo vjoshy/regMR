@@ -103,7 +103,7 @@
 MM_Grid <- function(g,
                     x,
                     y,
-                    family = c("gaussian", "poisson"),
+                    family = c("gaussian", "poisson", "binomial", "gamma"),
                     tol = 10e-04,
                     max_iter = 500,
                     reps = 1,
@@ -158,7 +158,8 @@ MM_Grid <- function(g,
   } else {
     family <- match.arg(family)
   }
-  if (family != "gaussian" && family != "poisson"){
+  if (family != "gaussian" && family != "poisson" &&
+      family != "binomial" && family != "gamma"){
     stop("Invalid distribution, currently not supported\n")
   }
 
@@ -222,7 +223,6 @@ MM_Grid <- function(g,
                                  init_sigma[[g]], init_gamma[[g]])
   }
   else if (family == "poisson"){
-    # ----initialize default values----
     init_mod <- NULL
     init_pi <- list()
     init_pi[[g]] <- rep(1/g, g)
@@ -267,6 +267,12 @@ MM_Grid <- function(g,
     init_parameters[[g]] <- list(init_pi[[g]], init_beta[[g]],
                                  init_z[[g]])
   }
+  else if (family == "binomial"){
+
+  }
+  else if (family == "gamma"){
+
+  }
 
   if(n >= p){
     lambda_factor <- 0.001
@@ -294,6 +300,12 @@ MM_Grid <- function(g,
       else if (family == "poisson"){
         lambda_max <- lambda_max_compute_FPMRM(x, y, init_parameters[[g]][[3]],
                                                init_parameters[[g]][[2]])
+      }
+      else if (family == "binomial"){
+
+      }
+      else if (family == "gamma"){
+
       }
 
 
@@ -370,6 +382,12 @@ MM_Grid <- function(g,
           else if (family == "poisson"){
             init_parameters[[g]][[2]] <- parameters[[i]]$beta
             init_parameters[[g]][[3]] <- parameters[[i]]$z
+          }
+          else if (family == "binomial"){
+
+          }
+          else if (family == "gamma"){
+
           }
         }
       }
@@ -453,6 +471,12 @@ MM_Grid <- function(g,
     else if (family == "poisson"){
       class(results) <- "FPMRM"
     }
+    if (family == "binomial"){
+      class(results) <- "FBMRM"
+    }
+    else if (family == "gamma"){
+      class(results) <- "FGamMRM"
+    }
 
     # ----return parameters, compartment number----
     return(results)
@@ -510,6 +534,12 @@ MM_Grid <- function(g,
     }
     else if (family == "poisson"){
       class(results) <- "FPMRM"
+    }
+    if (family == "binomial"){
+      class(results) <- "FBMRM"
+    }
+    else if (family == "gamma"){
+      class(results) <- "FGamMRM"
     }
 
     # ----return parameters, compartment number----

@@ -21,7 +21,3 @@ beta_update_FPMRM <- function(x, y, z_mat, beta_old, V, lambda, penalty = FALSE,
     .Call(`_regMR_beta_update_FPMRM`, x, y, z_mat, beta_old, V, lambda, penalty, max_iter, tol, verbose)
 }
 
-sgl_penalty_FPMRM <- function(lambda, alpha, beta, G) {
-    .Call(`_regMR_sgl_penalty_FPMRM`, lambda, alpha, beta, G)
-}
-

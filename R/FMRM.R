@@ -106,7 +106,7 @@
 FMRM <- function(x,
                  y,
                  G,
-                 family = c("gaussian", "poisson"),
+                 family = c("gaussian", "poisson", "binomial", "gamma"),
                  tol = 10e-04,
                  max_iter = 500,
                  reps = 1,
@@ -163,7 +163,8 @@ FMRM <- function(x,
   } else {
     family <- match.arg(family)
   }
-  if (family != "gaussian" && family != "poisson"){
+  if (family != "gaussian" && family != "poisson" &&
+      family != "binomial" && family != "gamma"){
     stop("Invalid distribution, currently not supported\n")
   }
 
@@ -252,6 +253,12 @@ FMRM <- function(x,
       else if (family == "poisson"){
         class(results) <- "FPMRM"
       }
+      if (family == "binomial"){
+        class(results) <- "FBMRM"
+      }
+      else if (family == "gamma"){
+        class(results) <- "FGamMRM"
+      }
 
       return(results)
     }
@@ -268,6 +275,12 @@ FMRM <- function(x,
       }
       else if (family == "poisson"){
         class(results) <- "FPMRM"
+      }
+      if (family == "binomial"){
+        class(results) <- "FBMRM"
+      }
+      else if (family == "gamma"){
+        class(results) <- "FGamMRM"
       }
 
       return(results)
@@ -362,6 +375,12 @@ FMRM <- function(x,
     else if (family == "poisson"){
       class(results) <- "FPMRM"
     }
+    if (family == "binomial"){
+      class(results) <- "FBMRM"
+    }
+    else if (family == "gamma"){
+      class(results) <- "FGamMRM"
+    }
 
     return(results)
   }
@@ -378,6 +397,12 @@ FMRM <- function(x,
     }
     else if (family == "poisson"){
       class(results) <- "FPMRM"
+    }
+    if (family == "binomial"){
+      class(results) <- "FBMRM"
+    }
+    else if (family == "gamma"){
+      class(results) <- "FGamMRM"
     }
 
     return(results)
