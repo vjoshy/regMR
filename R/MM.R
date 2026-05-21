@@ -280,12 +280,7 @@ MM <- function(x,
       }
 
       # ----LOG LIKELIHOOD----
-      if (family == "gaussian"){
-        ll <- log_likelihood_FGMRM(x, y, pi, beta, sigma)
-      }
-      else if (family == "poisson"){
-        ll <- log_likelihood_FPMRM(x, y, pi, beta)
-      }
+      ll <- log_likelihood(x, y, family, pi, beta, sigma = sigma)
 
       # ---- SGL PENALTY----
       if (penalty){

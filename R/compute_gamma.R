@@ -18,7 +18,7 @@
 #' number of mixture components G, and the number of columns is equal to the
 #' number of covariates p + 1.
 #' @param ... Additional arguments for computing the group responsibilities
-#' depending on the inputted family. add here once finished.
+#' depending on the inputted family.
 #'
 #' @returns A numeric matrix of size n x G, where the number of rows is equal to
 #' the number of observations n, and the number of columns is equal to the
@@ -31,7 +31,6 @@ compute_gamma <- function(x, y, family, pi, beta, ...){
   y <- as.vector(y)
   n <- length(y)
   G <- nrow(beta)
-  gamma_mat <- matrix(0, n, G)
 
   # ----calculate B_{g0} + x_{i1}B_{g1} + ... + x_{ip}B_{gp} for all i and g----
   linear_pred <- x %*% t(beta)
@@ -66,8 +65,7 @@ compute_gamma <- function(x, y, family, pi, beta, ...){
   }
   else if (family == "gamma"){
     nu <- args$nu
-    # mu <- -1/linear_pred
-    mu <- exp(linear_pred)
+    mu <- -1/linear_pred
 
     # ----derive rates----
     rate_matrix <- t(nu/t(mu))

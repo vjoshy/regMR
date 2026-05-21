@@ -26,7 +26,7 @@ number of mixture components G, and the number of columns is equal to the
 number of covariates p + 1.}
 
 \item{...}{Additional arguments for computing the group responsibilities
-depending on the inputted family. add here once finished.}
+depending on the inputted family.}
 }
 \value{
 A numeric matrix of size n x G, where the number of rows is equal to
