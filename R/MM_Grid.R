@@ -4,7 +4,7 @@
 #' Applies the Majorization-Minimization Algorithm to the inputted data over all
 #' lambda-alpha pairs given the specified parameters and distribution to estimate a finite
 #' mixture regression model. The function chooses the model with the
-#' lowest bic. It can be ran sequentially or in parallel. This function is used
+#' lowest information criteria (as specified). It can be ran sequentially or in parallel. This function is used
 #' for model estimation.
 #'
 #' @param g An integer greater than or equal to one representing the
@@ -49,6 +49,7 @@
 #' lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.
 #' @param n_random_la A non-negative integer (default value 100) specifying the
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
+#' @param information_criteria description
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
 #' @param common_sigma description
@@ -58,7 +59,7 @@
 #' @returns An object of class FGMRM containing the parameters of the estimated
 #' finite mixture regression model (parameters depend on inputted family),
 #' number of mixture components, parameters of models with the same alpha, and a numeric
-#' matrix containing the alpha, lambda, and bic values of all estimated models
+#' matrix containing the alpha, lambda, and ic values of all estimated models
 #' for plotting purposes.
 #' @importFrom mclust Mclust mclustBIC
 #' @export
@@ -115,6 +116,7 @@ MM_Grid <- function(g,
                     penalty = TRUE,
                     random = FALSE,
                     n_random_la = 100,
+                    information_criteria = c("bic", "ebic"),
                     parallel = TRUE,
                     common_sigma = FALSE,
                     sigma_penalty = TRUE,
@@ -163,6 +165,8 @@ MM_Grid <- function(g,
     stop("Invalid distribution, currently not supported\n")
   }
 
+  information_criteria <- match.arg(information_criteria)
+
   y <- as.matrix(y)
 
   if (verbose) cat("\n-- g =", g, "--\n")
@@ -174,7 +178,7 @@ MM_Grid <- function(g,
   n <- nrow(x)
 
   # ----vector for lambda-alpha selection process----
-  bic <- numeric(n_lambda * length(alpha))
+  ic <- numeric(n_lambda * length(alpha))
   parameters <- list()
   parameters_same_alpha <- list()
   init_parameters <- list()
@@ -197,7 +201,7 @@ MM_Grid <- function(g,
       gamma_g <- compute_gamma(x, y, family, pi_g, beta_g, sigma = sigma_g)
       params_g <- list(pi_g, beta_g, sigma_g, gamma_g)
 
-      init_mod <- MM(x, y, g, family, tol, max_iter, 10, 0, 0, params_g, 0, verbose, FALSE)
+      init_mod <- MM(x, y, g, family, tol, max_iter, 10, 0, 0, params_g, 0, verbose, FALSE, information_criteria)
 
       init_pi[[g]] <- init_mod$pi
 
@@ -251,10 +255,10 @@ MM_Grid <- function(g,
 
     # ----call MM once with lambda, alpha = 0----
     noreg_chosen_parameters <- MM(x, y, g, family, tol, max_iter, 10, 0, 0,
-                                  init_parameters[[g]], verbose, penalty)
+                                  init_parameters[[g]], verbose, penalty, information_criteria)
 
     # ----Check if unregularized model succeeded----
-    if (is.na(noreg_chosen_parameters$bic)){
+    if (is.na(noreg_chosen_parameters$ic)){
       # ----Fallback to original initialization if unregularized model fails----
       if (verbose) cat("Unregularized model failed, using original initialization\n")
     } else {
@@ -308,7 +312,6 @@ MM_Grid <- function(g,
 
       }
 
-
       # ----calculate lambda_min based on lambda_max for g, log the value----
       lambda_min <- lambda_factor * lambda_max
 
@@ -351,7 +354,7 @@ MM_Grid <- function(g,
         param_grid,
         function(alpha, lambda) {
           MM(x, y, g, family, tol, max_iter, reps, lambda, alpha, init_parameters[[g]],
-             verbose, penalty, common_sigma, sigma_penalty, pi_penalty)
+             verbose, penalty, information_criteria, common_sigma, sigma_penalty, pi_penalty)
         },
         .options = furrr::furrr_options(
           seed = TRUE,
@@ -367,13 +370,13 @@ MM_Grid <- function(g,
       for (i in 1:nrow(param_grid)){
         parameters[[i]] <- MM(x, y, g, family, tol, max_iter, reps, param_grid[i, 1],
                               param_grid[i, 2], init_parameters[[g]],
-                              verbose, penalty, common_sigma, sigma_penalty,
+                              verbose, penalty, information_criteria, common_sigma, sigma_penalty,
                               pi_penalty)
 
         # ---- Warm start: use solution from previous lambda ----
         if (i < nrow(param_grid) &&
             param_grid[i, 2] == param_grid[i+1, 2] &&
-            !is.na(parameters[[i]]$bic)){
+            !is.na(parameters[[i]]$ic)){
           if (family == "gaussian"){
             init_parameters[[g]][[2]] <- parameters[[i]]$beta
             init_parameters[[g]][[3]] <- parameters[[i]]$sigma
@@ -394,11 +397,11 @@ MM_Grid <- function(g,
     }
 
     # ----extract selection criteria----
-    bic <- sapply(parameters, function(p) p$bic)
+    ic <- sapply(parameters, function(p) p$ic)
 
-    if (!all(is.na(bic))){
-      # ----find model that minimizes bic----
-      selected_model <- which.min(bic)
+    if (!all(is.na(ic))){
+      # ----find model that minimizes information criteria----
+      selected_model <- which.min(ic)
 
       # ----extract parameters----
       chosen_parameters <- parameters[[selected_model]]
@@ -410,19 +413,26 @@ MM_Grid <- function(g,
                           function(p) isTRUE(all.equal(p$alpha, chosen_alpha))))
       parameters_same_alpha <- parameters[idx]
 
-      # ----get alpha, lambda, and bic for all models for plotting purposes----
+      # ----get alpha, lambda, and ic for all models for plotting purposes----
       alpha_vec <- sapply(parameters, function(p) p$alpha)
       lambda_vec <- sapply(parameters, function(p) p$lambda)
-      bic_vec <- sapply(parameters, function(p) p$bic)
-      alpha_lambda_bic <- cbind(alpha_vec, lambda_vec, bic_vec)
+      ic_vec <- sapply(parameters, function(p) p$ic)
+      alpha_lambda_ic <- cbind(alpha_vec, lambda_vec, ic_vec)
 
       # ----output progress----
       if (verbose){
         cat(strrep("=", getOption("width")), "\n\n")
         cat(" selected model for g =", g, "\n\n")
-        cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
-            round(chosen_parameters$alpha, 2), "|| BIC =",
-            round(chosen_parameters$bic, 2), "\n\n")
+        if (information_criteria == "bic"){
+          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
+              round(chosen_parameters$alpha, 2), "|| BIC =",
+              round(chosen_parameters$ic, 2), "\n\n")
+        }
+        else if (information_criteria == "ebic"){
+          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
+              round(chosen_parameters$alpha, 2), "|| EBIC =",
+              round(chosen_parameters$ic, 2), "\n\n")
+        }
         idx <- seq(1, g, length.out = g)
         cat(" Components")
         cat(paste(sprintf("%6.0f", idx), collapse = " "))
@@ -432,6 +442,11 @@ MM_Grid <- function(g,
         if (family == "gaussian"){
           cat("\n Sigma       ")
           cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
+                    collapse = " "))
+        }
+        else if (family == "gamma"){
+          cat("\n Nu (Shape)       ")
+          cat(paste(sprintf("%6.3f", chosen_parameters$nu),
                     collapse = " "))
         }
         cat("\n\n Beta (Regression Parameters)\n")
@@ -459,12 +474,12 @@ MM_Grid <- function(g,
       chosen_parameters$lambda_max <- lambda_max
       chosen_parameters$lambda_vector <- lambda[[g]]
       parameters_same_alpha <- NA
-      alpha_lambda_bic <- NA
+      alpha_lambda_ic <- NA
     }
 
     results <- list(parameters = chosen_parameters, g = g,
                     parameters_same_alpha = parameters_same_alpha,
-                    alpha_lambda_bic = alpha_lambda_bic)
+                    alpha_lambda_ic = alpha_lambda_ic)
     if (family == "gaussian"){
       class(results) <- "FGMRM"
     }
@@ -484,16 +499,24 @@ MM_Grid <- function(g,
   else{
     # ----if penalty is false, call MM once with lambda, alpha = 0----
     chosen_parameters <- MM(x, y, g, family, tol, max_iter, reps, 0, 0, init_parameters[[g]],
-                            verbose, penalty, sigma_penalty, pi_penalty)
+                            verbose, penalty, information_criteria, common_sigma,
+                            sigma_penalty, pi_penalty)
 
-    if (!is.na(chosen_parameters$bic)){
+    if (!is.na(chosen_parameters$ic)){
       # ----output progress----
       if (verbose){
         cat(strrep("=", getOption("width")), "\n\n")
         cat(" selected model for g =", g, "\n\n")
-        cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
-            round(chosen_parameters$alpha, 2), "|| BIC =",
-            round(chosen_parameters$bic, 2), "\n\n")
+        if (information_criteria == "bic"){
+          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
+              round(chosen_parameters$alpha, 2), "|| BIC =",
+              round(chosen_parameters$ic, 2), "\n\n")
+        }
+        else if (information_criteria == "ebic"){
+          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
+              round(chosen_parameters$alpha, 2), "|| EBIC =",
+              round(chosen_parameters$ic, 2), "\n\n")
+        }
         idx <- seq(1, g, length.out = g)
         cat(" Components")
         cat(paste(sprintf("%6.0f", idx), collapse = " "))
@@ -503,6 +526,11 @@ MM_Grid <- function(g,
         if (family == "gaussian"){
           cat("\n Sigma       ")
           cat(paste(sprintf("%6.3f", chosen_parameters$sigma),
+                    collapse = " "))
+        }
+        else if (family == "gamma"){
+          cat("\n Nu (Shape)       ")
+          cat(paste(sprintf("%6.3f", chosen_parameters$nu),
                     collapse = " "))
         }
         cat("\n\n Beta (Regression Parameters)\n")
@@ -528,7 +556,7 @@ MM_Grid <- function(g,
     chosen_parameters$lambda_vector <- NA
 
     results <- list(parameters = chosen_parameters, g = g,
-                    parameters_same_alpha = NA, alpha_lambda_bic = NA)
+                    parameters_same_alpha = NA, alpha_lambda_ic = NA)
     if (family == "gaussian"){
       class(results) <- "FGMRM"
     }

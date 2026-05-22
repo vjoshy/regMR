@@ -18,6 +18,7 @@ MM(
   init_parameters = NULL,
   verbose = TRUE,
   penalty = TRUE,
+  information_criteria = c("bic", "ebic"),
   common_sigma = FALSE,
   sigma_penalty = TRUE,
   pi_penalty = TRUE
@@ -65,6 +66,8 @@ function to print progress updates.}
 \item{penalty}{A logical value which, if true (default value), allows the
 function to apply the sgl penalty to the regression parameter
 updates and objective function within iterations of the MM algorithm.}
+
+\item{information_criteria}{description}
 
 \item{common_sigma}{description}
 

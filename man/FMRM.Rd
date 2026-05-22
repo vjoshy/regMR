@@ -8,7 +8,7 @@ FMRM(
   x,
   y,
   G,
-  family = c("gaussian", "poisson"),
+  family = c("gaussian", "poisson", "binomial", "gamma"),
   tol = 0.001,
   max_iter = 500,
   reps = 1,
@@ -20,6 +20,7 @@ FMRM(
   penalty = TRUE,
   random = FALSE,
   n_random_la = 100,
+  information_criteria = c("bic", "ebic"),
   automatic_stopping = FALSE,
   parallel = TRUE,
   common_sigma = FALSE,
@@ -85,8 +86,10 @@ lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.}
 \item{n_random_la}{A non-negative integer (default value 100) specifying the
 number of lambda-alpha pairs to be sampled when random is TRUE.}
 
+\item{information_criteria}{description}
+
 \item{automatic_stopping}{A logical value which, if true (false is the
-default value), allows the function to implement BIC automatic stopping on
+default value), allows the function to implement IC-based automatic stopping on
 the mixture components. When the condition for stopping is met, the function
 stops iterating over the group count.}
 
@@ -103,14 +106,15 @@ function to run parallel workers to increase computational speed.}
 An object of class FGMRM containing the parameters of the estimated
 finite mixture regression model (parameters depend on inputted family),
 number of mixture components, parameters of models with the same alpha, and a numeric
-matrix containing the alpha, lambda, and bic values of all estimated models
+matrix containing the alpha, lambda, and ic values of all estimated models
 for plotting purposes.
 }
 \description{
 Applies the Majorization-Minimization Algorithm to the inputted data over all
 group counts from 2 to G and all lambda-alpha pairs given the specified
 parameters and distribution to estimate a finite mixture regression model. The
-function chooses the model with the lowest bic. It can be ran sequentially or
+function chooses the model with the lowest information criteria (as specified).
+It can be ran sequentially or
 in parallel. This function is for model estimation.
 }
 \examples{

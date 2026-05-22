@@ -3,7 +3,8 @@
 #' Applies the Majorization-Minimization Algorithm to the inputted data over all
 #' group counts from 2 to G and all lambda-alpha pairs given the specified
 #' parameters and distribution to estimate a finite mixture regression model. The
-#' function chooses the model with the lowest bic. It can be ran sequentially or
+#' function chooses the model with the lowest information criteria (as specified).
+#' It can be ran sequentially or
 #' in parallel. This function is for model estimation.
 #'
 #' @param x Predictor/design matrix. A numeric matrix of size n x p where the
@@ -48,8 +49,9 @@
 #' lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.
 #' @param n_random_la A non-negative integer (default value 100) specifying the
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
+#' @param information_criteria description
 #' @param automatic_stopping A logical value which, if true (false is the
-#' default value), allows the function to implement BIC automatic stopping on
+#' default value), allows the function to implement IC-based automatic stopping on
 #' the mixture components. When the condition for stopping is met, the function
 #' stops iterating over the group count.
 #' @param parallel A logical value which, if true (default value), allows the
@@ -61,7 +63,7 @@
 #' @returns An object of class FGMRM containing the parameters of the estimated
 #' finite mixture regression model (parameters depend on inputted family),
 #' number of mixture components, parameters of models with the same alpha, and a numeric
-#' matrix containing the alpha, lambda, and bic values of all estimated models
+#' matrix containing the alpha, lambda, and ic values of all estimated models
 #' for plotting purposes.
 #' @importFrom mclust Mclust mclustBIC
 #' @export
@@ -118,6 +120,7 @@ FMRM <- function(x,
                  penalty = TRUE,
                  random = FALSE,
                  n_random_la = 100,
+                 information_criteria = c("bic", "ebic"),
                  automatic_stopping = FALSE,
                  parallel = TRUE,
                  common_sigma = FALSE,
@@ -168,13 +171,15 @@ FMRM <- function(x,
     stop("Invalid distribution, currently not supported\n")
   }
 
+  information_criteria <- match.arg(information_criteria)
+
   y <- as.matrix(y)
 
   # ----get covariates----
   p <- ncol(x)
 
   # ----vector for selection criteria tracking----
-  bic <- numeric(G)
+  ic <- numeric(G)
 
   # ----list for models----
   models <- list()
@@ -186,38 +191,47 @@ FMRM <- function(x,
     for (g in 2:G){
       models[[g]] <- MM_Grid(g, x, y, family, tol, max_iter, reps, lambda, lambda_max,
                                    n_lambda, alpha, verbose, penalty, random,
-                                   n_random_la, parallel, common_sigma,
+                                   n_random_la, information_criteria, parallel, common_sigma,
                                    sigma_penalty, pi_penalty)
 
       # ----get model selection criteria----
-      bic[g] <- models[[g]]$parameters$bic
+      ic[g] <- models[[g]]$parameters$ic
 
       # ----apply automatic stopping procedure----
-      running_bic <- -bic[2:g]/2
-      max_bic <- max(running_bic)
-      automatic_stopping_tracker[g] <- exp(running_bic[g - 1] - max_bic)/sum(exp(running_bic - max_bic))
+      running_ic <- -ic[2:g]/2
+      max_ic <- max(running_ic)
+      automatic_stopping_tracker[g] <- exp(running_ic[g - 1] - max_ic)/sum(exp(running_ic - max_ic))
       if (automatic_stopping_tracker[g] <= 1e-04){
         break
       }
     }
 
-    bic <- ifelse(bic == 0, NA, bic)
+    ic <- ifelse(ic == 0, NA, ic)
 
     # ----find compartment -> parameters which minimize model selection criteria
     # ----and return model----
-    if (!all(is.na(bic))){
-      selected_compartment <- which.min(bic)
+    if (!all(is.na(ic))){
+      selected_compartment <- which.min(ic)
       selected_parameters <- models[[selected_compartment]]$parameters
 
       if (verbose){
         cat(strrep("-", getOption("width")), "\n\n")
         cat(" overall model chosen ->\n\n")
         cat(" G =", selected_compartment, "\n\n")
-        cat(" lambda =", round(selected_parameters$lambda, 2),
-            "|| alpha =", selected_parameters$alpha,
-            "|| log-likelihood =", round(selected_parameters$loglik, 2),
-            "|| BIC =", round(selected_parameters$bic, 2),
-            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+        if (information_criteria == "bic"){
+          cat(" lambda =", round(selected_parameters$lambda, 2),
+              "|| alpha =", selected_parameters$alpha,
+              "|| log-likelihood =", round(selected_parameters$loglik, 2),
+              "|| BIC =", round(selected_parameters$ic, 2),
+              "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+        }
+        else if (information_criteria == "ebic"){
+          cat(" lambda =", round(selected_parameters$lambda, 2),
+              "|| alpha =", selected_parameters$alpha,
+              "|| log-likelihood =", round(selected_parameters$loglik, 2),
+              "|| EBIC =", round(selected_parameters$ic, 2),
+              "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+        }
         idx <- seq(1, selected_compartment, length.out = selected_compartment)
         cat(" Components")
         cat(paste(sprintf("%6.0f", idx), collapse = " "))
@@ -226,6 +240,11 @@ FMRM <- function(x,
         if (family == "gaussian"){
           cat("\n Sigma       ")
           cat(paste(sprintf("%6.3f", selected_parameters$sigma),
+                    collapse = " "))
+        }
+        else if (family == "gamma"){
+          cat("\n Nu (Shape)       ")
+          cat(paste(sprintf("%6.3f", selected_parameters$nu),
                     collapse = " "))
         }
         cat("\n\n Beta (Regression Parameters)\n")
@@ -246,7 +265,7 @@ FMRM <- function(x,
       results <- list(parameters = selected_parameters,
                       g = selected_compartment,
                       parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
-                      alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
+                      alpha_lambda_ic = models[[selected_compartment]]$alpha_lambda_ic)
       if (family == "gaussian"){
         class(results) <- "FGMRM"
       }
@@ -269,7 +288,7 @@ FMRM <- function(x,
       if (verbose) cat(strrep("-", getOption("width")), "\n")
 
       results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
-                      alpha_lambda_bic = NA)
+                      alpha_lambda_ic = NA)
       if (family == "gaussian"){
         class(results) <- "FGMRM"
       }
@@ -300,7 +319,9 @@ FMRM <- function(x,
                                   lambda_max = lambda_max, n_lambda = n_lambda,
                                   alpha = alpha, verbose = verbose,
                                   penalty = penalty, random = random,
-                                  n_random_la = n_random_la, common_sigma = common_sigma,
+                                  n_random_la = n_random_la,
+                                  information_criteria = information_criteria,
+                                  common_sigma = common_sigma,
                                   sigma_penalty = sigma_penalty, pi_penalty = pi_penalty,
                                   parallel = parallel, .progress = FALSE,
                                   .options = furrr::furrr_options(seed = TRUE))
@@ -314,6 +335,7 @@ FMRM <- function(x,
                            lambda_max = lambda_max, n_lambda = n_lambda,
                            alpha = alpha, verbose = verbose, penalty = penalty,
                            random = random, n_random_la = n_random_la,
+                           information_criteria = information_criteria,
                            sigma_penalty = sigma_penalty, pi_penalty = pi_penalty,
                            parallel = parallel, common_sigma = common_sigma)
 
@@ -321,12 +343,12 @@ FMRM <- function(x,
   }
 
   # ----get model selection criteria----
-  bic <- sapply(models, function(m) m$parameters$bic)
+  ic <- sapply(models, function(m) m$parameters$ic)
 
   # ----find compartment -> parameters which minimize model selection criteria--
   # ----and return model----
-  if (!all(is.na(bic))){
-    selected_compartment <- which.min(bic)
+  if (!all(is.na(ic))){
+    selected_compartment <- which.min(ic)
     selected_parameters <- models[[selected_compartment]]$parameters
     selected_compartment <- selected_compartment + 1
 
@@ -334,11 +356,20 @@ FMRM <- function(x,
       cat(strrep("-", getOption("width")), "\n\n")
       cat(" overall model chosen ->\n\n")
       cat(" G =", selected_compartment, "\n\n")
-      cat(" lambda =", round(selected_parameters$lambda, 2),
-          "|| alpha =", selected_parameters$alpha,
-          "|| log-likelihood =", round(selected_parameters$loglik, 2),
-          "|| BIC =", round(selected_parameters$bic, 2),
-          "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+      if (information_criteria == "bic"){
+        cat(" lambda =", round(selected_parameters$lambda, 2),
+            "|| alpha =", selected_parameters$alpha,
+            "|| log-likelihood =", round(selected_parameters$loglik, 2),
+            "|| BIC =", round(selected_parameters$ic, 2),
+            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+      }
+      else if (information_criteria == "ebic"){
+        cat(" lambda =", round(selected_parameters$lambda, 2),
+            "|| alpha =", selected_parameters$alpha,
+            "|| log-likelihood =", round(selected_parameters$loglik, 2),
+            "|| EBIC =", round(selected_parameters$ic, 2),
+            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
+      }
       idx <- seq(1, selected_compartment, length.out = selected_compartment)
       cat(" Components")
       cat(paste(sprintf("%6.0f", idx), collapse = " "))
@@ -347,6 +378,11 @@ FMRM <- function(x,
       if (family == "gaussian"){
         cat("\n Sigma       ")
         cat(paste(sprintf("%6.3f", selected_parameters$sigma),
+                  collapse = " "))
+      }
+      else if (family == "gamma"){
+        cat("\n Nu (Shape)       ")
+        cat(paste(sprintf("%6.3f", selected_parameters$nu),
                   collapse = " "))
       }
       cat("\n\n Beta (Regression Parameters)\n")
@@ -367,7 +403,7 @@ FMRM <- function(x,
     results <- list(parameters = selected_parameters,
                     g = selected_compartment,
                     parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
-                    alpha_lambda_bic = models[[selected_compartment]]$alpha_lambda_bic)
+                    alpha_lambda_ic = models[[selected_compartment]]$alpha_lambda_ic)
 
     if (family == "gaussian"){
       class(results) <- "FGMRM"
@@ -391,7 +427,7 @@ FMRM <- function(x,
     if (verbose) cat(strrep("-", getOption("width")), "\n")
 
     results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
-                    alpha_lambda_bic = NA)
+                    alpha_lambda_ic = NA)
     if (family == "gaussian"){
       class(results) <- "FGMRM"
     }

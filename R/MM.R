@@ -37,6 +37,7 @@
 #' @param penalty A logical value which, if true (default value), allows the
 #' function to apply the sgl penalty to the regression parameter
 #' updates and objective function within iterations of the MM algorithm.
+#' @param information_criteria description
 #' @param common_sigma description
 #' @param sigma_penalty description
 #' @param pi_penalty description
@@ -95,6 +96,7 @@ MM <- function(x,
                init_parameters = NULL,
                verbose = TRUE,
                penalty = TRUE,
+               information_criteria = c("bic", "ebic"),
                common_sigma = FALSE,
                sigma_penalty = TRUE,
                pi_penalty = TRUE){
@@ -131,9 +133,12 @@ MM <- function(x,
   } else {
     family <- match.arg(family)
   }
-  if (family != "gaussian" && family != "poisson"){
+  if (family != "gaussian" && family != "poisson" &&
+      family != "binomial" && family != "gamma"){
     stop("Invalid distribution, currently not supported\n")
   }
+
+  information_criteria <- match.arg(information_criteria)
 
   # ----get number of covariates and samples, add ones for the intercept----
   p = ncol(x)
@@ -145,9 +150,8 @@ MM <- function(x,
   pi <- numeric(G)
   beta <- matrix(0, G, p+1)
   N <- numeric(G)
-  if (family == "gaussian"){
-    sigma <- numeric(G)
-  }
+  sigma <- numeric(G)
+  nu <- numeric(G)
 
   # ----penalty term----
   V <- matrix(0, G, p+1)
@@ -195,15 +199,22 @@ MM <- function(x,
 
       init_parameters <- list(init_pi, init_beta, init_z)
     }
+    else if (family == "binomial"){
+
+    }
+    else if (family == "gamma"){
+
+    }
   }
 
   # ----history----
   pis <- vector("list", reps)
   betas <- vector("list", reps)
   sigmas <- vector("list", reps)
+  nus <- vector("list", reps)
   z_list <- vector("list", reps)
   logliks <- numeric(reps)
-  bics<- numeric(reps)
+  ics<- numeric(reps)
 
   for(k in 1:reps){
     if (family == "gaussian"){
@@ -216,9 +227,12 @@ MM <- function(x,
       pi <- init_parameters[[1]]
       beta <- init_parameters[[2]]
       gamma_mat <- init_parameters[[3]]
+    }
+    else if (family == "binomial"){
 
-      # ----placeholders----
-      sigma <- 0
+    }
+    else if (family == "gamma"){
+
     }
 
     # ----loop controls----
@@ -255,6 +269,12 @@ MM <- function(x,
       }
       else if (family == "poisson"){
         beta <- beta_update_FPMRM(x, y, gamma_mat, beta, V, lambda, penalty)
+      }
+      else if (family == "binomial"){
+
+      }
+      else if (family == "gamma"){
+
       }
 
       if (penalty){
@@ -307,7 +327,7 @@ MM <- function(x,
 
       # ----OBJECTIVE FUNCTION----
       objective_fun_old <- objective_fun_new
-      objective_fun_new <- objective_function(family, ll, pen, n)
+      objective_fun_new <- objective_function(ll, pen)
 
       if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol){
         break
@@ -317,103 +337,101 @@ MM <- function(x,
     }
 
     if (is.na(objective_fun_new) || is.na(objective_fun_old) || any(is.na(N))){
-      pis[[k]] <- betas[[k]] <- sigmas[[k]] <- logliks[k] <- bics[k] <- NA
+      pis[[k]] <- betas[[k]] <- sigmas[[k]] <- logliks[k] <- ics[k] <- NA
     }
     else{
-      # ----compute bic----
-      if (family == "gaussian"){
+      # ----compute information criteria----
+      if (information_criteria == "bic"){
         active_betas <- sum(abs(beta) != 1.0e-10)
         num_params <- active_betas + (if (common_sigma) 1 else G) + (G - 1)
-        bics[k] <-  (-2 * ll) + (num_params * log(n))
+        ics[k] <-  (-2 * ll) + (num_params * log(n))
       }
-      else if (family == "poisson"){
-        if(penalty){
-          active_betas_per_component <- numeric(G)
-          total_active_betas <- 0
+      else if (information_criteria == "ebic"){
+        active_betas_per_component <- numeric(G)
+        total_active_betas <- 0
 
+        for(g in 1:G) {
+          # ----Count non-zero covariates in component g (D_g)----
+          active_betas_per_component[g] <- sum(abs(beta[g, -1]) > 1e-10)
+          total_active_betas <- total_active_betas + active_betas_per_component[g]
+        }
+
+        # ----Determine j: number of covariates selected by group lasso----
+        # ----A covariate is selected if it's active in ANY component----
+        covariates_selected <- logical(p)
+        for(j_covar in 1:p) {
+          # ----Check if covariate j_covar is active in any component----
+          # ----+1 for intercept----
+          covariates_selected[j_covar] <- any(abs(beta[, j_covar + 1]) > 1e-10)
+        }
+
+        # ----Total number of selected covariates----
+        j_group_lasso <- sum(covariates_selected)
+
+        gamma <- 1.0
+        p_total <- p
+
+        # ----Calculate the double sum----
+        total_combinatorial_sum <- 0
+        if(j_group_lasso > 0) {
+          num_ways_to_choose_j <- choose(p_total, j_group_lasso)
           for(g in 1:G) {
-            # ----Count non-zero covariates in component g (D_g)----
-            active_betas_per_component[g] <- sum(abs(beta[g, -1]) > 1e-10)
-            total_active_betas <- total_active_betas + active_betas_per_component[g]
-          }
-
-          # ----Determine j: number of covariates selected by group lasso----
-          # ----A covariate is selected if it's active in ANY component----
-          covariates_selected <- logical(p)
-          for(j_covar in 1:p) {
-            # ----Check if covariate j_covar is active in any component----
-            # ----+1 for intercept----
-            covariates_selected[j_covar] <- any(abs(beta[, j_covar + 1]) > 1e-10)
-          }
-
-          # ----Total number of selected covariates----
-          j_group_lasso <- sum(covariates_selected)
-
-          gamma <- 1.0
-          p_total <- p
-
-          # ----Calculate the double sum----
-          total_combinatorial_sum <- 0
-          if(j_group_lasso > 0) {
-            num_ways_to_choose_j <- choose(p_total, j_group_lasso)
-            for(g in 1:G) {
-              D_g <- active_betas_per_component[g]
-              if(D_g <= G && D_g <= p_total) {
-                total_combinatorial_sum <- total_combinatorial_sum + choose(G, D_g)
-              }
+            D_g <- active_betas_per_component[g]
+            if(D_g <= G && D_g <= p_total) {
+              total_combinatorial_sum <- total_combinatorial_sum + choose(G, D_g)
             }
           }
-
-          # ----EBIC penalty: 2* gamma * log(total_combinatorial_sum)----
-          if(total_combinatorial_sum > 0) {
-            ebic_penalty <- 2 * gamma * log(num_ways_to_choose_j * total_combinatorial_sum)
-          } else {
-            ebic_penalty <- 0
-          }
-
-          # ----Total parameters: active betas + intercepts + mixing proportions----
-          total_params <- total_active_betas + G + (G - 1)
-
-          # ----Final EBIC----
-          bics[k] <- (-2 * ll) + (total_params * log(n)) + ebic_penalty
         }
-        else {
-          num_params <- G * (p + 1) + (G - 1)
-          bics[k] <- (-2 * ll) + (num_params * log(n))
+
+        # ----EBIC penalty: 2* gamma * log(total_combinatorial_sum)----
+        if(total_combinatorial_sum > 0) {
+          ebic_penalty <- 2 * gamma * log(num_ways_to_choose_j * total_combinatorial_sum)
+        } else {
+          ebic_penalty <- 0
         }
+
+        # ----Total parameters: active betas + intercepts + mixing proportions----
+        total_params <- total_active_betas + G + (G - 1)
+
+        # ----Final EBIC----
+        ics[k] <- (-2 * ll) + (total_params * log(n)) + ebic_penalty
       }
 
       pis[[k]] <- pi
       betas[[k]] <- beta
-      if (family == "gaussian"){
-        sigmas[[k]] <- sigma
-      }
+      sigmas[[k]] <- sigma
+      nus[[k]] <- nu
       z_list[[k]] <- gamma_mat
       logliks[k] <- ll
     }
   }
 
-  if (!all(is.na(bics))){
+  if (!all(is.na(ics))){
     # ----get run that minimized the selection criteria----
 
-    valid_indices <- which(!is.na(bics) & !sapply(betas, is.null))
+    valid_indices <- which(!is.na(ics) & !sapply(betas, is.null))
 
     if(length(valid_indices) == 0) {
       if (family == "gaussian"){
-        return(list(bic = NA, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
+        return(list(ic = NA, ic_type = information_criteria, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
                     z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
                     lambda = NA))
       }
-      else if (family == "poisson"){
-        return(list(bic = NA, loglik = NA, beta = NA, pi = NA, z = NA,
+      else if (family == "poisson" || family == "binomial"){
+        return(list(ic = NA, ic_type = information_criteria, loglik = NA, beta = NA, pi = NA, z = NA,
+                    z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
+                    lambda = NA))
+      }
+      else if (family == "gamma"){
+        return(list(ic = NA, ic_type = information_criteria, loglik = NA, beta = NA, pi = NA, nu = NA, z = NA,
                     z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
                     lambda = NA))
       }
     }
 
     # ----Find minimum among valid entries only----
-    valid_bics <- bics[valid_indices]
-    min_valid_idx <- which.min(valid_bics)
+    valid_ics <- ics[valid_indices]
+    min_valid_idx <- which.min(valid_ics)
     min_index <- valid_indices[min_valid_idx]
 
     # ----expected predicted y and mean squared error----
@@ -423,6 +441,12 @@ MM <- function(x,
     }
     else if (family == "poisson"){
       y_hat <- rowSums(z_list[[min_index]] * exp(y_ik))
+    }
+    else if (family == "binomial"){
+
+    }
+    else if (family == "gamma"){
+
     }
     mse <- mean((y_hat - y)^2)
 
@@ -442,14 +466,20 @@ MM <- function(x,
 
     # ----return parameters----
     if (family == "gaussian"){
-      return(list(bic = bics[min_index], loglik = logliks[min_index],
+      return(list(ic = ics[min_index], ic_type = information_criteria, loglik = logliks[min_index],
                   beta = betas[[min_index]], pi = pis[[min_index]], sigma = sigmas[[min_index]],
                   z = z_list[[min_index]], z_hard = z_mat_hard, y_hat = y_hat, mse = mse,
                   alpha = alpha, lambda = lambda))
     }
-    else if (family == "poisson"){
-      return(list(bic = bics[min_index], loglik = logliks[min_index],
+    else if (family == "poisson" || family == "binomial"){
+      return(list(ic = ics[min_index], ic_type = information_criteria, loglik = logliks[min_index],
                   beta = betas[[min_index]], pi = pis[[min_index]],
+                  z = z_list[[min_index]], z_hard = z_mat_hard, y_hat = y_hat, mse = mse,
+                  alpha = alpha, lambda = lambda))
+    }
+    else if (family == "gamma"){
+      return(list(ic = ics[min_index], ic_type = information_criteria, loglik = logliks[min_index],
+                  beta = betas[[min_index]], pi = pis[[min_index]], nu = nus[[min_index]],
                   z = z_list[[min_index]], z_hard = z_mat_hard, y_hat = y_hat, mse = mse,
                   alpha = alpha, lambda = lambda))
     }
@@ -457,12 +487,17 @@ MM <- function(x,
   else{
     # ----if all stopping criteria are NA, return NA for each parameter----
     if (family == "gaussian"){
-      return(list(bic = NA, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
+      return(list(ic = NA, ic_type = information_criteria, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
                   z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
                   lambda = NA))
     }
-    else if (family == "poisson"){
-      return(list(bic = NA, loglik = NA, beta = NA, pi = NA, z = NA,
+    else if (family == "poisson" || family == "binomial"){
+      return(list(ic = NA, ic_type = information_criteria, loglik = NA, beta = NA, pi = NA, z = NA,
+                  z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
+                  lambda = NA))
+    }
+    else if (family == "gamma"){
+      return(list(ic = NA, ic_type = information_criteria, loglik = NA, beta = NA, pi = NA, nu = NA, z = NA,
                   z_hard = NA, y_hat = NA, mse = NA, mse_fitted = NA, alpha = NA,
                   lambda = NA))
     }

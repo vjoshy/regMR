@@ -9,7 +9,7 @@ MM_Grid(
   g,
   x,
   y,
-  family = c("gaussian", "poisson"),
+  family = c("gaussian", "poisson", "binomial", "gamma"),
   tol = 0.001,
   max_iter = 500,
   reps = 1,
@@ -21,6 +21,7 @@ MM_Grid(
   penalty = TRUE,
   random = FALSE,
   n_random_la = 100,
+  information_criteria = c("bic", "ebic"),
   parallel = TRUE,
   common_sigma = FALSE,
   sigma_penalty = TRUE,
@@ -85,6 +86,8 @@ lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.}
 \item{n_random_la}{A non-negative integer (default value 100) specifying the
 number of lambda-alpha pairs to be sampled when random is TRUE.}
 
+\item{information_criteria}{description}
+
 \item{parallel}{A logical value which, if true (default value), allows the
 function to run parallel workers to increase computational speed.}
 
@@ -98,14 +101,14 @@ function to run parallel workers to increase computational speed.}
 An object of class FGMRM containing the parameters of the estimated
 finite mixture regression model (parameters depend on inputted family),
 number of mixture components, parameters of models with the same alpha, and a numeric
-matrix containing the alpha, lambda, and bic values of all estimated models
+matrix containing the alpha, lambda, and ic values of all estimated models
 for plotting purposes.
 }
 \description{
 Applies the Majorization-Minimization Algorithm to the inputted data over all
 lambda-alpha pairs given the specified parameters and distribution to estimate a finite
 mixture regression model. The function chooses the model with the
-lowest bic. It can be ran sequentially or in parallel. This function is used
+lowest information criteria (as specified). It can be ran sequentially or in parallel. This function is used
 for model estimation.
 }
 \examples{

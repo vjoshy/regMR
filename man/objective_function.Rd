@@ -4,18 +4,14 @@
 \alias{objective_function}
 \title{Objective Function for Finite Mixture Regression Distributions}
 \usage{
-objective_function(family, ll, pen, n)
+objective_function(ll, pen)
 }
 \arguments{
-\item{family}{description}
-
 \item{ll}{A numeric scalar representing the log-likelihood of the finite
 Gaussian mixture regression model.}
 
 \item{pen}{A numeric scalar representing the sparse group lasso (sgl) penalty
 being applied to the log-likelihood.}
-
-\item{n}{A numeric value representing the number of observations in the data.}
 }
 \value{
 A numeric scalar representing the negative penalized log-likelihood
