@@ -49,7 +49,11 @@
 #' lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.
 #' @param n_random_la A non-negative integer (default value 100) specifying the
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
-#' @param information_criteria description
+#' @param information_criteria A string of characters specifying the
+#' information criteria for model selection purposes. The model that minimizes the
+#' information criteria over all group counts and lambda-alpha pairs will be selected.
+#' Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
+#' and AIC ("aic").
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
 #' @param common_sigma description
@@ -116,7 +120,7 @@ MM_Grid <- function(g,
                     penalty = TRUE,
                     random = FALSE,
                     n_random_la = 100,
-                    information_criteria = c("bic", "ebic"),
+                    information_criteria = c("bic", "ebic", "aic"),
                     parallel = TRUE,
                     common_sigma = FALSE,
                     sigma_penalty = TRUE,
@@ -159,10 +163,6 @@ MM_Grid <- function(g,
     family <- family$family
   } else {
     family <- match.arg(family)
-  }
-  if (family != "gaussian" && family != "poisson" &&
-      family != "binomial" && family != "gamma"){
-    stop("Invalid distribution, currently not supported\n")
   }
 
   information_criteria <- match.arg(information_criteria)
@@ -423,16 +423,9 @@ MM_Grid <- function(g,
       if (verbose){
         cat(strrep("=", getOption("width")), "\n\n")
         cat(" selected model for g =", g, "\n\n")
-        if (information_criteria == "bic"){
-          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
-              round(chosen_parameters$alpha, 2), "|| BIC =",
-              round(chosen_parameters$ic, 2), "\n\n")
-        }
-        else if (information_criteria == "ebic"){
-          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
-              round(chosen_parameters$alpha, 2), "|| EBIC =",
-              round(chosen_parameters$ic, 2), "\n\n")
-        }
+        cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
+            round(chosen_parameters$alpha, 2),
+            "|| ", toupper(information_criteria), " =", round(chosen_parameters$ic, 2), "\n\n")
         idx <- seq(1, g, length.out = g)
         cat(" Components")
         cat(paste(sprintf("%6.0f", idx), collapse = " "))
@@ -507,16 +500,9 @@ MM_Grid <- function(g,
       if (verbose){
         cat(strrep("=", getOption("width")), "\n\n")
         cat(" selected model for g =", g, "\n\n")
-        if (information_criteria == "bic"){
-          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
-              round(chosen_parameters$alpha, 2), "|| BIC =",
-              round(chosen_parameters$ic, 2), "\n\n")
-        }
-        else if (information_criteria == "ebic"){
-          cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
-              round(chosen_parameters$alpha, 2), "|| EBIC =",
-              round(chosen_parameters$ic, 2), "\n\n")
-        }
+        cat(" lambda =", round(chosen_parameters$lambda, 2), "|| alpha =",
+            round(chosen_parameters$alpha, 2),
+            "|| ", toupper(information_criteria), " =", round(chosen_parameters$ic, 2), "\n\n")
         idx <- seq(1, g, length.out = g)
         cat(" Components")
         cat(paste(sprintf("%6.0f", idx), collapse = " "))

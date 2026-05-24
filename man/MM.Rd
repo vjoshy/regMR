@@ -18,7 +18,7 @@ MM(
   init_parameters = NULL,
   verbose = TRUE,
   penalty = TRUE,
-  information_criteria = c("bic", "ebic"),
+  information_criteria = c("bic", "ebic", "aic"),
   common_sigma = FALSE,
   sigma_penalty = TRUE,
   pi_penalty = TRUE
@@ -67,7 +67,11 @@ function to print progress updates.}
 function to apply the sgl penalty to the regression parameter
 updates and objective function within iterations of the MM algorithm.}
 
-\item{information_criteria}{description}
+\item{information_criteria}{A string of characters specifying the
+information criteria for model selection purposes. The model that minimizes the
+information criteria over all group counts and lambda-alpha pairs will be selected.
+Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
+and AIC ("aic").}
 
 \item{common_sigma}{description}
 

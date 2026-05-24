@@ -20,7 +20,7 @@ FMRM(
   penalty = TRUE,
   random = FALSE,
   n_random_la = 100,
-  information_criteria = c("bic", "ebic"),
+  information_criteria = c("bic", "ebic", "aic"),
   automatic_stopping = FALSE,
   parallel = TRUE,
   common_sigma = FALSE,
@@ -86,7 +86,11 @@ lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.}
 \item{n_random_la}{A non-negative integer (default value 100) specifying the
 number of lambda-alpha pairs to be sampled when random is TRUE.}
 
-\item{information_criteria}{description}
+\item{information_criteria}{A string of characters specifying the
+information criteria for model selection purposes. The model that minimizes the
+information criteria over all group counts and lambda-alpha pairs will be selected.
+Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
+and AIC ("aic").}
 
 \item{automatic_stopping}{A logical value which, if true (false is the
 default value), allows the function to implement IC-based automatic stopping on

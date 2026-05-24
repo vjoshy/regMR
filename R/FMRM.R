@@ -49,7 +49,11 @@
 #' lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.
 #' @param n_random_la A non-negative integer (default value 100) specifying the
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
-#' @param information_criteria description
+#' @param information_criteria A string of characters specifying the
+#' information criteria for model selection purposes. The model that minimizes the
+#' information criteria over all group counts and lambda-alpha pairs will be selected.
+#' Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
+#' and AIC ("aic").
 #' @param automatic_stopping A logical value which, if true (false is the
 #' default value), allows the function to implement IC-based automatic stopping on
 #' the mixture components. When the condition for stopping is met, the function
@@ -120,7 +124,7 @@ FMRM <- function(x,
                  penalty = TRUE,
                  random = FALSE,
                  n_random_la = 100,
-                 information_criteria = c("bic", "ebic"),
+                 information_criteria = c("bic", "ebic", "aic"),
                  automatic_stopping = FALSE,
                  parallel = TRUE,
                  common_sigma = FALSE,
@@ -165,10 +169,6 @@ FMRM <- function(x,
     family <- family$family
   } else {
     family <- match.arg(family)
-  }
-  if (family != "gaussian" && family != "poisson" &&
-      family != "binomial" && family != "gamma"){
-    stop("Invalid distribution, currently not supported\n")
   }
 
   information_criteria <- match.arg(information_criteria)
@@ -218,20 +218,11 @@ FMRM <- function(x,
         cat(strrep("-", getOption("width")), "\n\n")
         cat(" overall model chosen ->\n\n")
         cat(" G =", selected_compartment, "\n\n")
-        if (information_criteria == "bic"){
-          cat(" lambda =", round(selected_parameters$lambda, 2),
-              "|| alpha =", selected_parameters$alpha,
-              "|| log-likelihood =", round(selected_parameters$loglik, 2),
-              "|| BIC =", round(selected_parameters$ic, 2),
-              "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-        }
-        else if (information_criteria == "ebic"){
-          cat(" lambda =", round(selected_parameters$lambda, 2),
-              "|| alpha =", selected_parameters$alpha,
-              "|| log-likelihood =", round(selected_parameters$loglik, 2),
-              "|| EBIC =", round(selected_parameters$ic, 2),
-              "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-        }
+        cat(" lambda =", round(selected_parameters$lambda, 2),
+            "|| alpha =", selected_parameters$alpha,
+            "|| log-likelihood =", round(selected_parameters$loglik, 2),
+            "|| ", toupper(information_criteria), " =", round(selected_parameters$ic, 2),
+            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
         idx <- seq(1, selected_compartment, length.out = selected_compartment)
         cat(" Components")
         cat(paste(sprintf("%6.0f", idx), collapse = " "))
@@ -356,20 +347,11 @@ FMRM <- function(x,
       cat(strrep("-", getOption("width")), "\n\n")
       cat(" overall model chosen ->\n\n")
       cat(" G =", selected_compartment, "\n\n")
-      if (information_criteria == "bic"){
-        cat(" lambda =", round(selected_parameters$lambda, 2),
-            "|| alpha =", selected_parameters$alpha,
-            "|| log-likelihood =", round(selected_parameters$loglik, 2),
-            "|| BIC =", round(selected_parameters$ic, 2),
-            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-      }
-      else if (information_criteria == "ebic"){
-        cat(" lambda =", round(selected_parameters$lambda, 2),
-            "|| alpha =", selected_parameters$alpha,
-            "|| log-likelihood =", round(selected_parameters$loglik, 2),
-            "|| EBIC =", round(selected_parameters$ic, 2),
-            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-      }
+      cat(" lambda =", round(selected_parameters$lambda, 2),
+          "|| alpha =", selected_parameters$alpha,
+          "|| log-likelihood =", round(selected_parameters$loglik, 2),
+          "|| ", toupper(information_criteria), " =", round(selected_parameters$ic, 2),
+          "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
       idx <- seq(1, selected_compartment, length.out = selected_compartment)
       cat(" Components")
       cat(paste(sprintf("%6.0f", idx), collapse = " "))

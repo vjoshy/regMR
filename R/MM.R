@@ -37,7 +37,11 @@
 #' @param penalty A logical value which, if true (default value), allows the
 #' function to apply the sgl penalty to the regression parameter
 #' updates and objective function within iterations of the MM algorithm.
-#' @param information_criteria description
+#' @param information_criteria A string of characters specifying the
+#' information criteria for model selection purposes. The model that minimizes the
+#' information criteria over all group counts and lambda-alpha pairs will be selected.
+#' Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
+#' and AIC ("aic").
 #' @param common_sigma description
 #' @param sigma_penalty description
 #' @param pi_penalty description
@@ -96,7 +100,7 @@ MM <- function(x,
                init_parameters = NULL,
                verbose = TRUE,
                penalty = TRUE,
-               information_criteria = c("bic", "ebic"),
+               information_criteria = c("bic", "ebic", "aic"),
                common_sigma = FALSE,
                sigma_penalty = TRUE,
                pi_penalty = TRUE){
@@ -132,10 +136,6 @@ MM <- function(x,
     family <- family$family
   } else {
     family <- match.arg(family)
-  }
-  if (family != "gaussian" && family != "poisson" &&
-      family != "binomial" && family != "gamma"){
-    stop("Invalid distribution, currently not supported\n")
   }
 
   information_criteria <- match.arg(information_criteria)
@@ -395,6 +395,11 @@ MM <- function(x,
 
         # ----Final EBIC----
         ics[k] <- (-2 * ll) + (total_params * log(n)) + ebic_penalty
+      }
+      else if (information_criteria == "aic"){
+        active_betas <- sum(abs(beta) != 1.0e-10)
+        num_params <- active_betas + (if (common_sigma) 1 else G) + (G - 1)
+        ics[k] <-  (-2 * ll) + (num_params * 2)
       }
 
       pis[[k]] <- pi
