@@ -200,10 +200,10 @@ MM <- function(x,
       init_parameters <- list(init_pi, init_beta, init_z)
     }
     else if (family == "binomial"){
-
+      init_parameters <- list(init_pi, init_beta, init_z)
     }
     else if (family == "gamma"){
-
+      init_parameters <- list(init_pi, init_beta, init_nu, init_z)
     }
   }
 
@@ -223,16 +223,16 @@ MM <- function(x,
       sigma <- init_parameters[[3]]
       gamma_mat <- init_parameters[[4]]
     }
-    else if (family == "poisson"){
+    else if (family == "poisson" || family == "binomial"){
       pi <- init_parameters[[1]]
       beta <- init_parameters[[2]]
       gamma_mat <- init_parameters[[3]]
     }
-    else if (family == "binomial"){
-
-    }
     else if (family == "gamma"){
-
+      pi <- init_parameters[[1]]
+      beta <- init_parameters[[2]]
+      nu <- init_parameters[[3]]
+      gamma_mat <- init_parameters[[4]]
     }
 
     # ----loop controls----
@@ -243,7 +243,7 @@ MM <- function(x,
     # ----MM algorithm iterated until stopping criteria is met----
     while (iter < max_iter){
       # ----Zig----
-      gamma_mat <- compute_gamma(x, y, family, pi, beta, sigma = sigma)
+      gamma_mat <- compute_gamma(x, y, family, pi, beta, sigma = sigma, nu = nu)
 
       # ----N (column sums of gamma_mat)----
       N <- colSums(gamma_mat)
@@ -267,14 +267,9 @@ MM <- function(x,
           beta <- beta_update_FGMRM(x, y, gamma_mat, rep(1, G), sigma, V, lambda, penalty)
         }
       }
-      else if (family == "poisson"){
-        beta <- beta_update_FPMRM(x, y, gamma_mat, beta, V, lambda, penalty)
-      }
-      else if (family == "binomial"){
-
-      }
-      else if (family == "gamma"){
-
+      else {
+        beta <- beta_update_GLM(x, y, family, gamma_mat, beta, V, nu, pi,
+                                lambda, penalty, max_iter, 1e-08)
       }
 
       if (penalty){
@@ -297,6 +292,10 @@ MM <- function(x,
         } else {
           sigma <- sigma_update(x, y, gamma_mat, beta, N)
         }
+      }
+
+      if (family == "gamma"){
+        # ----UPDATE NU PARAMETER----
       }
 
       # ----LOG LIKELIHOOD----
@@ -448,10 +447,10 @@ MM <- function(x,
       y_hat <- rowSums(z_list[[min_index]] * exp(y_ik))
     }
     else if (family == "binomial"){
-
+      y_hat <- rowSums(z_list[[min_index]] * (1 / (1 + exp(-y_ik))))
     }
     else if (family == "gamma"){
-
+      y_hat <- rowSums(z_list[[min_index]] * (-1 / y_ik))
     }
     mse <- mean((y_hat - y)^2)
 

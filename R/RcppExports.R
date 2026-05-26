@@ -17,7 +17,7 @@ lambda_max_compute_FGMRM <- function(X, y, gamma_mat, pi, sigma) {
     .Call(`_regMR_lambda_max_compute_FGMRM`, X, y, gamma_mat, pi, sigma)
 }
 
-beta_update_FPMRM <- function(x, y, z_mat, beta_old, V, lambda, penalty = FALSE, max_iter = 500L, tol = 1e-8, verbose = FALSE) {
-    .Call(`_regMR_beta_update_FPMRM`, x, y, z_mat, beta_old, V, lambda, penalty, max_iter, tol, verbose)
+beta_update_GLM <- function(x, y, family, z_mat, beta_old, V, nu, pi, lambda, penalty = FALSE, max_iter = 500L, tol = 1e-8) {
+    .Call(`_regMR_beta_update_GLM`, x, y, family, z_mat, beta_old, V, nu, pi, lambda, penalty, max_iter, tol)
 }
 

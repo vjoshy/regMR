@@ -19,7 +19,7 @@ No return value, called for side effects.
 \description{
 This function displays a summary for finite Gaussian mixture regression
 models of class "FGMRM". It displays the number of mixture components,
-optimal lambda-alpha, log-likelihood, bic, mean-squared-error, and
+optimal lambda-alpha, log-likelihood, information criteria, mean-squared-error, and
 parameters (pi, sigma, beta) of the model.
 }
 \examples{

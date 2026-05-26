@@ -116,10 +116,11 @@ double lambda_max_compute_FGMRM(arma::mat X, arma::mat y, arma::mat gamma_mat,
   return lambda_max;
 }
 
-arma::vec update_beta_irls_single(arma::mat x, arma::vec y, arma::vec z_g,
-                                  arma::vec beta_g_old, arma::vec v_g,
-                                  double lambda, bool penalty = false,
-                                  int max_iter = 500, double tol = 1e-8) {
+arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
+                                  arma::vec z_g, arma::vec beta_g_old, arma::vec v_g,
+                                  double nu_g, double pi_g, double lambda,
+                                  bool penalty = false, int max_iter = 500,
+                                  double tol = 1e-8) {
 
   arma::vec beta_g = beta_g_old;
   int iter = 0;
@@ -136,11 +137,35 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, arma::vec z_g,
 
     // Linear predictor
     arma::vec eta_g = x * beta_g;
-    arma::vec mu_g = arma::exp(eta_g);
+
+    // Link function for mean
+    arma::vec mu_g;
+    if (family == "poisson"){
+      mu_g = arma::exp(eta_g);
+    } else if (family == "binomial"){
+      mu_g = 1 / (1 + arma::exp(-eta_g));
+    } else {
+      mu_g = -1 / eta_g;
+    }
 
     // Working response and weights
-    arma::vec working_response = eta_g + (y - mu_g) / mu_g;
-    arma::vec weights = mu_g % z_g;
+    arma::vec working_response;
+    if (family == "poisson"){
+      working_response = eta_g + (y - mu_g) / mu_g;
+    } else if (family == "binomial"){
+      working_response = eta_g + (y - mu_g) / (mu_g % (1 - mu_g));
+    } else {
+      working_response = eta_g + (y - mu_g) / arma::square(mu_g);
+    }
+
+    arma::vec weights;
+    if (family == "poisson"){
+      weights = mu_g % z_g;
+    } else if (family == "binomial"){
+      weights = (mu_g % (1 - mu_g)) % z_g;
+    } else {
+      weights = arma::square(mu_g) % z_g;
+    }
 
     // Weighted least squares matrices (avoiding diagonal matrix creation)
     arma::mat x_weighted = x.each_col() % arma::sqrt(weights);
@@ -150,7 +175,11 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, arma::vec z_g,
 
     // Add penalty if needed
     if (penalty) {
-      XtWX.diag() += lambda * penalty_vec;
+      if (family == "gamma"){
+        XtWX.diag() += lambda * (1/nu_g) * penalty_vec * pi_g * pi_g;
+      } else {
+        XtWX.diag() += lambda * penalty_vec * pi_g * pi_g;
+      }
     }
 
     // Regularization to avoid singularity
@@ -179,11 +208,10 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, arma::vec z_g,
 }
 
 // [[Rcpp::export]]
-arma::mat beta_update_FPMRM(arma::mat x, arma::vec y, arma::mat z_mat,
-                              arma::mat beta_old, arma::mat V,
-                              double lambda, bool penalty = false,
-                              int max_iter = 500, double tol = 1e-8,
-                              bool verbose = false) {
+arma::mat beta_update_GLM(arma::mat x, arma::vec y, std::string family, arma::mat z_mat,
+                              arma::mat beta_old, arma::mat V, arma::vec nu,
+                              arma::vec pi, double lambda, bool penalty = false,
+                              int max_iter = 500, double tol = 1e-8) {
 
   arma::uword G = z_mat.n_cols;
   arma::uword p = beta_old.n_cols;
@@ -194,13 +222,17 @@ arma::mat beta_update_FPMRM(arma::mat x, arma::vec y, arma::mat z_mat,
     arma::vec z_g = z_mat.col(g);
     arma::vec beta_g_old = beta_old.row(g).t();
     arma::vec v_g;
+    double nu_g = nu(g);
+    double pi_g = pi(g);
+
 
     if (penalty) {
       v_g = V.row(g).t();
     }
 
-    arma::vec beta_g_new = update_beta_irls_single(x, y, z_g, beta_g_old, v_g,
-                                                   lambda, penalty, max_iter, tol);
+    arma::vec beta_g_new = update_beta_irls_single(x, y, family, z_g, beta_g_old,
+                                                   v_g, nu_g, pi_g, lambda,
+                                                   penalty, max_iter, tol);
 
     beta_new.row(g) = beta_g_new.t();
   }

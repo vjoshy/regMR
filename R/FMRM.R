@@ -2,10 +2,9 @@
 #'
 #' Applies the Majorization-Minimization Algorithm to the inputted data over all
 #' group counts from 2 to G and all lambda-alpha pairs given the specified
-#' parameters and distribution to estimate a finite mixture regression model. The
-#' function chooses the model with the lowest information criteria (as specified).
-#' It can be ran sequentially or
-#' in parallel. This function is for model estimation.
+#' parameters and distribution (family) to estimate a finite mixture regression model.
+#' The function chooses the model with the lowest information criteria (as specified).
+#' It can be ran sequentially or in parallel. This function is for model estimation.
 #'
 #' @param x Predictor/design matrix. A numeric matrix of size n x p where the
 #' number of rows is equal to the number of observations n, and the number of
@@ -23,7 +22,9 @@
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
-#' @param reps description
+#' @param reps An integer greater than or equal to one specifying the
+#' number of times the MM algorithm is repeated on the same initial parameters.
+#' Default value is 1.
 #' @param lambda A list of length G of numeric vectors containing non-negative
 #' tuning parameters specifying various strengths of the sparse group lasso (sgl)
 #' penalty to be applied. Finite mixture regression models will be
@@ -64,7 +65,8 @@
 #' @param sigma_penalty description
 #' @param pi_penalty description
 #'
-#' @returns An object of class FGMRM containing the parameters of the estimated
+#' @returns An object, depending on inputted family, of class {FGMRM, FPMRM, FBMRM, FGamMRM}
+#' containing the parameters of the estimated
 #' finite mixture regression model (parameters depend on inputted family),
 #' number of mixture components, parameters of models with the same alpha, and a numeric
 #' matrix containing the alpha, lambda, and ic values of all estimated models
@@ -130,47 +132,17 @@ FMRM <- function(x,
                  common_sigma = FALSE,
                  sigma_penalty = TRUE,
                  pi_penalty = TRUE){
-  #----input validation/error check----
-  if(!is.numeric(x)){
-    stop("Invalid x\n")
-  }
-  if(!is.numeric(y)){
-    stop("Invalid y\n")
-  }
-  if (!is.numeric(G) || G <= 1){
-    stop("Invalid group size G\n")
-  }
-  if (!is.numeric(tol) || tol <= 0){
-    stop("Invalid tolerance level\n")
-  }
-  if (!is.numeric(max_iter) || max_iter < 1){
-    stop("Invalid max_iter\n")
-  }
-  if (!is.numeric(n_lambda) || n_lambda < 2){
-    stop("Invalid n_lambda\n")
-  }
-  if (!is.numeric(alpha) || !is.vector(alpha)){
-    stop("Invalid alpha\n")
-  }
-  if (!is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
-      !is.logical(automatic_stopping) || !is.logical(parallel) ||
-      !is.logical(common_sigma) || !is.logical(sigma_penalty) ||
-      !is.logical(pi_penalty)){
-    stop("Invalid input\n")
-  }
-  if (!is.numeric(n_random_la) || n_random_la <= 0){
-    stop("Invalid n_random_la\n")
-  }
-  if (length(alpha) * n_lambda < n_random_la && random){
-    stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
-  }
+  # ----input validation/error check----
+  error_check_FMRM(x, y, G, tol, max_iter, reps, lambda, lambda_max, n_lambda,
+                   alpha, verbose, penalty, random, n_random_la, automatic_stopping,
+                   parallel, common_sigma, sigma_penalty, pi_penalty)
 
+  # ----get family and information criteria arguments----
   if (inherits(family, "family")) {
     family <- family$family
   } else {
     family <- match.arg(family)
   }
-
   information_criteria <- match.arg(information_criteria)
 
   y <- as.matrix(y)
@@ -184,11 +156,11 @@ FMRM <- function(x,
   # ----list for models----
   models <- list()
 
-  # ----automatic_stopping----
+  # ----automatic stopping procedure----
   automatic_stopping_tracker <- numeric(G)
-
   if (automatic_stopping){
     for (g in 2:G){
+      # ----get models for specific g value over lambda-alpha grid----
       models[[g]] <- MM_Grid(g, x, y, family, tol, max_iter, reps, lambda, lambda_max,
                                    n_lambda, alpha, verbose, penalty, random,
                                    n_random_la, information_criteria, parallel, common_sigma,
@@ -214,49 +186,17 @@ FMRM <- function(x,
       selected_compartment <- which.min(ic)
       selected_parameters <- models[[selected_compartment]]$parameters
 
+      # ----if verbose, print the model----
       if (verbose){
-        cat(strrep("-", getOption("width")), "\n\n")
-        cat(" overall model chosen ->\n\n")
-        cat(" G =", selected_compartment, "\n\n")
-        cat(" lambda =", round(selected_parameters$lambda, 2),
-            "|| alpha =", selected_parameters$alpha,
-            "|| log-likelihood =", round(selected_parameters$loglik, 2),
-            "|| ", toupper(information_criteria), " =", round(selected_parameters$ic, 2),
-            "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-        idx <- seq(1, selected_compartment, length.out = selected_compartment)
-        cat(" Components")
-        cat(paste(sprintf("%6.0f", idx), collapse = " "))
-        cat("\n Pi          ")
-        cat(paste(sprintf("%6.3f", selected_parameters$pi), collapse = " "))
-        if (family == "gaussian"){
-          cat("\n Sigma       ")
-          cat(paste(sprintf("%6.3f", selected_parameters$sigma),
-                    collapse = " "))
-        }
-        else if (family == "gamma"){
-          cat("\n Nu (Shape)       ")
-          cat(paste(sprintf("%6.3f", selected_parameters$nu),
-                    collapse = " "))
-        }
-        cat("\n\n Beta (Regression Parameters)\n")
-        cat("  Components")
-        cat(paste(sprintf("%6.0f", idx), collapse = " "))
-        cat("\n  Intercept   ")
-        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
-                  collapse = " "))
-        for (k in 2:ncol(selected_parameters$beta)){
-          cat("\n  Beta", k - 1, "     ")
-          cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
-                    collapse = " "))
-        }
-        cat("\n\n")
-        cat(strrep("-", getOption("width")), "\n")
+        print_model_FMRM(selected_parameters, selected_compartment, family, information_criteria)
       }
 
+      # ----get results, add class to them per family argument----
       results <- list(parameters = selected_parameters,
                       g = selected_compartment,
                       parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
                       alpha_lambda_ic = models[[selected_compartment]]$alpha_lambda_ic)
+
       if (family == "gaussian"){
         class(results) <- "FGMRM"
       }
@@ -273,13 +213,14 @@ FMRM <- function(x,
       return(results)
     }
     else{
-      # ----if error, return NA for each item----
+      # ----if error, return NA for each item and print no model was chosen----
       if (verbose) cat(strrep("-", getOption("width")), "\n\n")
       if (verbose) cat(" no model chosen\n\n")
       if (verbose) cat(strrep("-", getOption("width")), "\n")
 
       results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
                       alpha_lambda_ic = NA)
+
       if (family == "gaussian"){
         class(results) <- "FGMRM"
       }
@@ -343,45 +284,12 @@ FMRM <- function(x,
     selected_parameters <- models[[selected_compartment]]$parameters
     selected_compartment <- selected_compartment + 1
 
+    # ----if verbose, print the model----
     if (verbose){
-      cat(strrep("-", getOption("width")), "\n\n")
-      cat(" overall model chosen ->\n\n")
-      cat(" G =", selected_compartment, "\n\n")
-      cat(" lambda =", round(selected_parameters$lambda, 2),
-          "|| alpha =", selected_parameters$alpha,
-          "|| log-likelihood =", round(selected_parameters$loglik, 2),
-          "|| ", toupper(information_criteria), " =", round(selected_parameters$ic, 2),
-          "|| MSE =", round(selected_parameters$mse, 2), "\n\n")
-      idx <- seq(1, selected_compartment, length.out = selected_compartment)
-      cat(" Components")
-      cat(paste(sprintf("%6.0f", idx), collapse = " "))
-      cat("\n Pi          ")
-      cat(paste(sprintf("%6.3f", selected_parameters$pi), collapse = " "))
-      if (family == "gaussian"){
-        cat("\n Sigma       ")
-        cat(paste(sprintf("%6.3f", selected_parameters$sigma),
-                  collapse = " "))
-      }
-      else if (family == "gamma"){
-        cat("\n Nu (Shape)       ")
-        cat(paste(sprintf("%6.3f", selected_parameters$nu),
-                  collapse = " "))
-      }
-      cat("\n\n Beta (Regression Parameters)\n")
-      cat("  Components")
-      cat(paste(sprintf("%6.0f", idx), collapse = " "))
-      cat("\n  Intercept   ")
-      cat(paste(sprintf("%6.3f", selected_parameters$beta[ , 1]),
-                collapse = " "))
-      for (k in 2:ncol(selected_parameters$beta)){
-        cat("\n  Beta", k - 1, "     ")
-        cat(paste(sprintf("%6.3f", selected_parameters$beta[ , k]),
-                  collapse = " "))
-      }
-      cat("\n\n")
-      cat(strrep("-", getOption("width")), "\n")
+      print_model_FMRM(selected_parameters, selected_compartment, family, information_criteria)
     }
 
+    # ----get results, add class to them per family argument----
     results <- list(parameters = selected_parameters,
                     g = selected_compartment,
                     parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
@@ -403,13 +311,14 @@ FMRM <- function(x,
     return(results)
   }
   else{
-    # ----if error, return NA for each item----
+    # ----if error, return NA for each item and print no model was chosen----
     if (verbose) cat(strrep("-", getOption("width")), "\n\n")
     if (verbose) cat(" no model chosen\n\n")
     if (verbose) cat(strrep("-", getOption("width")), "\n")
 
     results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
                     alpha_lambda_ic = NA)
+
     if (family == "gaussian"){
       class(results) <- "FGMRM"
     }

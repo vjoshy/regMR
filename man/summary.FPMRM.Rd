@@ -19,7 +19,7 @@ No return value, called for side effects.
 \description{
 This function displays a summary for finite Poisson mixture regression
 models of class "FPMRM". It displays the number of mixture components,
-optimal lambda-alpha, log-likelihood, bic, mean-squared-error, and
+optimal lambda-alpha, log-likelihood, information criteria, mean-squared-error, and
 parameters (pi, beta) of the model.
 }
 \examples{

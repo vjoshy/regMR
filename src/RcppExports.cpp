@@ -76,23 +76,25 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
-// beta_update_FPMRM
-arma::mat beta_update_FPMRM(arma::mat x, arma::vec y, arma::mat z_mat, arma::mat beta_old, arma::mat V, double lambda, bool penalty, int max_iter, double tol, bool verbose);
-RcppExport SEXP _regMR_beta_update_FPMRM(SEXP xSEXP, SEXP ySEXP, SEXP z_matSEXP, SEXP beta_oldSEXP, SEXP VSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP max_iterSEXP, SEXP tolSEXP, SEXP verboseSEXP) {
+// beta_update_GLM
+arma::mat beta_update_GLM(arma::mat x, arma::vec y, std::string family, arma::mat z_mat, arma::mat beta_old, arma::mat V, arma::vec nu, arma::vec pi, double lambda, bool penalty, int max_iter, double tol);
+RcppExport SEXP _regMR_beta_update_GLM(SEXP xSEXP, SEXP ySEXP, SEXP familySEXP, SEXP z_matSEXP, SEXP beta_oldSEXP, SEXP VSEXP, SEXP nuSEXP, SEXP piSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
     Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< arma::mat >::type z_mat(z_matSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type beta_old(beta_oldSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type V(VSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type nu(nuSEXP);
+    Rcpp::traits::input_parameter< arma::vec >::type pi(piSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
     Rcpp::traits::input_parameter< bool >::type penalty(penaltySEXP);
     Rcpp::traits::input_parameter< int >::type max_iter(max_iterSEXP);
     Rcpp::traits::input_parameter< double >::type tol(tolSEXP);
-    Rcpp::traits::input_parameter< bool >::type verbose(verboseSEXP);
-    rcpp_result_gen = Rcpp::wrap(beta_update_FPMRM(x, y, z_mat, beta_old, V, lambda, penalty, max_iter, tol, verbose));
+    rcpp_result_gen = Rcpp::wrap(beta_update_GLM(x, y, family, z_mat, beta_old, V, nu, pi, lambda, penalty, max_iter, tol));
     return rcpp_result_gen;
 END_RCPP
 }
@@ -102,7 +104,7 @@ static const R_CallMethodDef CallEntries[] = {
     {"_regMR_sigma_update", (DL_FUNC) &_regMR_sigma_update, 5},
     {"_regMR_sigma_update_pen", (DL_FUNC) &_regMR_sigma_update_pen, 7},
     {"_regMR_lambda_max_compute_FGMRM", (DL_FUNC) &_regMR_lambda_max_compute_FGMRM, 5},
-    {"_regMR_beta_update_FPMRM", (DL_FUNC) &_regMR_beta_update_FPMRM, 10},
+    {"_regMR_beta_update_GLM", (DL_FUNC) &_regMR_beta_update_GLM, 12},
     {NULL, NULL, 0}
 };
 

@@ -3,7 +3,7 @@
 #'
 #' This function displays a summary for finite Gaussian mixture regression
 #' models of class "FGMRM". It displays the number of mixture components,
-#' optimal lambda-alpha, log-likelihood, bic, mean-squared-error, and
+#' optimal lambda-alpha, log-likelihood, information criteria, mean-squared-error, and
 #' parameters (pi, sigma, beta) of the model.
 #'
 #' @param object An object of class "FGMRM", the result of calling FMRM() or
@@ -63,7 +63,7 @@ summary.FGMRM <- function(object, ...){
   cat(" lambda =", round(object$parameters$lambda, 2),
       "|| alpha =", object$parameters$alpha,
       "|| log-likelihood =", round(object$parameters$loglik, 2),
-      "|| \n BIC =", round(object$parameters$bic, 2),
+      "|| \n", toupper(object$parameters$ic_type), " =", round(object$parameters$ic, 2),
       "|| MSE =", round(object$parameters$mse, 2), "\n\n")
   idx <- seq(1, object$g, length.out = object$g)
   cat(" Components")

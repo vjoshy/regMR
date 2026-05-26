@@ -29,7 +29,7 @@ representing the sgl penalty majorization matrix.
 \description{
 Compute sparse group lasso (sgl) penalty majorization matrix for application
 when updating regression parameters for finite mixture regression
-models. This function is used during model estimation, specifically within
-iterations of the MM algorithm.
+models when penalty is true. This function is used during model estimation,
+specifically within iterations of the MM algorithm.
 }
 \keyword{internal}

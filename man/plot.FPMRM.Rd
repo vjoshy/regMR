@@ -13,13 +13,13 @@ MM_Grid() with family = poisson().}
 \item{...}{Additional arguments for plotting (currently unused).}
 }
 \value{
-A list of three ggplot objects: lambdas vs. bics for all alpha
+A list of three ggplot objects: lambdas vs. ics for all alpha
 values, lambdas vs. regression coefficients, and lambdas vs. group norms for
 all models with the same alpha as the optimal alpha.
 }
 \description{
 This function creates plots for finite Poisson mixture regression models of
-class "FPMRM". It generates three plots: lambdas vs. bics for all alpha
+class "FPMRM". It generates three plots: lambdas vs. ics for all alpha
 values, lambdas vs. regression coefficients, and lambdas vs. group norms for
 all models with the same alpha as the optimal alpha.
 }
@@ -68,7 +68,7 @@ mod <- FMRM(x = X, y = y, G = 6, family = poisson(), verbose = FALSE)
 plots <- plot(mod)
 
 # ----Display plots----
-plots[[1]] # ----lambdas vs. bics----
+plots[[1]] # ----lambdas vs. ics----
 plots[[2]] # ----lambdas vs. regression coefficients----
 plots[[3]] # ----lambdas vs. group norms----
 \dontshow{\}) # examplesIf}

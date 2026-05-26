@@ -34,7 +34,7 @@ log_likelihood <- function(x, y, family, pi, beta, ...){
   # ----calculate B_{g0} + x_{i1}B_{g1} + ... + x_{ip}B_{gp} for all i and g----
   linear_pred <- x %*% t(beta)
 
-  # ----calculate link function for mu, depending on the distribution----
+  # ----calculate link function for mu, depending on the family----
   # ----calculate weighted densities for all i and g----
   if (family == "gaussian"){
     sigma <- as.vector(args$sigma)

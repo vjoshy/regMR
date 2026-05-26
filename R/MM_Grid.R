@@ -227,7 +227,6 @@ MM_Grid <- function(g,
                                  init_sigma[[g]], init_gamma[[g]])
   }
   else if (family == "poisson"){
-    init_mod <- NULL
     init_pi <- list()
     init_pi[[g]] <- rep(1/g, g)
 
@@ -272,10 +271,12 @@ MM_Grid <- function(g,
                                  init_z[[g]])
   }
   else if (family == "binomial"){
-
+    init_parameters[[g]] <- list(init_pi[[g]], init_beta[[g]],
+                                 init_z[[g]])
   }
   else if (family == "gamma"){
-
+    init_parameters[[g]] <- list(init_pi[[g]], init_beta[[g]],
+                                 init_nu[[g]], init_z[[g]])
   }
 
   if(n >= p){
@@ -301,15 +302,9 @@ MM_Grid <- function(g,
                                            rep(1, g), init_parameters[[g]][[3]])
         }
       }
-      else if (family == "poisson"){
-        lambda_max <- lambda_max_compute_FPMRM(x, y, init_parameters[[g]][[3]],
+      else {
+        lambda_max <- lambda_max_compute_GLM(x, y, family, init_parameters[[g]][[3]],
                                                init_parameters[[g]][[2]])
-      }
-      else if (family == "binomial"){
-
-      }
-      else if (family == "gamma"){
-
       }
 
       # ----calculate lambda_min based on lambda_max for g, log the value----
@@ -382,15 +377,14 @@ MM_Grid <- function(g,
             init_parameters[[g]][[3]] <- parameters[[i]]$sigma
             init_parameters[[g]][[4]] <- parameters[[i]]$z
           }
-          else if (family == "poisson"){
+          else if (family == "poisson" || family == "binomial"){
             init_parameters[[g]][[2]] <- parameters[[i]]$beta
             init_parameters[[g]][[3]] <- parameters[[i]]$z
           }
-          else if (family == "binomial"){
-
-          }
           else if (family == "gamma"){
-
+            init_parameters[[g]][[2]] <- parameters[[i]]$beta
+            init_parameters[[g]][[3]] <- parameters[[i]]$nu
+            init_parameters[[g]][[4]] <- parameters[[i]]$z
           }
         }
       }

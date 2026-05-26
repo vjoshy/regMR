@@ -2,8 +2,8 @@
 #'
 #' Compute sparse group lasso (sgl) penalty majorization matrix for application
 #' when updating regression parameters for finite mixture regression
-#' models. This function is used during model estimation, specifically within
-#' iterations of the MM algorithm.
+#' models when penalty is true. This function is used during model estimation,
+#' specifically within iterations of the MM algorithm.
 #'
 #' @param G An integer greater than or equal to one representing the
 #' number of mixture components (groups) in a finite mixture regression

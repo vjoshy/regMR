@@ -1,7 +1,7 @@
 #' Plot Method for a Finite Gaussian Mixture Regression Model of class "FGMRM"
 #'
 #' This function creates plots for finite Gaussian mixture regression models of
-#' class "FGMRM". It generates three plots: lambdas vs. bics for all alpha
+#' class "FGMRM". It generates three plots: lambdas vs. ics for all alpha
 #' values, lambdas vs. regression coefficients, and lambdas vs. group norms for
 #' all models with the same alpha as the optimal alpha.
 #'
@@ -9,7 +9,7 @@
 #' MM_Grid() with family = gaussian().
 #' @param ... Additional arguments for plotting (currently unused).
 #'
-#' @returns A list of three ggplot objects: lambdas vs. bics for all alpha
+#' @returns A list of three ggplot objects: lambdas vs. ics for all alpha
 #' values, lambdas vs. regression coefficients, and lambdas vs. group norms for
 #' all models with the same alpha as the optimal alpha.
 #' @export
@@ -59,7 +59,7 @@
 #' plots <- plot(mod)
 #'
 #' # ----Display plots----
-#' plots[[1]] # ----lambdas vs. bics----
+#' plots[[1]] # ----lambdas vs. ics----
 #' plots[[2]] # ----lambdas vs. regression coefficients----
 #' plots[[3]] # ----lambdas vs. group norms----
 plot.FGMRM <- function(x, ...){
@@ -71,24 +71,24 @@ plot.FGMRM <- function(x, ...){
 
   # ----plot one----
 
-  # ----reshape the matrix containing the alpha, lambda, and bic values for----
+  # ----reshape the matrix containing the alpha, lambda, and ic values for----
   # ----plotting purposes----
-  long <- reshape2::melt(x$alpha_lambda_bic)
+  long <- reshape2::melt(x$alpha_lambda_ic)
   long <- long[seq(1, 1100), ]
-  long[, 1] <- x$alpha_lambda_bic[, 1]
-  long[, 2] <- x$alpha_lambda_bic[, 2]
-  long[, 3] <- x$alpha_lambda_bic[, 3]
-  colnames(long) <- c("alpha", "lambda", "bic")
+  long[, 1] <- x$alpha_lambda_ic[, 1]
+  long[, 2] <- x$alpha_lambda_ic[, 2]
+  long[, 3] <- x$alpha_lambda_ic[, 3]
+  colnames(long) <- c("alpha", "lambda", x$parameters$ic_type)
 
-  # ----plot the lambdas vs. the bics for all alpha values----
+  # ----plot the lambdas vs. the ics for all alpha values----
   plot_one <- ggplot(long, aes(x = log(.data[["lambda"]]),
-                                 y = .data[["bic"]],
+                                 y = .data[[x$parameters$ic_type]],
                                  group = as.factor(.data[["alpha"]]),
                                  color = as.factor(.data[["alpha"]]))) +
     geom_point(size = 1, aes(alpha = 0.2), na.rm = TRUE) +
     scale_color_viridis_d(option = "viridis") +
     theme_bw() +
-    labs(y = "BIC", x = expression(log(lambda)),
+    labs(y = toupper(x$parameters$ic_type), x = expression(log(lambda)),
          color = "Alpha") +
     theme(text = element_text(family = "serif", face="bold", size=12)) +
     guides(alpha = "none") +
