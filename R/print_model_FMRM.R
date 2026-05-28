@@ -1,7 +1,10 @@
-#' Title
+#' Printing Helper Function for FMRM()
 #'
-#' @param selected_parameters description
-#' @param selected_compartment description
+#' @param selected_parameters parameters for finite mixture regression model,
+#' depends on family.
+#' @param selected_compartment An integer greater than or equal to one
+#' representing the number of mixture components (groups) in a finite mixture
+#' regression model.
 #' @param family description
 #' @param information_criteria A string of characters specifying the
 #' information criteria for model selection purposes. The model that minimizes the
@@ -12,10 +15,8 @@
 #' @returns No return value, called for side effects
 #'
 #' @keywords internal
-print_model_FMRM <- function(selected_parameters,
-                             selected_compartment,
-                             family,
-                             information_criteria){
+print_model_FMRM <- function(selected_parameters,selected_compartment,
+                             family, information_criteria){
   cat(strrep("-", getOption("width")), "\n\n")
   cat(" overall model chosen ->\n\n")
   cat(" G =", selected_compartment, "\n\n")

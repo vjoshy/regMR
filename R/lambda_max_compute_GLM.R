@@ -29,6 +29,7 @@
 lambda_max_compute_GLM <- function(x, y, family, z_mat, beta_init) {
   G <- ncol(z_mat)
   p <- ncol(x)
+  m <- max(1, max(y))
 
   # ----Add intercept column to x if not already present----
   if (ncol(beta_init) == p + 1) {
@@ -48,6 +49,7 @@ lambda_max_compute_GLM <- function(x, y, family, z_mat, beta_init) {
     }
     else if (family == "binomial"){
       mu_g <- 1 / (1 + exp(-eta_g))
+      mu_g <- pmin(pmax(mu_g, 1e-10), 1 - 1e-10)
     }
     else {
       mu_g <- -1 / eta_g
@@ -58,7 +60,8 @@ lambda_max_compute_GLM <- function(x, y, family, z_mat, beta_init) {
       w_g <- mu_g * z_g
     }
     else if (family == "binomial"){
-      w_g = (mu_g * (1 - mu_g)) * z_g
+      w_g = m * (mu_g * (1 - mu_g)) * z_g
+      w_g <- pmax(w_g, 1e-10)
     }
     else {
       w_g = mu_g^2 * z_g

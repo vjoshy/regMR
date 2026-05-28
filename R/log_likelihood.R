@@ -51,11 +51,12 @@ log_likelihood <- function(x, y, family, pi, beta, ...){
       pi[g] * stats::dpois(y, lambda = lambda[, g]), numeric(n))
   }
   else if (family == "binomial"){
-    m <- max(y)
+    m <- max(1, max(y))
     p <- 1 / (1 + exp(-linear_pred))
+    p <- pmin(pmax(p, 1e-10), 1 - 1e-10)
 
     component_densities <- vapply(1:G, function(g)
-      pi[g] * stats::dbinom(y, size = m, prob = p[, g]), numeric(n))
+      pi[g] * stats::dbinom(x = y, size = m, prob = p[, g]), numeric(n))
   }
   else if (family == "gamma"){
     nu <- args$nu

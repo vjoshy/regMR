@@ -2,19 +2,22 @@
 % Please edit documentation in R/sigma_penalty_FGMRM.R
 \name{sigma_penalty_FGMRM}
 \alias{sigma_penalty_FGMRM}
-\title{Title}
+\title{Variance Penalty (Gaussian)}
 \usage{
 sigma_penalty_FGMRM(sigma, S_x, a_n)
 }
 \arguments{
-\item{sigma}{description}
+\item{sigma}{Component-wise standard deviations for each mixture
+component (group). Either a numeric vector or something coercible to
+one.}
 
 \item{S_x}{description}
 
 \item{a_n}{description}
 }
 \value{
-description
+A numeric scalar representing the variance penalty to be
+applied within the objective function being minimized.
 }
 \description{
 Description

@@ -1,13 +1,13 @@
-#' Error Check Function for Arguments of FMRM().
+#' Error Check Function for Arguments of MM_Grid().
 #'
+#' @param g An integer greater than or equal to one representing the
+#' number of mixture components (groups) in a finite mixture regression
+#' model.
 #' @param x Predictor/design matrix. A numeric matrix of size n x p where the
 #' number of rows is equal to the number of observations n, and the number of
 #' columns is equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
-#' @param G An integer greater than or equal to two specifying the maximum
-#' number of mixture components (groups) in the estimated model that the
-#' function will attempt to fit the data to.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -43,10 +43,6 @@
 #' lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.
 #' @param n_random_la A non-negative integer (default value 100) specifying the
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
-#' @param automatic_stopping A logical value which, if true (false is the
-#' default value), allows the function to implement IC-based automatic stopping on
-#' the mixture components. When the condition for stopping is met, the function
-#' stops iterating over the group count.
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
 #' @param common_sigma description
@@ -56,10 +52,10 @@
 #' @returns No return value, called for side effects.
 #'
 #' @keywords internal
-error_check_FMRM <- function(x, y, G, tol, max_iter, reps, lambda, lambda_max,
-                             n_lambda, alpha, verbose, penalty, random,
-                             n_random_la, automatic_stopping, parallel,
-                             common_sigma, sigma_penalty, pi_penalty){
+error_check_MM_Grid <- function(g, x, y, tol, max_iter, reps, lambda,
+                                lambda_max, n_lambda, alpha, verbose, penalty,
+                                random, n_random_la, parallel, common_sigma,
+                                sigma_penalty, pi_penalty){
   if(!is.numeric(x) || !is.matrix(x)){
     stop("Invalid x\n")
   }
@@ -70,8 +66,8 @@ error_check_FMRM <- function(x, y, G, tol, max_iter, reps, lambda, lambda_max,
   if (nrow(x) != length(y)){
     stop("x and y not compatible\n")
   }
-  if (!is.numeric(G) || G <= 1){
-    stop("Invalid group size G\n")
+  if (!is.numeric(g) || g < 1){
+    stop("Invalid group size g\n")
   }
   if (!is.numeric(tol) || tol <= 0){
     stop("Invalid tolerance level\n")
@@ -89,10 +85,9 @@ error_check_FMRM <- function(x, y, G, tol, max_iter, reps, lambda, lambda_max,
     stop("Invalid alpha\n")
   }
   if (!is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
-      !is.logical(automatic_stopping) || !is.logical(parallel) ||
-      !is.logical(common_sigma) || !is.logical(sigma_penalty) ||
-      !is.logical(pi_penalty)){
-    stop("Invalid input - boolean argument not a logical\n")
+      !is.logical(parallel) || !is.logical(common_sigma) ||
+      !is.logical(sigma_penalty) || !is.logical(pi_penalty)){
+    stop("Invalid input\n")
   }
   if (!is.numeric(n_random_la) || n_random_la <= 0){
     stop("Invalid n_random_la\n")

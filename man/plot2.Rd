@@ -7,8 +7,8 @@
 plot2(mod, x, y, covariate_one, covariate_two, ...)
 }
 \arguments{
-\item{mod}{An object of class {"FGMRM", "FPMRM"}, the result of calling FMRM() or
-MM_Grid().}
+\item{mod}{An object of class {"FGMRM", "FPMRM", "FBMRM, "FGamMRM"}, the
+result of calling FMRM() or MM_Grid() with the corresponding family designation.}
 
 \item{x}{Predictor/design matrix. A numeric matrix of size n x p, where the
 number of rows is equal to the number of observations n, and the number of
@@ -31,8 +31,8 @@ group assignments highlighted in colour.
 }
 \description{
 This function creates a 3-D plot for finite mixture regression
-models of class {"FGMRM", "FPMRM"}. It plots the specified covariates of x against y,
-with the group assignments highlighted in colour.
+models of class {"FGMRM", "FPMRM", "FBMRM, "FGamMRM"}. It plots the specified
+covariates of x against y, with the group assignments highlighted in colour.
 }
 \examples{
 \dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

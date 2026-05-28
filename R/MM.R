@@ -2,7 +2,7 @@
 #' Models
 #'
 #' Applies the Majorization-Minimization Algorithm to the inputted data given
-#' the specified parameters and distibution to estimate a finite mixture regression
+#' the specified parameters and distribution (family) to estimate a finite mixture regression
 #' model. Initial estimates for model parameters are
 #' provided within the function, but can be specified in the function call.
 #' This function is used for model estimation.
@@ -23,7 +23,9 @@
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
-#' @param reps description
+#' @param reps An integer greater than or equal to one specifying the
+#' number of times the MM algorithm is repeated on the same initial parameters.
+#' Default value is 1.
 #' @param lambda A non-negative numeric value (tuning parameter) specifying the
 #' strength of the sparse group lasso (sgl) penalty. Default value is zero (no penalty
 #' applied).
@@ -91,7 +93,7 @@
 MM <- function(x,
                y,
                G,
-               family = c("gaussian", "poisson"),
+               family = c("gaussian", "poisson", "binomial", "gamma"),
                tol = 1e-04,
                max_iter = 500,
                reps = 1,
@@ -105,42 +107,19 @@ MM <- function(x,
                sigma_penalty = TRUE,
                pi_penalty = TRUE){
   #----input validation/error check----
-  if(!is.numeric(x)){
-    stop("Invalid x\n")
-  }
-  if(!is.numeric(y)){
-    stop("Invalid y\n")
-  }
-  if (!is.numeric(G) || G < 1){
-    stop("Invalid group size G\n")
-  }
-  if (!is.numeric(tol) || tol <= 0){
-    stop("Invalid tolerance level\n")
-  }
-  if (!is.numeric(max_iter) || max_iter < 1){
-    stop("Invalid max_iter\n")
-  }
-  if (!is.numeric(lambda) || lambda < 0){
-    stop("Invalid lambda\n")
-  }
-  if (!is.numeric(alpha) || alpha > 1 || alpha < 0){
-    stop("Invalid alpha\n")
-  }
-  if (!is.logical(verbose) || !is.logical(penalty)||
-      !is.logical(common_sigma) ||
-      !is.logical(sigma_penalty) || !is.logical(pi_penalty)){
-    stop("Invalid input\n")
-  }
+  error_check_MM(x, y, G, tol, max_iter, reps, lambda, alpha,
+                 init_parameters, verbose, penalty, information_criteria,
+                 common_sigma, sigma_penalty, pi_penalty)
 
+  # ----get family and information criteria arguments----
   if (inherits(family, "family")) {
     family <- family$family
   } else {
     family <- match.arg(family)
   }
-
   information_criteria <- match.arg(information_criteria)
 
-  # ----get number of covariates and samples, add ones for the intercept----
+  # ----get number of covariates and observations, add ones for the intercept---
   p = ncol(x)
   n = nrow(x)
   x <- cbind(1, x)
@@ -161,33 +140,45 @@ MM <- function(x,
     penalty <- FALSE
   }
 
-  # ----initialize parameter estimates using Mclust function----
+
+  # ----initial parameter estimates for each family if not provided----
   if (is.null(init_parameters)){
     if (family == "gaussian"){
-        init_mod <- mclust::Mclust(y, G = G, modelNames = "V", verbose = FALSE)
+      # ----initialize parameter estimates using Mclust function----
+      init_mod <- mclust::Mclust(y, G = G, modelNames = "V", verbose = FALSE)
 
-        init_pi <- init_mod$parameters$pro
+      init_pi <- init_mod$parameters$pro
 
-        init_beta <- matrix(rep(1e-10, (p + 1) * G), ncol = p + 1, nrow = G)
-        init_beta[, 1] <- t(init_mod$parameters$mean)
+      init_beta <- matrix(rep(1e-10, (p + 1) * G), ncol = p + 1, nrow = G)
+      init_beta[, 1] <- t(init_mod$parameters$mean)
 
-        if (common_sigma) {
-          s_global <- mad(as.numeric(y))
-          init_sigma <- rep(s_global, G)
-        } else {
-          init_sigma <- sqrt(init_mod$parameters$variance$sigmasq)
-        }
+      if (common_sigma) {
+        s_global <- mad(as.numeric(y))
+        init_sigma <- rep(s_global, G)
+      } else {
+        init_sigma <- sqrt(init_mod$parameters$variance$sigmasq)
+      }
 
-        init_gamma <- init_mod$z
+      init_gamma <- init_mod$z
 
-        init_parameters <- list(init_pi, init_beta, init_sigma, init_gamma)
+      init_parameters <- list(init_pi, init_beta, init_sigma, init_gamma)
     }
-    else if (family == "poisson"){
+    else if (family == "poisson" || family == "binomial"){
+      # ----initialize parameter estimates using random initialization----
       init_pi <- rep(1/G, G)
 
+      if (family == "poisson"){
+        base_intercept <- log(mean(y))
+      }
+      else{
+        m <- max(1, max(y))
+        prop <- mean(y / m)
+        prop <- pmin(pmax(prop, 1e-10), 1 - 1e-10)  # ----guard against 0 and 1----
+        base_intercept <- log(prop / (1 - prop))
+      }
       init_beta <- matrix(0, nrow = G, ncol = p + 1)
       for(g in 1:G) {
-        init_beta[g, 1] <- log(mean(y)) + rnorm(1, 0, 0.1)
+        init_beta[g, 1] <- base_intercept + rnorm(1, 0, 0.1)
         init_beta[g, 2:(p+1)] <- rnorm(p, 0, 0.05)
       }
 
@@ -199,10 +190,8 @@ MM <- function(x,
 
       init_parameters <- list(init_pi, init_beta, init_z)
     }
-    else if (family == "binomial"){
-      init_parameters <- list(init_pi, init_beta, init_z)
-    }
     else if (family == "gamma"){
+      # ----initialize parameter estimates using random initialization----
       init_parameters <- list(init_pi, init_beta, init_nu, init_z)
     }
   }
@@ -217,6 +206,7 @@ MM <- function(x,
   ics<- numeric(reps)
 
   for(k in 1:reps){
+    # ----copy over initial parameters----
     if (family == "gaussian"){
       pi <- init_parameters[[1]]
       beta <- init_parameters[[2]]
@@ -256,10 +246,10 @@ MM <- function(x,
         V <- compute_V(G, beta, alpha, pi)
       }
 
-      # ----UPDATE PI PARAMETER----
+      # ----update pi parameter----
       pi <- pi_update(n, gamma_mat)
 
-      # ----UPDATE BETA PARAMETER----
+      # ----update beta parameter----
       if (family == "gaussian"){
         if (pi_penalty){
           beta <- beta_update_FGMRM(x, y, gamma_mat, pi, sigma, V, lambda, penalty)
@@ -272,12 +262,13 @@ MM <- function(x,
                                 lambda, penalty, max_iter, 1e-08)
       }
 
+      # ----if penalizing, declare non-active betas----
       if (penalty){
         beta <- ifelse(abs(beta) < 1e-10, 1e-10, beta)
       }
 
       if (family == "gaussian"){
-        # ----UPDATE SIGMA PARAMETER----
+        # ----update sigma parameter----
         if (common_sigma) {
           # ----pooled variance: (1/n) * sum_{n,g} tau_{ng} * residual^2----
           y_ik <- x %*% t(beta)
@@ -295,13 +286,13 @@ MM <- function(x,
       }
 
       if (family == "gamma"){
-        # ----UPDATE NU PARAMETER----
+        # ----update nu parameter----
       }
 
-      # ----LOG LIKELIHOOD----
-      ll <- log_likelihood(x, y, family, pi, beta, sigma = sigma)
+      # ----log likelihood----
+      ll <- log_likelihood(x, y, family, pi, beta, sigma = sigma, nu = nu)
 
-      # ----SGL PENALTY----
+      # ----sgl penalty----
       if (penalty){
         if (pi_penalty){
           pen <- sgl_penalty(lambda, alpha, beta, pi, G)
@@ -313,7 +304,7 @@ MM <- function(x,
         pen <- 0
       }
 
-      # ----Variance Penalty----
+      # ----variance penalty for Gaussian----
       if (family == "gaussian"){
         if(common_sigma || !sigma_penalty){
           pen_var <- 0
@@ -324,7 +315,7 @@ MM <- function(x,
         pen <- pen + pen_var
       }
 
-      # ----OBJECTIVE FUNCTION----
+      # ----objective function being minimized----
       objective_fun_old <- objective_fun_new
       objective_fun_new <- objective_function(ll, pen)
 
@@ -335,6 +326,7 @@ MM <- function(x,
       iter <- iter + 1
     }
 
+    # ----if error in algorithm, set history to NA for specific run----
     if (is.na(objective_fun_new) || is.na(objective_fun_old) || any(is.na(N))){
       pis[[k]] <- betas[[k]] <- sigmas[[k]] <- logliks[k] <- ics[k] <- NA
     }
@@ -350,27 +342,27 @@ MM <- function(x,
         total_active_betas <- 0
 
         for(g in 1:G) {
-          # ----Count non-zero covariates in component g (D_g)----
+          # ----count non-zero covariates in component g (D_g)----
           active_betas_per_component[g] <- sum(abs(beta[g, -1]) > 1e-10)
           total_active_betas <- total_active_betas + active_betas_per_component[g]
         }
 
-        # ----Determine j: number of covariates selected by group lasso----
-        # ----A covariate is selected if it's active in ANY component----
+        # ----determine j: number of covariates selected by group lasso----
+        # ----a covariate is selected if it's active in ANY component----
         covariates_selected <- logical(p)
         for(j_covar in 1:p) {
-          # ----Check if covariate j_covar is active in any component----
+          # ----check if covariate j_covar is active in any component----
           # ----+1 for intercept----
           covariates_selected[j_covar] <- any(abs(beta[, j_covar + 1]) > 1e-10)
         }
 
-        # ----Total number of selected covariates----
+        # ----total number of selected covariates----
         j_group_lasso <- sum(covariates_selected)
 
         gamma <- 1.0
         p_total <- p
 
-        # ----Calculate the double sum----
+        # ----calculate the double sum----
         total_combinatorial_sum <- 0
         if(j_group_lasso > 0) {
           num_ways_to_choose_j <- choose(p_total, j_group_lasso)
@@ -389,10 +381,10 @@ MM <- function(x,
           ebic_penalty <- 0
         }
 
-        # ----Total parameters: active betas + intercepts + mixing proportions----
+        # ----total parameters: active betas + intercepts + mixing proportions----
         total_params <- total_active_betas + G + (G - 1)
 
-        # ----Final EBIC----
+        # ----final EBIC----
         ics[k] <- (-2 * ll) + (total_params * log(n)) + ebic_penalty
       }
       else if (information_criteria == "aic"){
@@ -401,6 +393,7 @@ MM <- function(x,
         ics[k] <-  (-2 * ll) + (num_params * 2)
       }
 
+      # ----copy history----
       pis[[k]] <- pi
       betas[[k]] <- beta
       sigmas[[k]] <- sigma
@@ -412,9 +405,9 @@ MM <- function(x,
 
   if (!all(is.na(ics))){
     # ----get run that minimized the selection criteria----
-
     valid_indices <- which(!is.na(ics) & !sapply(betas, is.null))
 
+    # ----if no valid runs, return NA for everything----
     if(length(valid_indices) == 0) {
       if (family == "gaussian"){
         return(list(ic = NA, ic_type = information_criteria, loglik = NA, beta = NA, pi = NA, sigma = NA, z = NA,
@@ -433,7 +426,7 @@ MM <- function(x,
       }
     }
 
-    # ----Find minimum among valid entries only----
+    # ----find minimum among valid entries only----
     valid_ics <- ics[valid_indices]
     min_valid_idx <- which.min(valid_ics)
     min_index <- valid_indices[min_valid_idx]
@@ -447,7 +440,8 @@ MM <- function(x,
       y_hat <- rowSums(z_list[[min_index]] * exp(y_ik))
     }
     else if (family == "binomial"){
-      y_hat <- rowSums(z_list[[min_index]] * (1 / (1 + exp(-y_ik))))
+      m <- max(1, max(y))
+      y_hat <- rowSums(z_list[[min_index]] * (1 / (1 + exp(-y_ik)))) * m
     }
     else if (family == "gamma"){
       y_hat <- rowSums(z_list[[min_index]] * (-1 / y_ik))

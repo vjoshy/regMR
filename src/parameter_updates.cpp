@@ -125,6 +125,8 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
   arma::vec beta_g = beta_g_old;
   int iter = 0;
   bool converged = false;
+  int max_y = arma::max(y);
+  int m = std::max(1, max_y);
 
   // Prepare penalty vector if needed
   arma::vec penalty_vec;
@@ -143,6 +145,7 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
     if (family == "poisson"){
       mu_g = arma::exp(eta_g);
     } else if (family == "binomial"){
+      eta_g = arma::clamp(eta_g, -30, 30);
       mu_g = 1 / (1 + arma::exp(-eta_g));
     } else {
       mu_g = -1 / eta_g;
@@ -153,7 +156,9 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
     if (family == "poisson"){
       working_response = eta_g + (y - mu_g) / mu_g;
     } else if (family == "binomial"){
-      working_response = eta_g + (y - mu_g) / (mu_g % (1 - mu_g));
+      arma::vec denom = arma::clamp(mu_g % (1.0 - mu_g), 1e-10, arma::datum::inf);
+      working_response = eta_g + (y / m - mu_g) / denom;
+      working_response = arma::clamp(working_response, -30, 30);
     } else {
       working_response = eta_g + (y - mu_g) / arma::square(mu_g);
     }
@@ -162,7 +167,9 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
     if (family == "poisson"){
       weights = mu_g % z_g;
     } else if (family == "binomial"){
-      weights = (mu_g % (1 - mu_g)) % z_g;
+      arma::vec var = arma::clamp(mu_g % (1.0 - mu_g), 1e-10, arma::datum::inf);
+      weights = m * var % z_g;
+      weights = arma::clamp(weights, 1e-10, arma::datum::inf);
     } else {
       weights = arma::square(mu_g) % z_g;
     }

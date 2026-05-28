@@ -9,7 +9,7 @@ MM(
   x,
   y,
   G,
-  family = c("gaussian", "poisson"),
+  family = c("gaussian", "poisson", "binomial", "gamma"),
   tol = 1e-04,
   max_iter = 500,
   reps = 1,
@@ -47,7 +47,9 @@ iterations, the algorithm stops.}
 maximum number of iterations ran within the MM algorithm. Default value is
 500.}
 
-\item{reps}{description}
+\item{reps}{An integer greater than or equal to one specifying the
+number of times the MM algorithm is repeated on the same initial parameters.
+Default value is 1.}
 
 \item{lambda}{A non-negative numeric value (tuning parameter) specifying the
 strength of the sparse group lasso (sgl) penalty. Default value is zero (no penalty
@@ -85,7 +87,7 @@ mixture regression model.
 }
 \description{
 Applies the Majorization-Minimization Algorithm to the inputted data given
-the specified parameters and distibution to estimate a finite mixture regression
+the specified parameters and distribution (family) to estimate a finite mixture regression
 model. Initial estimates for model parameters are
 provided within the function, but can be specified in the function call.
 This function is used for model estimation.

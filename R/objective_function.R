@@ -5,7 +5,7 @@
 #' model estimation, specifically within iterations of the MM algorithm.
 #'
 #' @param ll A numeric scalar representing the log-likelihood of the finite
-#' Gaussian mixture regression model.
+#' mixture regression model.
 #' @param pen A numeric scalar representing the sparse group lasso (sgl) penalty
 #' being applied to the log-likelihood.
 #'

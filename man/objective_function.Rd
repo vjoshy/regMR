@@ -8,7 +8,7 @@ objective_function(ll, pen)
 }
 \arguments{
 \item{ll}{A numeric scalar representing the log-likelihood of the finite
-Gaussian mixture regression model.}
+mixture regression model.}
 
 \item{pen}{A numeric scalar representing the sparse group lasso (sgl) penalty
 being applied to the log-likelihood.}

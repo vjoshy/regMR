@@ -1,11 +1,11 @@
 #' Plot Covariates of X Against Y With Group Assignments
 #'
 #' This function creates a 3-D plot for finite mixture regression
-#' models of class {"FGMRM", "FPMRM"}. It plots the specified covariates of x against y,
-#' with the group assignments highlighted in colour.
+#' models of class {"FGMRM", "FPMRM", "FBMRM, "FGamMRM"}. It plots the specified
+#' covariates of x against y, with the group assignments highlighted in colour.
 #'
-#' @param mod An object of class {"FGMRM", "FPMRM"}, the result of calling FMRM() or
-#' MM_Grid().
+#' @param mod An object of class {"FGMRM", "FPMRM", "FBMRM, "FGamMRM"}, the
+#' result of calling FMRM() or MM_Grid() with the corresponding family designation.
 #' @param x Predictor/design matrix. A numeric matrix of size n x p, where the
 #' number of rows is equal to the number of observations n, and the number of
 #' columns is equal to the number of covariates p.
