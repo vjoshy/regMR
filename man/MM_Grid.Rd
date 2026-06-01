@@ -104,8 +104,8 @@ function to run parallel workers to increase computational speed.}
 \item{pi_penalty}{description}
 }
 \value{
-An object, depending on inputted family, of class {FGMRM, FPMRM, FBMRM, FGamMRM}
-containing the parameters of the estimated
+An object, depending on inputted family, of class
+(FGMRM, FPMRM, FBMRM, FGamMRM) containing the parameters of the estimated
 finite mixture regression model (parameters depend on inputted family),
 number of mixture components, parameters of models with the same alpha, and a numeric
 matrix containing the alpha, lambda, and ic values of all estimated models

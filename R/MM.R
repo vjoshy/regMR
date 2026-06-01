@@ -153,7 +153,7 @@ MM <- function(x,
       init_beta[, 1] <- t(init_mod$parameters$mean)
 
       if (common_sigma) {
-        s_global <- mad(as.numeric(y))
+        s_global <- stats::mad(as.numeric(y))
         init_sigma <- rep(s_global, G)
       } else {
         init_sigma <- sqrt(init_mod$parameters$variance$sigmasq)
@@ -178,8 +178,8 @@ MM <- function(x,
       }
       init_beta <- matrix(0, nrow = G, ncol = p + 1)
       for(g in 1:G) {
-        init_beta[g, 1] <- base_intercept + rnorm(1, 0, 0.1)
-        init_beta[g, 2:(p+1)] <- rnorm(p, 0, 0.05)
+        init_beta[g, 1] <- base_intercept + stats::rnorm(1, 0, 0.1)
+        init_beta[g, 2:(p+1)] <- stats::rnorm(p, 0, 0.05)
       }
 
       init_z <- matrix(0, nrow = n, ncol = G)
@@ -276,9 +276,9 @@ MM <- function(x,
           num <- sum(gamma_mat * resid2)
           sigma <- rep(sqrt(num / n), G)
         } else if (sigma_penalty) {
-          q1 <- quantile(y, 0.25)
-          q3 <- quantile(y, 0.75)
-          iqr_var <- var(y[y >= q1 & y <= q3])
+          q1 <- stats::quantile(y, 0.25)
+          q3 <- stats::quantile(y, 0.75)
+          iqr_var <- stats::var(y[y >= q1 & y <= q3])
           sigma <- sigma_update_pen(x, y, iqr_var = iqr_var, n = n, gamma_mat, beta, N)
         } else {
           sigma <- sigma_update(x, y, gamma_mat, beta, N)

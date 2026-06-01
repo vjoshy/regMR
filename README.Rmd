@@ -23,9 +23,9 @@ knitr::opts_chunk$set(
 
 ## Overview
 
-regMR provides a comprehensive framework for fitting regularized finite mixture regression models via the MM algorithm. The sparse-group-lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection. The package provides multiple functions for estimation and allows users to fit models over different lambda-alpha sgl penalty combinations and group counts.
+regMR provides a comprehensive framework for fitting regularized finite mixture regression models via the MM algorithm. The sparse-group-lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection. The package provides multiple functions for estimation and allows users to fit models over different lambda-alpha sgl penalty combinations, group counts, and to Gaussian, Poisson, Binomial, and Gamma distributed data.
 
-This readme file provides a brief and basic example on how to use the regMR package. It walks through generating clustered data to be modeled, applying one of the main functions, `FGMRM()`, to fit a finite Gaussian mixture regression model to the data, and how to apply the plotting and summary methods/functions to the model, getting the most use out of the package.
+This readme file provides a brief and basic example on how to use the regMR package. It walks through generating clustered data to be modeled, applying one of the main functions, `FMRM()`, to fit a finite Gaussian mixture regression model to the data, and how to apply the plotting and summary methods/functions to the model, getting the most use out of the package.
 
 ## Installation
 
@@ -92,23 +92,23 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 ```
 
-2.  Call `FGMRM()` to fit a finite Gaussian mixture regression model to the data
+2.  Call `FMRM()` with `family = gaussian()` to fit a finite Gaussian mixture regression model to the data
 
-`FGMRM()` fits regularized finite Gaussian mixture regression models via the MM algorithm over a range of lambda-alpha pairs (sgl penalty values) and group counts. The maximum group count to be tested is specified in the function below as `G = 6`. The function chooses the model with the lowest BIC value. 
+`FMRM()` fits regularized finite mixture regression models via the MM algorithm over a range of lambda-alpha pairs (sgl penalty values) and group counts. The maximum group count to be tested is specified in the function below as `G = 4`. The function chooses the model with the lowest information criteria value as specified by the user (default is BIC). 
 
 ```{r example-2}
 # ----Load the regMR package----
 library(regMR)
 
 # ----Fit model----
-mod <- FGMRM(x = X, y = y, G = 6)
+mod <- FMRM(x = X, y = y, G = 4, family = gaussian())
 ```
 
-3.  Use `plot()`, `plot2()`, and `summary()` on the finite Gaussian mixture regression model from `FGMRM()` 
+3.  Use `plot()`, `plot2()`, and `summary()` on the finite Gaussian mixture regression model from `FMRM()` of class `FGMRM` 
 
-`plot()` is an S3 method for plotting results (class FGMRM) from the `FGMRM()` and `MM_Grid_FGMRM()` functions. The function outputs three plots:
+`plot()` is an S3 method for plotting results (class FGMRM) from the `FMRM()` and `MM_Grid()` functions. The function outputs three plots:
 
-1.  Lambdas vs. the BICs of models for all alpha values
+1.  Lambdas vs. the ICs of models for all alpha values
 
 2.  Regression parameters over lambdas for all models with the same alpha as the optimal alpha.
 
@@ -124,7 +124,7 @@ plot(mod)
 plot2(mod, X, y, 1, 2)
 ```
 
-`summary()` is an S3 method for summarizing results (class FGMRM) from the `FGMRM()` and `MM_Grid_FGMRM()` functions. Outputs the number of mixture components, optimal lambda-alpha, log-likelihood, bic, mean-squared-error, and parameters (pi, sigma, beta) of the model.
+`summary()` is an S3 method for summarizing results (class FGMRM) from the `FMRM()` and `MM_Grid()` functions. Outputs the number of mixture components, optimal lambda-alpha, log-likelihood, bic, mean-squared-error, and parameters (pi, sigma, beta) of the model.
 
 ```{r example-5}
 summary(mod)

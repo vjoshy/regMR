@@ -62,8 +62,8 @@
 #' @param sigma_penalty description
 #' @param pi_penalty description
 #'
-#' @returns An object, depending on inputted family, of class {FGMRM, FPMRM, FBMRM, FGamMRM}
-#' containing the parameters of the estimated
+#' @returns An object, depending on inputted family, of class
+#' (FGMRM, FPMRM, FBMRM, FGamMRM) containing the parameters of the estimated
 #' finite mixture regression model (parameters depend on inputted family),
 #' number of mixture components, parameters of models with the same alpha, and a numeric
 #' matrix containing the alpha, lambda, and ic values of all estimated models
@@ -224,9 +224,9 @@ MM_Grid <- function(g,
     }
     init_beta[[g]] <- matrix(0, nrow = g, ncol = p + 1)
     for(comp in 1:g) {
-      init_beta[[g]][comp, 1] <- base_intercept + rnorm(1, 0, 0.1)  # Small variation
+      init_beta[[g]][comp, 1] <- base_intercept + stats::rnorm(1, 0, 0.1)  # Small variation
       if(p > 0) {
-        init_beta[[g]][comp, 2:(p+1)] <- rnorm(p, 0, 0.1)  # Even smaller slopes
+        init_beta[[g]][comp, 2:(p+1)] <- stats::rnorm(p, 0, 0.1)  # Even smaller slopes
       }
     }
 

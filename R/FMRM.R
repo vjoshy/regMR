@@ -65,8 +65,8 @@
 #' @param sigma_penalty description
 #' @param pi_penalty description
 #'
-#' @returns An object, depending on inputted family, of class {FGMRM, FPMRM, FBMRM, FGamMRM}
-#' containing the parameters of the estimated
+#' @returns An object, depending on inputted family, of class
+#' (FGMRM, FPMRM, FBMRM, FGamMRM) containing the parameters of the estimated
 #' finite mixture regression model (parameters depend on inputted family),
 #' number of mixture components, parameters of models with the same alpha, and a numeric
 #' matrix containing the alpha, lambda, and ic values of all estimated models
@@ -110,7 +110,7 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' mod <- FMRM(x = X, y = y, G = 6, family = gaussian(), verbose = FALSE)
+#' mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), verbose = FALSE)
 FMRM <- function(x,
                  y,
                  G,

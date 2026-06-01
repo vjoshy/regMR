@@ -53,7 +53,7 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' mod <- FMRM(x = X, y = y, G = 6, family = gaussian(), verbose = FALSE)
+#' mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), verbose = FALSE)
 #'
 #' # ----Call plot----
 #' plots <- plot(mod)

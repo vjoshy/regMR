@@ -56,7 +56,7 @@
 #' # ----Simulate response y (count of successes out of m trials)----
 #' y <- rbinom(n, size = m, prob = prob_vec)
 #'
-#' mod <- FMRM(x = X, y = y, G = 6, family = binomial(), verbose = FALSE)
+#' mod <- FMRM(x = X, y = y, G = 4, family = binomial(), verbose = FALSE)
 #'
 #' # ----Call plot----
 #' plots <- plot(mod)
@@ -65,7 +65,7 @@
 #' plots[[1]] # ----lambdas vs. ics----
 #' plots[[2]] # ----lambdas vs. regression coefficients----
 #' plots[[3]] # ----lambdas vs. group norms----
-plot.FPMRM <- function(x, ...){
+plot.FBMRM <- function(x, ...){
   # ----error check----
   if (all(is.na(x$parameters_same_alpha))){
     stop("plot() on an object of class FBMRM is invalid if model was estimated
