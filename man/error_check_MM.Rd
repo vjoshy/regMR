@@ -65,11 +65,17 @@ function to print progress updates.}
 function to apply the sgl penalty to the regression parameter
 updates and objective function within iterations of the MM algorithm.}
 
-\item{common_sigma}{description}
+\item{common_sigma}{A logical value which, if true (false is the default value)
+and family = "gaussian" or gaussian(), estimates the standard deviations as
+equivalent across mixture components.}
 
-\item{sigma_penalty}{description}
+\item{sigma_penalty}{A logical value which, if true (default value)
+and family = "gaussian" or gaussian(), allows a variance-induced penalty to
+be applied to the objective function being minimized within the MM algorithm.}
 
-\item{pi_penalty}{description}
+\item{pi_penalty}{A logical value which, if true (default value), allows the
+MM algorithm to use estimates for pi in other parameter updates. If false,
+all values in the pi vector are replaced with the value one.}
 }
 \value{
 No return value, called for side effects.

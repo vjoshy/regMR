@@ -16,7 +16,9 @@ term).}
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
 
-\item{family}{description}
+\item{family}{A string of characters specifying the distribution of the
+finite mixture regression model being fit to the data. Parameter updates
+are altered depending on the inputted family.}
 
 \item{pi}{Mixing proportions for each component. Either a numeric vector, or
 something coercible to one.}

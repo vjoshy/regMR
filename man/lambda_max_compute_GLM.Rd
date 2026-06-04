@@ -15,7 +15,9 @@ term).}
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
 
-\item{family}{description}
+\item{family}{A string of characters specifying the distribution of the
+finite mixture regression model being fit to the data. Parameter updates
+are altered depending on the inputted family.}
 
 \item{z_mat}{A numeric matrix of size n x G, where the number of rows is equal to
 the number of observations n, and the number of columns is equal to the

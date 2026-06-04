@@ -31,9 +31,15 @@
 #' @param penalty A logical value which, if true (default value), allows the
 #' function to apply the sgl penalty to the regression parameter
 #' updates and objective function within iterations of the MM algorithm.
-#' @param common_sigma description
-#' @param sigma_penalty description
-#' @param pi_penalty description
+#' @param common_sigma A logical value which, if true (false is the default value)
+#' and family = "gaussian" or gaussian(), estimates the standard deviations as
+#' equivalent across mixture components.
+#' @param sigma_penalty A logical value which, if true (default value)
+#' and family = "gaussian" or gaussian(), allows a variance-induced penalty to
+#' be applied to the objective function being minimized within the MM algorithm.
+#' @param pi_penalty A logical value which, if true (default value), allows the
+#' MM algorithm to use estimates for pi in other parameter updates. If false,
+#' all values in the pi vector are replaced with the value one.
 #'
 #' @returns No return value, called for side effects.
 #'
@@ -42,10 +48,10 @@ error_check_MM <- function(x, y, G, tol, max_iter, reps, lambda, alpha,
                            init_parameters, verbose, penalty,
                            information_criteria, common_sigma, sigma_penalty,
                            pi_penalty){
-  if(!is.numeric(x)){
+  if(!is.numeric(x) || !is.matrix(x)){
     stop("Invalid x\n")
   }
-  if(!is.numeric(y)){
+  if(!is.numeric(y) || (!is.vector(y) && !is.matrix(y))){
     stop("Invalid y\n")
   }
   y <- as.vector(y)
@@ -73,6 +79,6 @@ error_check_MM <- function(x, y, G, tol, max_iter, reps, lambda, alpha,
   if (!is.logical(verbose) || !is.logical(penalty)||
       !is.logical(common_sigma) ||
       !is.logical(sigma_penalty) || !is.logical(pi_penalty)){
-    stop("Invalid input\n")
+    stop("Invalid input - boolean argument not a logical\n")
   }
 }

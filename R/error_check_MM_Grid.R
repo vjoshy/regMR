@@ -45,9 +45,15 @@
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
-#' @param common_sigma description
-#' @param sigma_penalty description
-#' @param pi_penalty description
+#' @param common_sigma A logical value which, if true (false is the default value)
+#' and family = "gaussian" or gaussian(), estimates the standard deviations as
+#' equivalent across mixture components.
+#' @param sigma_penalty A logical value which, if true (default value)
+#' and family = "gaussian" or gaussian(), allows a variance-induced penalty to
+#' be applied to the objective function being minimized within the MM algorithm.
+#' @param pi_penalty A logical value which, if true (default value), allows the
+#' MM algorithm to use estimates for pi in other parameter updates. If false,
+#' all values in the pi vector are replaced with the value one.
 #'
 #' @returns No return value, called for side effects.
 #'
@@ -87,7 +93,7 @@ error_check_MM_Grid <- function(g, x, y, tol, max_iter, reps, lambda,
   if (!is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
       !is.logical(parallel) || !is.logical(common_sigma) ||
       !is.logical(sigma_penalty) || !is.logical(pi_penalty)){
-    stop("Invalid input\n")
+    stop("Invalid input - boolean argument not a logical\n")
   }
   if (!is.numeric(n_random_la) || n_random_la <= 0){
     stop("Invalid n_random_la\n")

@@ -14,7 +14,12 @@
 #' @param G An integer greater than or equal to two specifying the maximum
 #' number of mixture components (groups) in the estimated model that the
 #' function will attempt to fit the data to.
-#' @param family description
+#' @param family A string of characters specifying the distribution of the
+#' finite mixture regression model being fit to the data. Parameter updates
+#' are altered depending on the inputted family. Current accepted types include
+#' Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
+#' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
+#' Input is converted to all lowercase within the function for simplification.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -61,9 +66,15 @@
 #' stops iterating over the group count.
 #' @param parallel A logical value which, if true (default value), allows the
 #' function to run parallel workers to increase computational speed.
-#' @param common_sigma description
-#' @param sigma_penalty description
-#' @param pi_penalty description
+#' @param common_sigma A logical value which, if true (false is the default value)
+#' and family = "gaussian" or gaussian(), estimates the standard deviations as
+#' equivalent across mixture components.
+#' @param sigma_penalty A logical value which, if true (default value)
+#' and family = "gaussian" or gaussian(), allows a variance-induced penalty to
+#' be applied to the objective function being minimized within the MM algorithm.
+#' @param pi_penalty A logical value which, if true (default value), allows the
+#' MM algorithm to use estimates for pi in other parameter updates. If false,
+#' all values in the pi vector are replaced with the value one.
 #'
 #' @returns An object, depending on inputted family, of class
 #' (FGMRM, FPMRM, FBMRM, FGamMRM) containing the parameters of the estimated
@@ -143,6 +154,7 @@ FMRM <- function(x,
   } else {
     family <- match.arg(family)
   }
+  family <- tolower(family)
   information_criteria <- match.arg(information_criteria)
 
   y <- as.matrix(y)

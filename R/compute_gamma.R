@@ -10,7 +10,9 @@
 #' term).
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one.
-#' @param family description
+#' @param family A string of characters specifying the distribution of the
+#' finite mixture regression model being fit to the data. Parameter updates
+#' are altered depending on the inputted family.
 #' @param pi Mixing proportions for each component. Either a numeric vector, or
 #' something coercible to one.
 #' @param beta Regression parameters for each mixture component (group). A

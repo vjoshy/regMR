@@ -40,7 +40,12 @@ columns is equal to the number of covariates p.}
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one.}
 
-\item{family}{description}
+\item{family}{A string of characters specifying the distribution of the
+finite mixture regression model being fit to the data. Parameter updates
+are altered depending on the inputted family. Current accepted types include
+Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
+poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
+Input is converted to all lowercase within the function for simplification.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the
@@ -97,11 +102,17 @@ and AIC ("aic").}
 \item{parallel}{A logical value which, if true (default value), allows the
 function to run parallel workers to increase computational speed.}
 
-\item{common_sigma}{description}
+\item{common_sigma}{A logical value which, if true (false is the default value)
+and family = "gaussian" or gaussian(), estimates the standard deviations as
+equivalent across mixture components.}
 
-\item{sigma_penalty}{description}
+\item{sigma_penalty}{A logical value which, if true (default value)
+and family = "gaussian" or gaussian(), allows a variance-induced penalty to
+be applied to the objective function being minimized within the MM algorithm.}
 
-\item{pi_penalty}{description}
+\item{pi_penalty}{A logical value which, if true (default value), allows the
+MM algorithm to use estimates for pi in other parameter updates. If false,
+all values in the pi vector are replaced with the value one.}
 }
 \value{
 An object, depending on inputted family, of class

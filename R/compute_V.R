@@ -15,6 +15,8 @@
 #' @param alpha A numeric value between zero and one inclusive specifying the
 #' weight between the lasso penalty and group lasso penalty being applied.
 #' Alpha = 1 gives the lasso fit and alpha = 0 gives the group lasso fit.
+#' @param pi Mixing proportions for each component. Either a numeric vector, or
+#' something coercible to one.
 #'
 #' @returns A numeric matrix of size G x (p + 1), where the number of
 #' rows is equal to the number of mixture components G, and the number of
