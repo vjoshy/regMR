@@ -62,7 +62,7 @@ mu_vec <- exp(eta_vec)
 # ----Simulate response y (count data)----
 y <- rpois(n, lambda = mu_vec)
 
-mod <- FMRM(x = X, y = y, G = 4, family = poisson(), verbose = FALSE)
+mod <- FMRM(x = X, y = y, G = 3, family = poisson(), verbose = FALSE)
 
 # ----Call plot----
 plots <- plot(mod)

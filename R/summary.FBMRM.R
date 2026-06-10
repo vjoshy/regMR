@@ -53,7 +53,7 @@
 #' # ----Simulate response y (count of successes out of m trials)----
 #' y <- rbinom(n, size = m, prob = prob_vec)
 #'
-#' mod <- FMRM(x = X, y = y, G = 4, family = binomial(), verbose = FALSE)
+#' mod <- FMRM(x = X, y = y, G = 3, family = binomial(), verbose = FALSE)
 #'
 #' # ----Display summary----
 #' summary(mod)

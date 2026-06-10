@@ -183,9 +183,9 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
     // Add penalty if needed
     if (penalty) {
       if (family == "gamma"){
-        XtWX.diag() += lambda * (1/nu_g) * penalty_vec * pi_g * pi_g;
+        XtWX.diag() += 2 * lambda * (1/nu_g) * penalty_vec * pi_g * pi_g;
       } else {
-        XtWX.diag() += lambda * penalty_vec * pi_g * pi_g;
+        XtWX.diag() += 2 * lambda * penalty_vec * pi_g * pi_g;
       }
     }
 

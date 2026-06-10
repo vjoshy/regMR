@@ -121,7 +121,7 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), verbose = FALSE)
+#' mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), verbose = FALSE)
 FMRM <- function(x,
                  y,
                  G,
@@ -292,18 +292,18 @@ FMRM <- function(x,
   # ----find compartment -> parameters which minimize model selection criteria--
   # ----and return model----
   if (!all(is.na(ic))){
+    names(models) <- 1:length(models)
     selected_compartment <- which.min(ic)
     selected_parameters <- models[[selected_compartment]]$parameters
-    selected_compartment <- selected_compartment + 1
 
     # ----if verbose, print the model----
     if (verbose){
-      print_model_FMRM(selected_parameters, selected_compartment, family, information_criteria)
+      print_model_FMRM(selected_parameters, selected_compartment + 1, family, information_criteria)
     }
 
     # ----get results, add class to them per family argument----
     results <- list(parameters = selected_parameters,
-                    g = selected_compartment,
+                    g = selected_compartment + 1,
                     parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
                     alpha_lambda_ic = models[[selected_compartment]]$alpha_lambda_ic)
 

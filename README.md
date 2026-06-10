@@ -278,8 +278,8 @@ plot2(mod, X, y, 1, 2)
     #>     return(list(x = xyz$x/x.scal + yx.f * y, y = xyz$z/z.scal + 
     #>         yz.f * y))
     #> }
-    #> <bytecode: 0x117fd97c0>
-    #> <environment: 0x117ff0358>
+    #> <bytecode: 0x13c480da0>
+    #> <environment: 0x13c4515b8>
     #> 
     #> $points3d
     #> function (x, y = NULL, z = NULL, type = "p", ...) 
@@ -301,8 +301,8 @@ plot2(mod, X, y, 1, 2)
     #>     }
     #>     else points(x, y, type = type, ...)
     #> }
-    #> <bytecode: 0x117fdbda8>
-    #> <environment: 0x117ff0358>
+    #> <bytecode: 0x13c47f970>
+    #> <environment: 0x13c4515b8>
     #> 
     #> $plane3d
     #> function (Intercept, x.coef = NULL, y.coef = NULL, lty = "dashed", 
@@ -350,8 +350,8 @@ plot2(mod, X, y, 1, 2)
     #>         segments(x.min + y * yx.f, z1 + y * yz.f, x.max + y * 
     #>             yx.f, z2 + y * yz.f, lty = ltya, ...)
     #> }
-    #> <bytecode: 0x117fe10b0>
-    #> <environment: 0x117ff0358>
+    #> <bytecode: 0x13c476dd8>
+    #> <environment: 0x13c4515b8>
     #> 
     #> $box3d
     #> function (...) 
@@ -366,8 +366,8 @@ plot2(mod, X, y, 1, 2)
     #>     lines(c(x.min, x.min), c(z.min, z.max), ...)
     #>     lines(c(x.min, x.max), c(z.min, z.min), ...)
     #> }
-    #> <bytecode: 0x117fe70b0>
-    #> <environment: 0x117ff0358>
+    #> <bytecode: 0x13c46ac88>
+    #> <environment: 0x13c4515b8>
     #> 
     #> $contour3d
     #> function (f, x.count = 10, y.count = 10, type = "l", lty = "24", 
@@ -428,8 +428,8 @@ plot2(mod, X, y, 1, 2)
     #>         else points(x, y, type = type, lty = lty, ...)
     #>     }
     #> }
-    #> <bytecode: 0x117fe5440>
-    #> <environment: 0x117ff0358>
+    #> <bytecode: 0x13c45ebe0>
+    #> <environment: 0x13c4515b8>
     #> 
     #> $par.mar
     #> $par.mar$mar

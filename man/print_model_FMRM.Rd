@@ -19,7 +19,9 @@ depends on family.}
 representing the number of mixture components (groups) in a finite mixture
 regression model.}
 
-\item{family}{description}
+\item{family}{A string of characters specifying the distribution of the
+finite mixture regression model being fit to the data. Parameter updates
+are altered depending on the inputted family.}
 
 \item{information_criteria}{A string of characters specifying the
 information criteria for model selection purposes. The model that minimizes the

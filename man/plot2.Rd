@@ -72,7 +72,7 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
 # ----Fit model----
-mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), verbose = FALSE)
+mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), verbose = FALSE)
 
 # ----Call plot2----
 plot <- plot2(mod, X, y, 1, 2)
