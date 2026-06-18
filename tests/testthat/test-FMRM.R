@@ -182,12 +182,14 @@ test_that("check on family works", {
 test_that("check on information criteria works", {
   expect_error(
     FMRM(X, y, G = 6, information_criteria = "aicc"),
-    "'arg' should be one of \"bic\", \"ebic\", \"aic\"",
+    "'arg' should be one of \"bic\", \"gebic\", \"aic\", \"icl\"",
     fixed = TRUE)
 })
 
 if (requireNamespace("mvtnorm", quietly = TRUE)) {
   set.seed(2025)
+
+  # ----Gaussian----
 
   # ----Simulate data----
   n <- 500   # total samples
@@ -240,49 +242,50 @@ if (requireNamespace("mvtnorm", quietly = TRUE)) {
   test_that("code runs with family = gaussian(), with automatic stopping", {
     expect_equal(round(mod$parameters$ic, 2), 1431.58)
   })
+
+  # ----Poisson----
+  # ----Simulate data----
+  n <- 500  # total samples
+  p <- 6    # number of covariates
+  G <- 3    # number of mixture components
+  rho <- 0.2  # correlation
+
+  # ----True parameters for 3 clusters----
+  betas <- matrix(c(
+    1,  2, -1,  0.5, 0, 0, 0,  # component 1
+    5, -2,  1,  0,   0, 0, 0,  # component 2
+    -3,  0,  2,  0,   0, 0, 0   # component 3
+  ), nrow = G, byrow = TRUE) / 2
+  pis <- c(0.4, 0.4, 0.2)
+
+  # ----Generate correlation matrix----
+  cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
+  Sigma <- cor_mat
+
+  # ----Simulate design matrix X (n x p)----
+  X <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
+
+  # ----Generate responsibilities----
+  z <- rmultinom(n, size = 1, prob = pis)
+  groups <- apply(z, 2, which.max)
+
+  # ----b0 + b1x1 + b2x2 + ... + bkxp (log-linear predictor)----
+  eta_vec <- rowSums(cbind(1, X) * betas[groups, ])
+
+  # ----Apply inverse link (exp) to get Poisson means----
+  mu_vec <- exp(eta_vec)
+
+  # ----Simulate response y (count data)----
+  y <- rpois(n, lambda = mu_vec)
+
+  mod <- FMRM(x = X, y = y, G = 3, family = poisson(), verbose = FALSE)
+
+  test_that("code runs with family = poisson()", {
+    expect_equal(mod$g, 3)
+  })
 } else{
   message("mvtnorm not installed — skipping block")
 }
-
-# # ----Simulate data----
-# n <- 500  # total samples
-# p <- 6    # number of covariates
-# G <- 3    # number of mixture components
-# rho <- 0.2  # correlation
-#
-# # ----True parameters for 3 clusters----
-# betas <- matrix(c(
-#   1,  2, -1,  0.5, 0, 0, 0,  # component 1
-#   5, -2,  1,  0,   0, 0, 0,  # component 2
-#   -3,  0,  2,  0,   0, 0, 0   # component 3
-#   ), nrow = G, byrow = TRUE) / 2
-#   pis <- c(0.4, 0.4, 0.2)
-#
-# # ----Generate correlation matrix----
-# cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
-# Sigma <- cor_mat
-#
-# # ----Simulate design matrix X (n x p)----
-# X <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
-#
-# # ----Generate responsibilities----
-# z <- rmultinom(n, size = 1, prob = pis)
-# groups <- apply(z, 2, which.max)
-#
-# # ----b0 + b1x1 + b2x2 + ... + bkxp (log-linear predictor)----
-# eta_vec <- rowSums(cbind(1, X) * betas[groups, ])
-#
-# # ----Apply inverse link (exp) to get Poisson means----
-# mu_vec <- exp(eta_vec)
-#
-# # ----Simulate response y (count data)----
-# y <- rpois(n, lambda = mu_vec)
-#
-# mod <- FMRM(x = X, y = y, G = 3, family = poisson(), verbose = FALSE)
-#
-# test_that("code runs with family = poisson(), in parallel", {
-#   expect_equal(round(mod$parameters$ic, 2), 2571.94)
-# })
 
 
 

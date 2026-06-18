@@ -176,7 +176,7 @@ test_that("check on family works", {
 test_that("check on information criteria works", {
   expect_error(
     MM_Grid(g = 6, X, y, information_criteria = "aicc"),
-    "'arg' should be one of \"bic\", \"ebic\", \"aic\"",
+    "'arg' should be one of \"bic\", \"gebic\", \"aic\", \"icl\"",
     fixed = TRUE)
 })
 

@@ -46,9 +46,10 @@
 #' updates and objective function within iterations of the MM algorithm.
 #' @param information_criteria A string of characters specifying the
 #' information criteria for model selection purposes. The model that minimizes the
-#' information criteria over all group counts and lambda-alpha pairs will be selected.
-#' Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
-#' and AIC ("aic").
+#' information criteria will be selected. Current accepted types include the default Bayesian
+#' Information Criterion (BIC) ("bic"), group-structured Extended BIC (gEBIC) ("gebic"),
+#' Akaike Information Criterion (AIC) ("aic"), and Integrated Classification
+#' Likelihood (ICL) Criterion ("icl").
 #' @param common_sigma A logical value which, if true (false is the default value)
 #' and family = "gaussian" or gaussian(), estimates the standard deviations as
 #' equivalent across mixture components.
@@ -113,7 +114,7 @@ MM <- function(x,
                init_parameters = NULL,
                verbose = TRUE,
                penalty = TRUE,
-               information_criteria = c("bic", "ebic", "aic"),
+               information_criteria = c("bic", "gebic", "aic", "icl"),
                common_sigma = FALSE,
                sigma_penalty = TRUE,
                pi_penalty = TRUE){
@@ -354,7 +355,7 @@ MM <- function(x,
         num_params <- active_betas + (if (common_sigma) 1 else G) + (G - 1)
         ics[k] <-  (-2 * ll) + (num_params * log(n))
       }
-      else if (information_criteria == "ebic"){
+      else if (information_criteria == "gebic"){
         active_betas_per_component <- numeric(G)
         total_active_betas <- 0
 
@@ -391,7 +392,7 @@ MM <- function(x,
           }
         }
 
-        # ----EBIC penalty: 2* gamma * log(total_combinatorial_sum)----
+        # ----gEBIC penalty: 2* gamma * log(total_combinatorial_sum)----
         if(total_combinatorial_sum > 0) {
           ebic_penalty <- 2 * gamma * log(num_ways_to_choose_j * total_combinatorial_sum)
         } else {
@@ -401,13 +402,28 @@ MM <- function(x,
         # ----total parameters: active betas + intercepts + mixing proportions----
         total_params <- total_active_betas + G + (G - 1)
 
-        # ----final EBIC----
+        # ----final gEBIC----
         ics[k] <- (-2 * ll) + (total_params * log(n)) + ebic_penalty
       }
       else if (information_criteria == "aic"){
         active_betas <- sum(abs(beta) != 1.0e-10)
         num_params <- active_betas + (if (common_sigma) 1 else G) + (G - 1)
         ics[k] <-  (-2 * ll) + (num_params * 2)
+      }
+      else if (information_criteria == "icl"){
+        active_betas <- sum(abs(beta) != 1.0e-10)
+        num_params <- active_betas + (if (common_sigma) 1 else G) + (G - 1)
+        bic <-  (-2 * ll) + (num_params * log(n))
+
+        # ----replace exact 0s with a tiny number to prevent log(0) = -Inf errors----
+        gamma_safe <- gamma_mat
+        gamma_safe[gamma_safe == 0] <- 1e-10
+
+        # ----calculate the entropy term----
+        entropy <- -sum(rowSums(gamma_safe * log(gamma_safe)))
+
+        # ----calculate ICL----
+        ics[k] <- bic + 2 * entropy
       }
 
       # ----copy history----

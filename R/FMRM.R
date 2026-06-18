@@ -57,9 +57,11 @@
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
 #' @param information_criteria A string of characters specifying the
 #' information criteria for model selection purposes. The model that minimizes the
-#' information criteria over all group counts and lambda-alpha pairs will be selected.
-#' Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
-#' and AIC ("aic").
+#' information criteria over all group counts and lambda-alpha sgl penalty combinations
+#' will be selected. Current accepted types include the default Bayesian
+#' Information Criterion (BIC) ("bic"), group-structured Extended BIC (gEBIC) ("gebic"),
+#' Akaike Information Criterion (AIC) ("aic"), and Integrated Classification
+#' Likelihood (ICL) Criterion ("icl").
 #' @param automatic_stopping A logical value which, if true (false is the
 #' default value), allows the function to implement IC-based automatic stopping on
 #' the mixture components. When the condition for stopping is met, the function
@@ -137,7 +139,7 @@ FMRM <- function(x,
                  penalty = TRUE,
                  random = FALSE,
                  n_random_la = 100,
-                 information_criteria = c("bic", "ebic", "aic"),
+                 information_criteria = c("bic", "gebic", "aic", "icl"),
                  automatic_stopping = FALSE,
                  parallel = TRUE,
                  common_sigma = FALSE,

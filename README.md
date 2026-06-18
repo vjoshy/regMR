@@ -14,19 +14,26 @@ coverage](https://codecov.io/gh/vjoshy/regMR/graph/badge.svg)](https://app.codec
 ## Overview
 
 regMR provides a comprehensive framework for fitting regularized finite
-mixture regression models via the MM algorithm. The sparse-group-lasso
+mixture regression models via the MM algorithm. The sparse group lasso
 (sgl) penalty is applied to parameter updates within the MM algorithm
-for variable selection. The package provides multiple functions for
-estimation and allows users to fit models over different lambda-alpha
-sgl penalty combinations, group counts, and to Gaussian, Poisson,
-Binomial, and Gamma distributed data.
+for variable selection with respect to groups and covariates. The
+package provides multiple functions for estimation and allows users to
+fit models over different lambda-alpha sgl penalty combinations and
+group counts. There are four families of finite mixture regression
+models able to be fit: Gaussian, Poisson, Binomial, and Gamma. These are
+specified using the `family` argument. The models can also be selected
+using different information criterion including the default Bayesian
+Information Criterion (BIC), group-structured Extended BIC (gEBIC),
+Akaike Information Criterion (AIC) , and Integrated Classification
+Likelihood (ICL) Criterion. See the documentation for more information
+regarding arguments
 
 This readme file provides a brief and basic example on how to use the
 regMR package. It walks through generating clustered data to be modeled,
 applying one of the main functions, `FMRM()`, to fit a finite Gaussian
-mixture regression model to the data, and how to apply the plotting and
-summary methods/functions to the model, getting the most use out of the
-package.
+mixture regression model to the data using BIC, and how to apply the
+plotting and summary methods/functions to the model, getting the most
+use out of the package.
 
 ## Installation
 
@@ -47,9 +54,9 @@ install.packages("regMR")
 
 ## Example
 
-1.  Generate clustered data to be modeled
+1.  Data Simulation
 
-To generate the clustered data to be modeled using regMR, we require the
+To generate the clustered data to fit using regMR, we require the
 package mvtnorm to be installed. More information on mvtnorm can be
 found here: <https://CRAN.R-project.org/package=mvtnorm>. After setting
 the seed to ensure reproducibility of the data, initializing the
@@ -70,7 +77,7 @@ function coupled with the $\pi$ vector. For the mean vector, we
 calculate $\beta_0 + \sum^p_{j = 1}x_{ij}\beta_{gj}$, where i goes from
 1 to n and g is the group that the $i^{th}$ observation belongs to.
 Then, using the mean vector and the true standard deviations, `y` (a
-vector of length n) is generated with `rnorm()`.
+response vector of length n) is generated with `rnorm()`.
 
 ``` r
 # install.packages("mvtnorm")
@@ -111,15 +118,16 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 ```
 
-2.  Call `FMRM()` with `family = gaussian()` to fit a finite Gaussian
-    mixture regression model to the data
+2.  Call `FMRM()` with `family = gaussian()` and
+    `information_criteria = "bic"` to fit a finite Gaussian mixture
+    regression model to the data
 
 `FMRM()` fits regularized finite mixture regression models via the MM
 algorithm over a range of lambda-alpha pairs (sgl penalty values) and
 group counts. The maximum group count to be tested is specified in the
 function below as `G = 4`. The function chooses the model with the
-lowest information criteria value as specified by the user (default is
-BIC).
+lowest information criteria value as specified by the user, which in
+this case will be BIC.
 
 ``` r
 # ----Load the regMR package----
@@ -131,7 +139,7 @@ library(regMR)
 #> ────────────────────────────────────────
 
 # ----Fit model----
-mod <- FMRM(x = X, y = y, G = 4, family = gaussian())
+mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bic")
 #> 
 #> -- g = 2 --
 #> ================================================================================ 
@@ -226,8 +234,8 @@ mod <- FMRM(x = X, y = y, G = 4, family = gaussian())
 3.  Use `plot()`, `plot2()`, and `summary()` on the finite Gaussian
     mixture regression model from `FMRM()` of class `FGMRM`
 
-`plot()` is an S3 method for plotting results (class FGMRM) from the
-`FMRM()` and `MM_Grid()` functions. The function outputs three plots:
+`plot()` is an S3 method for plotting results from the `FMRM()` and
+`MM_Grid()` functions. The function outputs three plots:
 
 1.  Lambdas vs. the ICs of models for all alpha values
 
@@ -257,7 +265,7 @@ plot(mod)
 `plot2()` plots two specified covariates of the predictor/design matrix
 (`X`) against the response vector (`y`). The observations are coloured
 per the group responsibility matrix (`z_hard`) in the finite Gaussian
-mixture regression model of class FGMRM passed to the function.
+mixture regression model passed to the function.
 
 ``` r
 plot2(mod, X, y, 1, 2)
@@ -278,8 +286,8 @@ plot2(mod, X, y, 1, 2)
     #>     return(list(x = xyz$x/x.scal + yx.f * y, y = xyz$z/z.scal + 
     #>         yz.f * y))
     #> }
-    #> <bytecode: 0x13c480da0>
-    #> <environment: 0x13c4515b8>
+    #> <bytecode: 0x12099f660>
+    #> <environment: 0x12097c400>
     #> 
     #> $points3d
     #> function (x, y = NULL, z = NULL, type = "p", ...) 
@@ -301,8 +309,8 @@ plot2(mod, X, y, 1, 2)
     #>     }
     #>     else points(x, y, type = type, ...)
     #> }
-    #> <bytecode: 0x13c47f970>
-    #> <environment: 0x13c4515b8>
+    #> <bytecode: 0x12099b6d0>
+    #> <environment: 0x12097c400>
     #> 
     #> $plane3d
     #> function (Intercept, x.coef = NULL, y.coef = NULL, lty = "dashed", 
@@ -350,8 +358,8 @@ plot2(mod, X, y, 1, 2)
     #>         segments(x.min + y * yx.f, z1 + y * yz.f, x.max + y * 
     #>             yx.f, z2 + y * yz.f, lty = ltya, ...)
     #> }
-    #> <bytecode: 0x13c476dd8>
-    #> <environment: 0x13c4515b8>
+    #> <bytecode: 0x120996400>
+    #> <environment: 0x12097c400>
     #> 
     #> $box3d
     #> function (...) 
@@ -366,8 +374,8 @@ plot2(mod, X, y, 1, 2)
     #>     lines(c(x.min, x.min), c(z.min, z.max), ...)
     #>     lines(c(x.min, x.max), c(z.min, z.min), ...)
     #> }
-    #> <bytecode: 0x13c46ac88>
-    #> <environment: 0x13c4515b8>
+    #> <bytecode: 0x12098cc88>
+    #> <environment: 0x12097c400>
     #> 
     #> $contour3d
     #> function (f, x.count = 10, y.count = 10, type = "l", lty = "24", 
@@ -428,17 +436,17 @@ plot2(mod, X, y, 1, 2)
     #>         else points(x, y, type = type, lty = lty, ...)
     #>     }
     #> }
-    #> <bytecode: 0x13c45ebe0>
-    #> <environment: 0x13c4515b8>
+    #> <bytecode: 0x12098aa58>
+    #> <environment: 0x12097c400>
     #> 
     #> $par.mar
     #> $par.mar$mar
     #> [1] 5.1 4.1 4.1 2.1
 
-`summary()` is an S3 method for summarizing results (class FGMRM) from
-the `FMRM()` and `MM_Grid()` functions. Outputs the number of mixture
-components, optimal lambda-alpha, log-likelihood, bic,
-mean-squared-error, and parameters (pi, sigma, beta) of the model.
+`summary()` is an S3 method for summarizing results from the `FMRM()`
+and `MM_Grid()` functions. Outputs the number of mixture components,
+optimal lambda-alpha pair, log-likelihood, ic, mean squared error, and
+parameters of the model.
 
 ``` r
 summary(mod)

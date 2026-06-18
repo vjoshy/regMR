@@ -18,7 +18,7 @@ MM(
   init_parameters = NULL,
   verbose = TRUE,
   penalty = TRUE,
-  information_criteria = c("bic", "ebic", "aic"),
+  information_criteria = c("bic", "gebic", "aic", "icl"),
   common_sigma = FALSE,
   sigma_penalty = TRUE,
   pi_penalty = TRUE
@@ -76,9 +76,10 @@ updates and objective function within iterations of the MM algorithm.}
 
 \item{information_criteria}{A string of characters specifying the
 information criteria for model selection purposes. The model that minimizes the
-information criteria over all group counts and lambda-alpha pairs will be selected.
-Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
-and AIC ("aic").}
+information criteria will be selected. Current accepted types include the default Bayesian
+Information Criterion (BIC) ("bic"), group-structured Extended BIC (gEBIC) ("gebic"),
+Akaike Information Criterion (AIC) ("aic"), and Integrated Classification
+Likelihood (ICL) Criterion ("icl").}
 
 \item{common_sigma}{A logical value which, if true (false is the default value)
 and family = "gaussian" or gaussian(), estimates the standard deviations as
