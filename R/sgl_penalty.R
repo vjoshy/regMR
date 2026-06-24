@@ -21,9 +21,8 @@
 #' @returns A numeric scalar representing the sgl penalty for the given model.
 #'
 #' @keywords internal
-sgl_penalty <- function(lambda, alpha, beta, pi, G){
-
-  beta_noint <- beta[, -1, drop = FALSE]  # ----G x p----
+sgl_penalty <- function(lambda, alpha, beta, pi, G) {
+  beta_noint <- beta[, -1, drop = FALSE] # ----G x p----
 
   # ---lasso term----
   lasso_term <- sum(abs(pi * beta_noint))

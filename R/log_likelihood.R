@@ -27,7 +27,7 @@
 #' for the given model.
 #'
 #' @keywords internal
-log_likelihood <- function(x, y, family, pi, beta, ...){
+log_likelihood <- function(x, y, family, pi, beta, ...) {
   args <- list(...)
   y <- as.vector(y)
   n <- length(y)
@@ -38,38 +38,53 @@ log_likelihood <- function(x, y, family, pi, beta, ...){
 
   # ----calculate link function for mu, depending on the family----
   # ----calculate weighted densities for all i and g----
-  if (family == "gaussian"){
+  if (family == "gaussian") {
     sigma <- as.vector(args$sigma)
     mu <- linear_pred
 
-    component_densities <- vapply(1:G, function(g)
-      pi[g] * stats::dnorm(y, mean = mu[, g], sd = sigma[g]),
-      numeric(n))
-  }
-  else if (family == "poisson"){
+    component_densities <- vapply(
+      1:G,
+      function(g) {
+        pi[g] * stats::dnorm(y, mean = mu[, g], sd = sigma[g])
+      },
+      numeric(n)
+    )
+  } else if (family == "poisson") {
     lambda <- exp(linear_pred)
 
-    component_densities <- vapply(1:G, function(g)
-      pi[g] * stats::dpois(y, lambda = lambda[, g]), numeric(n))
-  }
-  else if (family == "binomial"){
+    component_densities <- vapply(
+      1:G,
+      function(g) {
+        pi[g] * stats::dpois(y, lambda = lambda[, g])
+      },
+      numeric(n)
+    )
+  } else if (family == "binomial") {
     m <- max(1, max(y))
     p <- 1 / (1 + exp(-linear_pred))
     p <- pmin(pmax(p, 1e-10), 1 - 1e-10)
 
-    component_densities <- vapply(1:G, function(g)
-      pi[g] * stats::dbinom(x = y, size = m, prob = p[, g]), numeric(n))
-  }
-  else if (family == "gamma"){
+    component_densities <- vapply(
+      1:G,
+      function(g) {
+        pi[g] * stats::dbinom(x = y, size = m, prob = p[, g])
+      },
+      numeric(n)
+    )
+  } else if (family == "gamma") {
     nu <- args$nu
-    mu <- -1/linear_pred
+    mu <- -1 / linear_pred
 
     # ----derive rates----
-    rate_matrix <- t(nu/t(mu))
+    rate_matrix <- t(nu / t(mu))
 
-    component_densities <- vapply(1:G, function(g)
-      pi[g] * stats::dgamma(y, shape = nu[g], rate = rate_matrix[, g]),
-      numeric(n))
+    component_densities <- vapply(
+      1:G,
+      function(g) {
+        pi[g] * stats::dgamma(y, shape = nu[g], rate = rate_matrix[, g])
+      },
+      numeric(n)
+    )
   }
 
   if (n == 1) {

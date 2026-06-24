@@ -199,7 +199,7 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
       beta_g_new = arma::solve(XtWX, XtWz);
     }
     catch (const std::runtime_error& e) {
-      // If we have a singular matrix and an error is thrown, calculate
+      // If singular matrix and an error is thrown, calculate
       // pseudo-inverse
       beta_g_new = arma::pinv(XtWX) * XtWz;
     }

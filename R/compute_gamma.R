@@ -28,7 +28,7 @@
 #' the given model.
 #'
 #' @keywords internal
-compute_gamma <- function(x, y, family, pi, beta, ...){
+compute_gamma <- function(x, y, family, pi, beta, ...) {
   args <- list(...)
   y <- as.vector(y)
   n <- length(y)
@@ -39,44 +39,58 @@ compute_gamma <- function(x, y, family, pi, beta, ...){
 
   # ----calculate link function for mu, depending on the family----
   # ----weighted densities for all i and g----
-  if (family == "gaussian"){
+  if (family == "gaussian") {
     sigma <- as.vector(args$sigma)
     mu <- linear_pred
 
-    component_densities <- vapply(1:G, function(g) {
-      densities <- pi[g] * stats::dnorm(y, mean = mu[, g], sd = sigma[g])
-      return(densities)
-    }, numeric(n))
-  }
-  else if (family == "poisson"){
+    component_densities <- vapply(
+      1:G,
+      function(g) {
+        densities <- pi[g] * stats::dnorm(y, mean = mu[, g], sd = sigma[g])
+        return(densities)
+      },
+      numeric(n)
+    )
+  } else if (family == "poisson") {
     lambda <- exp(linear_pred)
 
-    component_densities <- vapply(1:G, function(g) {
-      densities <- pi[g] * stats::dpois(y, lambda = lambda[, g])
-      return(densities)
-    }, numeric(n))
-  }
-  else if (family == "binomial"){
+    component_densities <- vapply(
+      1:G,
+      function(g) {
+        densities <- pi[g] * stats::dpois(y, lambda = lambda[, g])
+        return(densities)
+      },
+      numeric(n)
+    )
+  } else if (family == "binomial") {
     m <- max(1, max(y))
     p <- 1 / (1 + exp(-linear_pred))
     p <- pmin(pmax(p, 1e-10), 1 - 1e-10)
 
-    component_densities <- vapply(1:G, function(g) {
-      densities <- pi[g] * stats::dbinom(x = y, size = m, prob = p[, g])
-      return(densities)
-    }, numeric(n))
-  }
-  else if (family == "gamma"){
+    component_densities <- vapply(
+      1:G,
+      function(g) {
+        densities <- pi[g] * stats::dbinom(x = y, size = m, prob = p[, g])
+        return(densities)
+      },
+      numeric(n)
+    )
+  } else if (family == "gamma") {
     nu <- args$nu
-    mu <- -1/linear_pred
+    mu <- -1 / linear_pred
 
     # ----derive rates----
-    rate_matrix <- t(nu/t(mu))
+    rate_matrix <- t(nu / t(mu))
 
-    component_densities <- vapply(1:G, function(g) {
-      densities <- pi[g] * stats::dgamma(y, shape = nu[g], rate = rate_matrix[, g])
-      return(densities)
-    }, numeric(n))
+    component_densities <- vapply(
+      1:G,
+      function(g) {
+        densities <- pi[g] *
+          stats::dgamma(y, shape = nu[g], rate = rate_matrix[, g])
+        return(densities)
+      },
+      numeric(n)
+    )
   }
 
   mixture_densities <- rowSums(component_densities)

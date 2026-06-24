@@ -46,26 +46,22 @@ lambda_max_compute_GLM <- function(x, y, family, z_mat, beta_init) {
 
     # ----Calculate mu_g from initial beta estimates using link function----
     eta_g <- x %*% beta_init[g, ]
-    if (family == "poisson"){
+    if (family == "poisson") {
       mu_g <- exp(eta_g)
-    }
-    else if (family == "binomial"){
+    } else if (family == "binomial") {
       mu_g <- 1 / (1 + exp(-eta_g))
       mu_g <- pmin(pmax(mu_g, 1e-10), 1 - 1e-10)
-    }
-    else {
+    } else {
       mu_g <- -1 / eta_g
     }
 
     # ----IRLS weights (element-wise) ----
-    if (family == "poisson"){
+    if (family == "poisson") {
       w_g <- mu_g * z_g
-    }
-    else if (family == "binomial"){
+    } else if (family == "binomial") {
       w_g = m * (mu_g * (1 - mu_g)) * z_g
       w_g <- pmax(w_g, 1e-10)
-    }
-    else {
+    } else {
       w_g = mu_g^2 * z_g
     }
 

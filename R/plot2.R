@@ -1,11 +1,10 @@
 #' Plot Covariates of X Against Y With Group Assignments
 #'
-#' This function creates a 3-D plot for finite mixture regression
-#' models of class (FGMRM, FPMRM, FBMRM, FGamMRM). It plots the specified
-#' covariates of x against y, with the group assignments highlighted in colour.
+#' This function creates a 3-D plot for finite mixture regression models of
+#' class FMRM. It plots the specified covariates of x against y, with the group
+#' assignments highlighted in colour.
 #'
-#' @param mod An object of class (FGMRM, FPMRM, FBMRM, FGamMRM), the
-#' result of calling FMRM() or MM_Grid() with the corresponding family designation.
+#' @param mod An object of class FMRM, the result of calling FMRM() or MM_Grid().
 #' @param x Predictor/design matrix. A numeric matrix of size n x p, where the
 #' number of rows is equal to the number of observations n, and the number of
 #' columns is equal to the number of covariates p.
@@ -66,9 +65,9 @@
 #'
 #' # ----Display plot----
 #' plot
-plot2 <- function(mod, x, y, covariate_one, covariate_two, ...){
+plot2 <- function(mod, x, y, covariate_one, covariate_two, ...) {
   # ----error check----
-  if (ncol(x) < covariate_one || ncol(x) < covariate_two){
+  if (ncol(x) < covariate_one || ncol(x) < covariate_two) {
     stop("Covariate does not exist\n")
   }
 
@@ -79,16 +78,21 @@ plot2 <- function(mod, x, y, covariate_one, covariate_two, ...){
 
   # ----create plot, specified covariates of x vs. y with group assignments as--
   # ----colour----
-  plot <- scatterplot3d::scatterplot3d(x = x[ , covariate_one],
-                                       y = x[ , covariate_two], z = y,
-                                       xlab = paste("Covariate ", covariate_one),
-                                       ylab = paste("Covariate ", covariate_two),
-                                       zlab = "y", , pch = 16,
-                                       color = as.factor(Groups))
-  fit <- stats::lm(y ~ x[ , covariate_one] + x[ , covariate_two])
+  plot <- scatterplot3d::scatterplot3d(
+    x = x[, covariate_one],
+    y = x[, covariate_two],
+    z = y,
+    xlab = paste("Covariate ", covariate_one),
+    ylab = paste("Covariate ", covariate_two),
+    zlab = "y",
+    ,
+    pch = 16,
+    color = as.factor(Groups)
+  )
+  fit <- stats::lm(y ~ x[, covariate_one] + x[, covariate_two])
   plot$plane3d(fit)
   for (i in 1:nrow(x)) {
-    coords <- plot$xyz.convert(x[i , covariate_one], x[i , covariate_two], y[i])
+    coords <- plot$xyz.convert(x[i, covariate_one], x[i, covariate_two], y[i])
     graphics::text(coords$x, coords$y, labels = Groups[i], pos = 3, cex = 0.7)
   }
 

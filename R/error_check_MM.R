@@ -44,41 +44,58 @@
 #' @returns No return value, called for side effects.
 #'
 #' @keywords internal
-error_check_MM <- function(x, y, G, tol, max_iter, reps, lambda, alpha,
-                           init_parameters, verbose, penalty,
-                           information_criteria, common_sigma, sigma_penalty,
-                           pi_penalty){
-  if(!is.numeric(x) || !is.matrix(x)){
+error_check_MM <- function(
+  x,
+  y,
+  G,
+  tol,
+  max_iter,
+  reps,
+  lambda,
+  alpha,
+  init_parameters,
+  verbose,
+  penalty,
+  information_criteria,
+  common_sigma,
+  sigma_penalty,
+  pi_penalty
+) {
+  if (!is.numeric(x) || !is.matrix(x)) {
     stop("Invalid x\n")
   }
-  if(!is.numeric(y) || (!is.vector(y) && !is.matrix(y))){
+  if (!is.numeric(y) || (!is.vector(y) && !is.matrix(y))) {
     stop("Invalid y\n")
   }
   y <- as.vector(y)
-  if (nrow(x) != length(y)){
+  if (nrow(x) != length(y)) {
     stop("x and y not compatible\n")
   }
-  if (!is.numeric(G) || G < 1){
+  if (!is.numeric(G) || G < 1) {
     stop("Invalid group size G\n")
   }
-  if (!is.numeric(tol) || tol <= 0){
+  if (!is.numeric(tol) || tol <= 0) {
     stop("Invalid tolerance level\n")
   }
-  if (!is.numeric(max_iter) || max_iter < 1){
+  if (!is.numeric(max_iter) || max_iter < 1) {
     stop("Invalid max_iter\n")
   }
-  if (!is.numeric(reps) || reps < 1){
+  if (!is.numeric(reps) || reps < 1) {
     stop("Invalid reps\n")
   }
-  if (!is.numeric(lambda) || lambda < 0){
+  if (!is.numeric(lambda) || lambda < 0) {
     stop("Invalid lambda\n")
   }
-  if (!is.numeric(alpha) || alpha > 1 || alpha < 0){
+  if (!is.numeric(alpha) || alpha > 1 || alpha < 0) {
     stop("Invalid alpha\n")
   }
-  if (!is.logical(verbose) || !is.logical(penalty)||
+  if (
+    !is.logical(verbose) ||
+      !is.logical(penalty) ||
       !is.logical(common_sigma) ||
-      !is.logical(sigma_penalty) || !is.logical(pi_penalty)){
+      !is.logical(sigma_penalty) ||
+      !is.logical(pi_penalty)
+  ) {
     stop("Invalid input - boolean argument not a logical\n")
   }
 }

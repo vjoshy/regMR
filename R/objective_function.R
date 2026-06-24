@@ -13,7 +13,7 @@
 #' objective function used for minimization.
 #'
 #' @keywords internal
-objective_function <- function(ll, pen){
+objective_function <- function(ll, pen) {
   obj_fun <- -ll + pen
 
   return(obj_fun)

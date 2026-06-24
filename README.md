@@ -14,7 +14,7 @@ coverage](https://codecov.io/gh/vjoshy/regMR/graph/badge.svg)](https://app.codec
 ## Overview
 
 regMR provides a comprehensive framework for fitting regularized finite
-mixture regression models via the MM algorithm. The sparse group lasso
+mixture regression models via a MM algorithm. The sparse group lasso
 (sgl) penalty is applied to parameter updates within the MM algorithm
 for variable selection with respect to groups and covariates. The
 package provides multiple functions for estimation and allows users to
@@ -118,16 +118,16 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 ```
 
-2.  Call `FMRM()` with `family = gaussian()` and
-    `information_criteria = "bic"` to fit a finite Gaussian mixture
-    regression model to the data
+2.  Model Fitting
 
-`FMRM()` fits regularized finite mixture regression models via the MM
-algorithm over a range of lambda-alpha pairs (sgl penalty values) and
-group counts. The maximum group count to be tested is specified in the
-function below as `G = 4`. The function chooses the model with the
-lowest information criteria value as specified by the user, which in
-this case will be BIC.
+We call `FMRM()` with `family = gaussian()` and
+`information_criteria = "bic"` to fit a finite Gaussian mixture
+regression model to the data. `FMRM()` fits regularized finite mixture
+regression models via the MM algorithm over a range of lambda-alpha
+pairs (sgl penalty values) and group counts. The maximum group count to
+be tested is specified in the function below as `G = 4`. The function
+chooses the model with the lowest information criteria value as
+specified by the user, which in this case will be BIC.
 
 ``` r
 # ----Load the regMR package----
@@ -139,28 +139,28 @@ library(regMR)
 #> ────────────────────────────────────────
 
 # ----Fit model----
-mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bic")
+fit <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bic")
 #> 
 #> -- g = 2 --
 #> ================================================================================ 
 #> 
 #>  selected model for g = 2 
 #> 
-#>  lambda = 69.92 || alpha = 0.3 ||  BIC  = 1773.32 
+#>  lambda = 40.01 || alpha = 0.2 ||  BIC  = 1766.12 
 #> 
 #>  Components     1      2
-#>  Pi           0.573  0.427
-#>  Sigma        1.362  0.388
+#>  Pi           0.574  0.426
+#>  Sigma        1.349  0.386
 #> 
 #>  Beta (Regression Parameters)
 #>   Components     1      2
-#>   Intercept   -0.332  2.552
-#>   Beta 1       0.404 -0.976
-#>   Beta 2       0.089  0.474
-#>   Beta 3       0.000  0.000
-#>   Beta 4       0.000  0.000
-#>   Beta 5       0.000  0.000
-#>   Beta 6       0.000 -0.000
+#>   Intercept   -0.320  2.547
+#>   Beta 1       0.479 -0.995
+#>   Beta 2       0.134  0.488
+#>   Beta 3       0.000 -0.000
+#>   Beta 4       0.000 -0.000
+#>   Beta 5      -0.000 -0.000
+#>   Beta 6      -0.000 -0.000
 #> 
 #> 
 #> -- g = 3 --
@@ -168,21 +168,21 @@ mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bi
 #> 
 #>  selected model for g = 3 
 #> 
-#>  lambda = 67.01 || alpha = 0.9 ||  BIC  = 1431.58 
+#>  lambda = 62.5 || alpha = 0.9 ||  BIC  = 1430.54 
 #> 
 #>  Components     1      2      3
-#>  Pi           0.237  0.335  0.427
-#>  Sigma        0.279  0.462  0.384
+#>  Pi           0.237  0.335  0.428
+#>  Sigma        0.279  0.461  0.384
 #> 
 #>  Beta (Regression Parameters)
 #>   Components     1      2      3
-#>   Intercept   -1.514  0.503  2.545
-#>   Beta 1       0.041  0.973 -0.993
-#>   Beta 2       0.986 -0.454  0.487
-#>   Beta 3       0.000  0.163  0.000
-#>   Beta 4       0.000  0.000  0.000
-#>   Beta 5       0.026  0.000  0.000
-#>   Beta 6       0.000  0.000 -0.024
+#>   Intercept   -1.514  0.503  2.544
+#>   Beta 1       0.041  0.977 -0.996
+#>   Beta 2       0.987 -0.459  0.489
+#>   Beta 3      -0.000  0.168  0.000
+#>   Beta 4       0.000  0.000 -0.000
+#>   Beta 5       0.027 -0.000 -0.000
+#>   Beta 6      -0.000 -0.000 -0.026
 #> 
 #> 
 #> -- g = 4 --
@@ -190,21 +190,21 @@ mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bi
 #> 
 #>  selected model for g = 4 
 #> 
-#>  lambda = 40.52 || alpha = 1 ||  BIC  = 1460.35 
+#>  lambda = 61.59 || alpha = 0.8 ||  BIC  = 1457.72 
 #> 
 #>  Components     1      2      3      4
-#>  Pi           0.237  0.300  0.034  0.429
-#>  Sigma        0.274  0.430  0.017  0.383
+#>  Pi           0.238  0.295  0.038  0.429
+#>  Sigma        0.276  0.442  0.022  0.383
 #> 
 #>  Beta (Regression Parameters)
 #>   Components     1      2      3      4
-#>   Intercept   -1.515  0.527  0.207  2.544
-#>   Beta 1       0.041  0.968  1.135 -1.008
-#>   Beta 2       0.992 -0.514 -0.026  0.490
-#>   Beta 3      -0.009  0.209  0.047  0.000
-#>   Beta 4       0.005  0.000  0.071 -0.006
-#>   Beta 5       0.028  0.000  0.063  0.000
-#>   Beta 6       0.000  0.000 -0.135 -0.035
+#>   Intercept   -1.517  0.532  0.185  2.546
+#>   Beta 1       0.046  0.957  0.935 -0.992
+#>   Beta 2       0.985 -0.496  0.009  0.485
+#>   Beta 3      -0.000  0.181  0.106  0.000
+#>   Beta 4       0.000  0.000  0.081 -0.000
+#>   Beta 5       0.022  0.000 -0.059 -0.000
+#>   Beta 6      -0.000  0.000 -0.159 -0.023
 #> 
 #> -------------------------------------------------------------------------------- 
 #> 
@@ -212,30 +212,29 @@ mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bi
 #> 
 #>  G = 3 
 #> 
-#>  lambda = 67.01 || alpha = 0.9 || log-likelihood = -662.97 ||  BIC  = 1431.58 || MSE = 0.12 
+#>  lambda = 62.5 || alpha = 0.9 || log-likelihood = -662.45 ||  BIC  = 1430.54 || MSE = 0.12 
 #> 
 #>  Components     1      2      3
-#>  Pi           0.237  0.335  0.427
-#>  Sigma        0.279  0.462  0.384
+#>  Pi           0.237  0.335  0.428
+#>  Sigma        0.279  0.461  0.384
 #> 
 #>  Beta (Regression Parameters)
 #>   Components     1      2      3
-#>   Intercept   -1.514  0.503  2.545
-#>   Beta 1       0.041  0.973 -0.993
-#>   Beta 2       0.986 -0.454  0.487
-#>   Beta 3       0.000  0.163  0.000
-#>   Beta 4       0.000  0.000  0.000
-#>   Beta 5       0.026  0.000  0.000
-#>   Beta 6       0.000  0.000 -0.024
+#>   Intercept   -1.514  0.503  2.544
+#>   Beta 1       0.041  0.977 -0.996
+#>   Beta 2       0.987 -0.459  0.489
+#>   Beta 3      -0.000  0.168  0.000
+#>   Beta 4       0.000  0.000 -0.000
+#>   Beta 5       0.027 -0.000 -0.000
+#>   Beta 6      -0.000 -0.000 -0.026
 #> 
 #> --------------------------------------------------------------------------------
 ```
 
-3.  Use `plot()`, `plot2()`, and `summary()` on the finite Gaussian
-    mixture regression model from `FMRM()` of class `FGMRM`
+3.  Use Methods
 
 `plot()` is an S3 method for plotting results from the `FMRM()` and
-`MM_Grid()` functions. The function outputs three plots:
+`MM_Grid()` functions of class FMRM. The function outputs three plots:
 
 1.  Lambdas vs. the ICs of models for all alpha values
 
@@ -246,7 +245,7 @@ mod <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bi
     optimal alpha.
 
 ``` r
-plot(mod)
+plot(fit)
 #> [[1]]
 ```
 
@@ -264,11 +263,11 @@ plot(mod)
 
 `plot2()` plots two specified covariates of the predictor/design matrix
 (`X`) against the response vector (`y`). The observations are coloured
-per the group responsibility matrix (`z_hard`) in the finite Gaussian
-mixture regression model passed to the function.
+per the group responsibility matrix (`z_hard`) in the finite mixture
+regression model passed to the function.
 
 ``` r
-plot2(mod, X, y, 1, 2)
+plot2(fit, X, y, 1, 2)
 ```
 
 <img src="man/figures/README-example-4-1.png" width="100%" />
@@ -286,8 +285,8 @@ plot2(mod, X, y, 1, 2)
     #>     return(list(x = xyz$x/x.scal + yx.f * y, y = xyz$z/z.scal + 
     #>         yz.f * y))
     #> }
-    #> <bytecode: 0x12099f660>
-    #> <environment: 0x12097c400>
+    #> <bytecode: 0x130267c10>
+    #> <environment: 0x130245698>
     #> 
     #> $points3d
     #> function (x, y = NULL, z = NULL, type = "p", ...) 
@@ -309,8 +308,8 @@ plot2(mod, X, y, 1, 2)
     #>     }
     #>     else points(x, y, type = type, ...)
     #> }
-    #> <bytecode: 0x12099b6d0>
-    #> <environment: 0x12097c400>
+    #> <bytecode: 0x130265628>
+    #> <environment: 0x130245698>
     #> 
     #> $plane3d
     #> function (Intercept, x.coef = NULL, y.coef = NULL, lty = "dashed", 
@@ -358,8 +357,8 @@ plot2(mod, X, y, 1, 2)
     #>         segments(x.min + y * yx.f, z1 + y * yz.f, x.max + y * 
     #>             yx.f, z2 + y * yz.f, lty = ltya, ...)
     #> }
-    #> <bytecode: 0x120996400>
-    #> <environment: 0x12097c400>
+    #> <bytecode: 0x130260588>
+    #> <environment: 0x130245698>
     #> 
     #> $box3d
     #> function (...) 
@@ -374,8 +373,8 @@ plot2(mod, X, y, 1, 2)
     #>     lines(c(x.min, x.min), c(z.min, z.max), ...)
     #>     lines(c(x.min, x.max), c(z.min, z.min), ...)
     #> }
-    #> <bytecode: 0x12098cc88>
-    #> <environment: 0x12097c400>
+    #> <bytecode: 0x130259190>
+    #> <environment: 0x130245698>
     #> 
     #> $contour3d
     #> function (f, x.count = 10, y.count = 10, type = "l", lty = "24", 
@@ -436,41 +435,44 @@ plot2(mod, X, y, 1, 2)
     #>         else points(x, y, type = type, lty = lty, ...)
     #>     }
     #> }
-    #> <bytecode: 0x12098aa58>
-    #> <environment: 0x12097c400>
+    #> <bytecode: 0x130257c48>
+    #> <environment: 0x130245698>
     #> 
     #> $par.mar
     #> $par.mar$mar
     #> [1] 5.1 4.1 4.1 2.1
 
 `summary()` is an S3 method for summarizing results from the `FMRM()`
-and `MM_Grid()` functions. Outputs the number of mixture components,
-optimal lambda-alpha pair, log-likelihood, ic, mean squared error, and
-parameters of the model.
+and `MM_Grid()` functions of class FMRM. Outputs the number of mixture
+components, optimal lambda-alpha pair, log-likelihood, ic, mean squared
+error, and parameters of the model.
 
 ``` r
-summary(mod)
+summary(fit)
 #> =======================================================================
 #> Regularized Finite Gaussian Mixture Regression Model Using MM Algorithm
 #> =======================================================================
 #> 
+#> Call:
+#>  FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bic") 
+#> 
 #>  G = 3 
 #> 
-#>  lambda = 67.01 || alpha = 0.9 || log-likelihood = -662.97 || 
-#>  BIC  = 1431.58 || MSE = 0.12 
+#>  lambda = 62.5 || alpha = 0.9 || log-likelihood = -662.45 || 
+#>  BIC  = 1430.54 || MSE = 0.12 
 #> 
 #>  Components     1      2      3
-#>  Pi           0.237  0.335  0.427
-#>  Clusters       124    151    225
-#>  Sigma        0.279  0.462  0.384
+#>  Pi           0.237  0.335  0.428
+#>  Clusters       123    152    225
+#>  Sigma        0.279  0.461  0.384
 #> 
 #>  Beta (Regression Parameters)
 #>   Components     1      2      3
-#>   Intercept   -1.514  0.503  2.545
-#>   Beta 1       0.041  0.973 -0.993
-#>   Beta 2       0.986 -0.454  0.487
-#>   Beta 3       0.000  0.163  0.000
-#>   Beta 4       0.000  0.000  0.000
-#>   Beta 5       0.026  0.000  0.000
-#>   Beta 6       0.000  0.000 -0.024
+#>   Intercept   -1.514  0.503  2.544
+#>   Beta 1       0.041  0.977 -0.996
+#>   Beta 2       0.987 -0.459  0.489
+#>   Beta 3      -0.000  0.168  0.000
+#>   Beta 4       0.000  0.000 -0.000
+#>   Beta 5       0.027 -0.000 -0.000
+#>   Beta 6      -0.000 -0.000 -0.026
 ```

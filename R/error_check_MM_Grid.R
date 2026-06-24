@@ -58,47 +58,69 @@
 #' @returns No return value, called for side effects.
 #'
 #' @keywords internal
-error_check_MM_Grid <- function(g, x, y, tol, max_iter, reps, lambda,
-                                lambda_max, n_lambda, alpha, verbose, penalty,
-                                random, n_random_la, parallel, common_sigma,
-                                sigma_penalty, pi_penalty){
-  if(!is.numeric(x) || !is.matrix(x)){
+error_check_MM_Grid <- function(
+  g,
+  x,
+  y,
+  tol,
+  max_iter,
+  reps,
+  lambda,
+  lambda_max,
+  n_lambda,
+  alpha,
+  verbose,
+  penalty,
+  random,
+  n_random_la,
+  parallel,
+  common_sigma,
+  sigma_penalty,
+  pi_penalty
+) {
+  if (!is.numeric(x) || !is.matrix(x)) {
     stop("Invalid x\n")
   }
-  if(!is.numeric(y) || (!is.vector(y) && !is.matrix(y))){
+  if (!is.numeric(y) || (!is.vector(y) && !is.matrix(y))) {
     stop("Invalid y\n")
   }
   y <- as.vector(y)
-  if (nrow(x) != length(y)){
+  if (nrow(x) != length(y)) {
     stop("x and y not compatible\n")
   }
-  if (!is.numeric(g) || g < 1){
+  if (!is.numeric(g) || g < 1) {
     stop("Invalid group size g\n")
   }
-  if (!is.numeric(tol) || tol <= 0){
+  if (!is.numeric(tol) || tol <= 0) {
     stop("Invalid tolerance level\n")
   }
-  if (!is.numeric(max_iter) || max_iter < 1){
+  if (!is.numeric(max_iter) || max_iter < 1) {
     stop("Invalid max_iter\n")
   }
-  if (!is.numeric(reps) || reps < 1){
+  if (!is.numeric(reps) || reps < 1) {
     stop("Invalid reps\n")
   }
-  if (!is.numeric(n_lambda) || n_lambda < 2){
+  if (!is.numeric(n_lambda) || n_lambda < 2) {
     stop("Invalid n_lambda\n")
   }
-  if (!is.numeric(alpha) || !is.vector(alpha)){
+  if (!is.numeric(alpha) || !is.vector(alpha)) {
     stop("Invalid alpha\n")
   }
-  if (!is.logical(verbose) || !is.logical(penalty) || !is.logical(random) ||
-      !is.logical(parallel) || !is.logical(common_sigma) ||
-      !is.logical(sigma_penalty) || !is.logical(pi_penalty)){
+  if (
+    !is.logical(verbose) ||
+      !is.logical(penalty) ||
+      !is.logical(random) ||
+      !is.logical(parallel) ||
+      !is.logical(common_sigma) ||
+      !is.logical(sigma_penalty) ||
+      !is.logical(pi_penalty)
+  ) {
     stop("Invalid input - boolean argument not a logical\n")
   }
-  if (!is.numeric(n_random_la) || n_random_la <= 0){
+  if (!is.numeric(n_random_la) || n_random_la <= 0) {
     stop("Invalid n_random_la\n")
   }
-  if (length(alpha) * n_lambda < n_random_la && random){
+  if (length(alpha) * n_lambda < n_random_la && random) {
     stop("Invalid input (n_random_la > number of lambda and alpha pairs)\n")
   }
 }

@@ -79,11 +79,11 @@
 #' all values in the pi vector are replaced with the value one.
 #'
 #' @returns An object, depending on inputted family, of class
-#' (FGMRM, FPMRM, FBMRM, FGamMRM) containing the parameters of the estimated
+#' FGMRM, FPMRM, FBMRM, or FGamMRM and FMRM containing the parameters of the estimated
 #' finite mixture regression model (parameters depend on inputted family),
-#' number of mixture components, parameters of models with the same alpha, and a numeric
+#' number of mixture components, parameters of models with the same alpha, a numeric
 #' matrix containing the alpha, lambda, and ic values of all estimated models
-#' for plotting purposes.
+#' for plotting purposes, and the function call for summary purposes.
 #' @importFrom mclust Mclust mclustBIC
 #' @export
 #'
@@ -124,31 +124,51 @@
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
 #' mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), verbose = FALSE)
-FMRM <- function(x,
-                 y,
-                 G,
-                 family = c("gaussian", "poisson", "binomial", "gamma"),
-                 tol = 10e-04,
-                 max_iter = 500,
-                 reps = 1,
-                 lambda = NULL,
-                 lambda_max = NULL,
-                 n_lambda = 100,
-                 alpha = seq(0, 1, by = 0.1),
-                 verbose = TRUE,
-                 penalty = TRUE,
-                 random = FALSE,
-                 n_random_la = 100,
-                 information_criteria = c("bic", "gebic", "aic", "icl"),
-                 automatic_stopping = FALSE,
-                 parallel = TRUE,
-                 common_sigma = FALSE,
-                 sigma_penalty = TRUE,
-                 pi_penalty = TRUE){
+FMRM <- function(
+  x,
+  y,
+  G,
+  family = c("gaussian", "poisson", "binomial", "gamma"),
+  tol = 10e-04,
+  max_iter = 500,
+  reps = 1,
+  lambda = NULL,
+  lambda_max = NULL,
+  n_lambda = 100,
+  alpha = seq(0, 1, by = 0.1),
+  verbose = TRUE,
+  penalty = TRUE,
+  random = FALSE,
+  n_random_la = 100,
+  information_criteria = c("bic", "gebic", "aic", "icl"),
+  automatic_stopping = FALSE,
+  parallel = TRUE,
+  common_sigma = FALSE,
+  sigma_penalty = TRUE,
+  pi_penalty = TRUE
+) {
   # ----input validation/error check----
-  error_check_FMRM(x, y, G, tol, max_iter, reps, lambda, lambda_max, n_lambda,
-                   alpha, verbose, penalty, random, n_random_la, automatic_stopping,
-                   parallel, common_sigma, sigma_penalty, pi_penalty)
+  error_check_FMRM(
+    x,
+    y,
+    G,
+    tol,
+    max_iter,
+    reps,
+    lambda,
+    lambda_max,
+    n_lambda,
+    alpha,
+    verbose,
+    penalty,
+    random,
+    n_random_la,
+    automatic_stopping,
+    parallel,
+    common_sigma,
+    sigma_penalty,
+    pi_penalty
+  )
 
   # ----get family and information criteria arguments----
   if (inherits(family, "family")) {
@@ -158,6 +178,9 @@ FMRM <- function(x,
   }
   family <- tolower(family)
   information_criteria <- match.arg(information_criteria)
+
+  # ----Capture the current function call----
+  call <- match.call()
 
   y <- as.matrix(y)
 
@@ -172,22 +195,41 @@ FMRM <- function(x,
 
   # ----automatic stopping procedure----
   automatic_stopping_tracker <- numeric(G)
-  if (automatic_stopping){
-    for (g in 2:G){
+  if (automatic_stopping) {
+    for (g in 2:G) {
       # ----get models for specific g value over lambda-alpha grid----
-      models[[g]] <- MM_Grid(g, x, y, family, tol, max_iter, reps, lambda, lambda_max,
-                                   n_lambda, alpha, verbose, penalty, random,
-                                   n_random_la, information_criteria, parallel, common_sigma,
-                                   sigma_penalty, pi_penalty)
+      models[[g]] <- MM_Grid(
+        g,
+        x,
+        y,
+        family,
+        tol,
+        max_iter,
+        reps,
+        lambda,
+        lambda_max,
+        n_lambda,
+        alpha,
+        verbose,
+        penalty,
+        random,
+        n_random_la,
+        information_criteria,
+        parallel,
+        common_sigma,
+        sigma_penalty,
+        pi_penalty
+      )
 
       # ----get model selection criteria----
       ic[g] <- models[[g]]$parameters$ic
 
       # ----apply automatic stopping procedure----
-      running_ic <- -ic[2:g]/2
+      running_ic <- -ic[2:g] / 2
       max_ic <- max(running_ic)
-      automatic_stopping_tracker[g] <- exp(running_ic[g - 1] - max_ic)/sum(exp(running_ic - max_ic))
-      if (automatic_stopping_tracker[g] <= 1e-04){
+      automatic_stopping_tracker[g] <- exp(running_ic[g - 1] - max_ic) /
+        sum(exp(running_ic - max_ic))
+      if (automatic_stopping_tracker[g] <= 1e-04) {
         break
       }
     }
@@ -196,95 +238,139 @@ FMRM <- function(x,
 
     # ----find compartment -> parameters which minimize model selection criteria
     # ----and return model----
-    if (!all(is.na(ic))){
+    if (!all(is.na(ic))) {
       selected_compartment <- which.min(ic)
       selected_parameters <- models[[selected_compartment]]$parameters
 
       # ----if verbose, print the model----
-      if (verbose){
-        print_model_FMRM(selected_parameters, selected_compartment, family, information_criteria)
+      if (verbose) {
+        print_model_FMRM(
+          selected_parameters,
+          selected_compartment,
+          family,
+          information_criteria
+        )
       }
 
       # ----get results, add class to them per family argument----
-      results <- list(parameters = selected_parameters,
-                      g = selected_compartment,
-                      parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
-                      alpha_lambda_ic = models[[selected_compartment]]$alpha_lambda_ic)
+      results <- list(
+        parameters = selected_parameters,
+        g = selected_compartment,
+        parameters_same_alpha = models[[
+          selected_compartment
+        ]]$parameters_same_alpha,
+        alpha_lambda_ic = models[[selected_compartment]]$alpha_lambda_ic,
+        call = call
+      )
 
-      if (family == "gaussian"){
-        class(results) <- "FGMRM"
+      if (family == "gaussian") {
+        class(results) <- c("FGMRM", "FMRM")
+      } else if (family == "poisson") {
+        class(results) <- c("FPMRM", "FMRM")
       }
-      else if (family == "poisson"){
-        class(results) <- "FPMRM"
-      }
-      if (family == "binomial"){
-        class(results) <- "FBMRM"
-      }
-      else if (family == "gamma"){
-        class(results) <- "FGamMRM"
+      if (family == "binomial") {
+        class(results) <- c("FBMRM", "FMRM")
+      } else if (family == "gamma") {
+        class(results) <- c("FGamMRM", "FMRM")
       }
 
       return(results)
-    }
-    else{
+    } else {
       # ----if error, return NA for each item and print no model was chosen----
-      if (verbose) cat(strrep("-", getOption("width")), "\n\n")
-      if (verbose) cat(" no model chosen\n\n")
-      if (verbose) cat(strrep("-", getOption("width")), "\n")
+      if (verbose) {
+        cat(strrep("-", getOption("width")), "\n\n")
+      }
+      if (verbose) {
+        cat(" no model chosen\n\n")
+      }
+      if (verbose) {
+        cat(strrep("-", getOption("width")), "\n")
+      }
 
-      results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
-                      alpha_lambda_ic = NA)
+      results <- list(
+        parameters = NA,
+        g = NA,
+        parameters_same_alpha = NA,
+        alpha_lambda_ic = NA,
+        call = call
+      )
 
-      if (family == "gaussian"){
-        class(results) <- "FGMRM"
+      if (family == "gaussian") {
+        class(results) <- c("FGMRM", "FMRM")
+      } else if (family == "poisson") {
+        class(results) <- c("FPMRM", "FMRM")
       }
-      else if (family == "poisson"){
-        class(results) <- "FPMRM"
-      }
-      if (family == "binomial"){
-        class(results) <- "FBMRM"
-      }
-      else if (family == "gamma"){
-        class(results) <- "FGamMRM"
+      if (family == "binomial") {
+        class(results) <- c("FBMRM", "FMRM")
+      } else if (family == "gamma") {
+        class(results) <- c("FGamMRM", "FMRM")
       }
 
       return(results)
     }
-  }
-  else{
-    if (parallel){
+  } else {
+    if (parallel) {
       # ----initialize workers and session----
       if (!inherits(future::plan(), "multisession")) {
-        future::plan(future::multisession,
-                     workers = max(1, floor(future::availableCores()/2)))
+        future::plan(
+          future::multisession,
+          workers = max(1, floor(future::availableCores() / 2))
+        )
       }
 
       # ----parallelize MM algorithm over 2 -> G----
-      models <- furrr::future_map(2:G, MM_Grid, x = x, y = y, family = family, tol = tol,
-                                  max_iter = max_iter, reps = reps, lambda = lambda,
-                                  lambda_max = lambda_max, n_lambda = n_lambda,
-                                  alpha = alpha, verbose = verbose,
-                                  penalty = penalty, random = random,
-                                  n_random_la = n_random_la,
-                                  information_criteria = information_criteria,
-                                  common_sigma = common_sigma,
-                                  sigma_penalty = sigma_penalty, pi_penalty = pi_penalty,
-                                  parallel = parallel, .progress = FALSE,
-                                  .options = furrr::furrr_options(seed = TRUE))
+      models <- furrr::future_map(
+        2:G,
+        MM_Grid,
+        x = x,
+        y = y,
+        family = family,
+        tol = tol,
+        max_iter = max_iter,
+        reps = reps,
+        lambda = lambda,
+        lambda_max = lambda_max,
+        n_lambda = n_lambda,
+        alpha = alpha,
+        verbose = verbose,
+        penalty = penalty,
+        random = random,
+        n_random_la = n_random_la,
+        information_criteria = information_criteria,
+        common_sigma = common_sigma,
+        sigma_penalty = sigma_penalty,
+        pi_penalty = pi_penalty,
+        parallel = parallel,
+        .progress = FALSE,
+        .options = furrr::furrr_options(seed = TRUE)
+      )
 
       future::plan(future::sequential)
-    }
-    else{
+    } else {
       # ----MM algorithm over 2 -> G----
-      models <- purrr::map(2:G, MM_Grid, x = x, y = y, family = family, tol = tol,
-                           max_iter = max_iter, reps = reps, lambda = lambda,
-                           lambda_max = lambda_max, n_lambda = n_lambda,
-                           alpha = alpha, verbose = verbose, penalty = penalty,
-                           random = random, n_random_la = n_random_la,
-                           information_criteria = information_criteria,
-                           sigma_penalty = sigma_penalty, pi_penalty = pi_penalty,
-                           parallel = parallel, common_sigma = common_sigma)
-
+      models <- purrr::map(
+        2:G,
+        MM_Grid,
+        x = x,
+        y = y,
+        family = family,
+        tol = tol,
+        max_iter = max_iter,
+        reps = reps,
+        lambda = lambda,
+        lambda_max = lambda_max,
+        n_lambda = n_lambda,
+        alpha = alpha,
+        verbose = verbose,
+        penalty = penalty,
+        random = random,
+        n_random_la = n_random_la,
+        information_criteria = information_criteria,
+        sigma_penalty = sigma_penalty,
+        pi_penalty = pi_penalty,
+        parallel = parallel,
+        common_sigma = common_sigma
+      )
     }
   }
 
@@ -293,57 +379,73 @@ FMRM <- function(x,
 
   # ----find compartment -> parameters which minimize model selection criteria--
   # ----and return model----
-  if (!all(is.na(ic))){
+  if (!all(is.na(ic))) {
     names(models) <- 1:length(models)
     selected_compartment <- which.min(ic)
     selected_parameters <- models[[selected_compartment]]$parameters
 
     # ----if verbose, print the model----
-    if (verbose){
-      print_model_FMRM(selected_parameters, selected_compartment + 1, family, information_criteria)
+    if (verbose) {
+      print_model_FMRM(
+        selected_parameters,
+        selected_compartment + 1,
+        family,
+        information_criteria
+      )
     }
 
     # ----get results, add class to them per family argument----
-    results <- list(parameters = selected_parameters,
-                    g = selected_compartment + 1,
-                    parameters_same_alpha = models[[selected_compartment]]$parameters_same_alpha,
-                    alpha_lambda_ic = models[[selected_compartment]]$alpha_lambda_ic)
+    results <- list(
+      parameters = selected_parameters,
+      g = selected_compartment + 1,
+      parameters_same_alpha = models[[
+        selected_compartment
+      ]]$parameters_same_alpha,
+      alpha_lambda_ic = models[[selected_compartment]]$alpha_lambda_ic,
+      call = call
+    )
 
-    if (family == "gaussian"){
-      class(results) <- "FGMRM"
+    if (family == "gaussian") {
+      class(results) <- c("FGMRM", "FMRM")
+    } else if (family == "poisson") {
+      class(results) <- c("FPMRM", "FMRM")
     }
-    else if (family == "poisson"){
-      class(results) <- "FPMRM"
-    }
-    if (family == "binomial"){
-      class(results) <- "FBMRM"
-    }
-    else if (family == "gamma"){
-      class(results) <- "FGamMRM"
+    if (family == "binomial") {
+      class(results) <- c("FBMRM", "FMRM")
+    } else if (family == "gamma") {
+      class(results) <- c("FGamMRM", "FMRM")
     }
 
     return(results)
-  }
-  else{
+  } else {
     # ----if error, return NA for each item and print no model was chosen----
-    if (verbose) cat(strrep("-", getOption("width")), "\n\n")
-    if (verbose) cat(" no model chosen\n\n")
-    if (verbose) cat(strrep("-", getOption("width")), "\n")
+    if (verbose) {
+      cat(strrep("-", getOption("width")), "\n\n")
+    }
+    if (verbose) {
+      cat(" no model chosen\n\n")
+    }
+    if (verbose) {
+      cat(strrep("-", getOption("width")), "\n")
+    }
 
-    results <- list(parameters = NA, g = NA, parameters_same_alpha = NA,
-                    alpha_lambda_ic = NA)
+    results <- list(
+      parameters = NA,
+      g = NA,
+      parameters_same_alpha = NA,
+      alpha_lambda_ic = NA,
+      call = call
+    )
 
-    if (family == "gaussian"){
-      class(results) <- "FGMRM"
+    if (family == "gaussian") {
+      class(results) <- c("FGMRM", "FMRM")
+    } else if (family == "poisson") {
+      class(results) <- c("FPMRM", "FMRM")
     }
-    else if (family == "poisson"){
-      class(results) <- "FPMRM"
-    }
-    if (family == "binomial"){
-      class(results) <- "FBMRM"
-    }
-    else if (family == "gamma"){
-      class(results) <- "FGamMRM"
+    if (family == "binomial") {
+      class(results) <- c("FBMRM", "FMRM")
+    } else if (family == "gamma") {
+      class(results) <- c("FGamMRM", "FMRM")
     }
 
     return(results)

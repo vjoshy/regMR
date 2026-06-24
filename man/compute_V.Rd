@@ -26,8 +26,8 @@ something coercible to one.}
 \value{
 A numeric matrix of size G x (p + 1), where the number of
 rows is equal to the number of mixture components G, and the number of
-columns is equal to the number of covariates p + 1,
-representing the sgl penalty majorization matrix.
+columns is equal to the number of covariates p + 1, representing the sgl
+penalty majorization matrix.
 }
 \description{
 Compute sparse group lasso (sgl) penalty majorization matrix for application

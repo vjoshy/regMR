@@ -123,11 +123,11 @@ all values in the pi vector are replaced with the value one.}
 }
 \value{
 An object, depending on inputted family, of class
-(FGMRM, FPMRM, FBMRM, FGamMRM) containing the parameters of the estimated
+FGMRM, FPMRM, FBMRM, or FGamMRM and FMRM containing the parameters of the estimated
 finite mixture regression model (parameters depend on inputted family),
-number of mixture components, parameters of models with the same alpha, and a numeric
+number of mixture components, parameters of models with the same alpha, a numeric
 matrix containing the alpha, lambda, and ic values of all estimated models
-for plotting purposes.
+for plotting purposes, and the function call for summary purposes.
 }
 \description{
 Applies the Majorization-Minimization Algorithm to the inputted data over all

@@ -6,7 +6,7 @@ Authors@R: c(
     person("Vinay", "Joshy", email = "joshy@uoguelph.ca", role = c("aut", "ctb", "cph")),
     person("Zeny", "Feng", email = "zfeng@uoguelph.ca", role = c("aut", "ths", "cph")),
     person("Grace", "Stelter", email = "stelterg@uoguelph.ca", role = c("aut", "cph")))
-Description: Provides a comprehensive framework for fitting regularized finite mixture regression models via the MM algorithm. The sparse group lasso (SGL) penalty is applied to parameter updates within the MM algorithm for variable selection. The package provides multiple functions for estimation and allows users to fit finite mixture regression models over different lambda-alpha SGL penalty combinations and group counts.
+Description: Provides a comprehensive framework for fitting regularized finite mixture regression models via a MM algorithm. The sparse group lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection with respect to groups and covariates. The package provides multiple functions for estimation and allows users to fit models over different lambda-alpha sgl penalty combinations and group counts.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
