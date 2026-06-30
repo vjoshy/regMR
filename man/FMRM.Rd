@@ -9,6 +9,7 @@ FMRM(
   y,
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
+  binomial_size = NULL,
   tol = 0.001,
   max_iter = 500,
   reps = 1,
@@ -46,6 +47,10 @@ are altered depending on the inputted family. Current accepted types include
 Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 Input is converted to all lowercase within the function for simplification.}
+
+\item{binomial_size}{A single numerical value or a numerical vector the same
+length as y representing the number of trials for each response. Must be
+inputted if family is Binomial.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the

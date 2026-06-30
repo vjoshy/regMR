@@ -20,6 +20,9 @@
 #' Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 #' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 #' Input is converted to all lowercase within the function for simplification.
+#' @param binomial_size A single numerical value or a numerical vector the same
+#' length as y representing the number of trials for each response. Must be
+#' inputted if family is Binomial.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -129,6 +132,7 @@ FMRM <- function(
   y,
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
+  binomial_size = NULL,
   tol = 10e-04,
   max_iter = 500,
   reps = 1,
@@ -179,6 +183,15 @@ FMRM <- function(
   family <- tolower(family)
   information_criteria <- match.arg(information_criteria)
 
+  # ----check if size is inputted if family is Binomial----
+  if (family == "binomial" && is.null(binomial_size)) {
+    stop(
+      "Require input for binomial_size when family is Binomial. Input is
+         either a single numerical value or a numerical vector the same length
+         as y."
+    )
+  }
+
   # ----Capture the current function call----
   call <- match.call()
 
@@ -203,6 +216,7 @@ FMRM <- function(
         x,
         y,
         family,
+        binomial_size,
         tol,
         max_iter,
         reps,
@@ -325,6 +339,7 @@ FMRM <- function(
         x = x,
         y = y,
         family = family,
+        binomial_size = binomial_size,
         tol = tol,
         max_iter = max_iter,
         reps = reps,
@@ -354,6 +369,7 @@ FMRM <- function(
         x = x,
         y = y,
         family = family,
+        binomial_size = binomial_size,
         tol = tol,
         max_iter = max_iter,
         reps = reps,

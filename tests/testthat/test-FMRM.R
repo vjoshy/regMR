@@ -298,13 +298,16 @@ if (requireNamespace("mvtnorm", quietly = TRUE)) {
     y = y,
     G = 3,
     family = gaussian(),
+    parallel = FALSE,
     automatic_stopping = TRUE,
     verbose = FALSE
   )
 
-  test_that("code runs with family = gaussian(), with automatic stopping", {
+  test_that("code runs with family = gaussian(), with automatic stopping in sequential", {
     expect_equal(mod$g, 3)
   })
+
+  set.seed(2025)
 
   # ----Poisson----
 

@@ -21,6 +21,9 @@
 #' Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 #' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 #' Input is converted to all lowercase within the function for simplification.
+#' @param binomial_size A single numerical value or a numerical vector the same
+#' length as y representing the number of trials for each response. Must be
+#' inputted if family is Binomial.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -126,6 +129,7 @@ MM_Grid <- function(
   x,
   y,
   family = c("gaussian", "poisson", "binomial", "gamma"),
+  binomial_size = NULL,
   tol = 10e-04,
   max_iter = 500,
   reps = 1,
@@ -173,6 +177,15 @@ MM_Grid <- function(
   }
   family <- tolower(family)
   information_criteria <- match.arg(information_criteria)
+
+  # ----check if size is inputted if family is Binomial----
+  if (family == "binomial" && is.null(binomial_size)) {
+    stop(
+      "Require input for binomial_size when family is Binomial. Input is
+         either a single numerical value or a numerical vector the same length
+         as y."
+    )
+  }
 
   # ----Capture the current function call----
   call <- match.call()
@@ -222,16 +235,19 @@ MM_Grid <- function(
         y,
         g,
         family,
+        binomial_size,
         tol,
         max_iter,
         10,
         0,
         0,
         params_g,
-        0,
         verbose,
         FALSE,
-        information_criteria
+        information_criteria,
+        common_sigma,
+        sigma_penalty,
+        pi_penalty
       )
 
       # ----get initial parameters from return----
@@ -303,6 +319,7 @@ MM_Grid <- function(
       y,
       g,
       family,
+      binomial_size,
       tol,
       max_iter,
       10,
@@ -310,8 +327,11 @@ MM_Grid <- function(
       0,
       init_parameters[[g]],
       verbose,
-      penalty,
-      information_criteria
+      FALSE,
+      information_criteria,
+      common_sigma,
+      sigma_penalty,
+      pi_penalty
     )
 
     # ----Check if unregularized model succeeded----
@@ -427,66 +447,89 @@ MM_Grid <- function(
         )
       }
 
-      # for (lambda in unique(param_grid$lambda)) {
-      #   alpha_row <- param_grid[param_grid$lambda == lambda, ]
-      #
-      #   parameters <- future_map(
-      #     alpha_row$alpha,
-      #     function(alpha) {
-      #       MM(
-      #         x,
-      #         y,
-      #         g,
-      #         family,
-      #         tol,
-      #         max_iter,
-      #         reps,
-      #         lambda,
-      #         alpha,
-      #         init_parameters[[g]],
-      #         verbose,
-      #         penalty,
-      #         information_criteria,
-      #         common_sigma,
-      #         sigma_penalty,
-      #         pi_penalty
-      #       )
-      #     },
-      #     .options = furrr::furrr_options(
-      #       seed = TRUE,
-      #       globals = list(MM = MM)
-      #     )
-      #   )
-      # }
+      for (i in 1:length(unique(param_grid$lambda))) {
+        # ----get lambda and alpha values from parameter grid----
+        lam <- unique(param_grid$lambda)[i]
+        alpha_row <- param_grid[param_grid$lambda == lam, ]
 
-      # ----fit models in parallel----
-      parameters <- furrr::future_pmap(
-        param_grid,
-        function(alpha, lambda) {
-          MM(
-            x,
-            y,
-            g,
-            family,
-            tol,
-            max_iter,
-            reps,
-            lambda,
-            alpha,
-            init_parameters[[g]],
-            verbose,
-            penalty,
-            information_criteria,
-            common_sigma,
-            sigma_penalty,
-            pi_penalty
+        # ----Warm start: use solution from previous lambda----
+        if (i == 1) {
+          init_parameters_alpha <- stats::setNames(
+            replicate(nrow(alpha_row), init_parameters[[g]], simplify = FALSE),
+            as.character(alpha_row$alpha)
           )
-        },
-        .options = furrr::furrr_options(
-          seed = TRUE,
-          globals = list(MM = MM)
+        } else {
+          if (family == "gaussian") {
+            init_parameters_alpha <- stats::setNames(
+              purrr::map(
+                parameters[[i - 1]],
+                ~ list(
+                  init_parameters[[g]][[1]],
+                  .x$beta,
+                  .x$sigma,
+                  .x$z
+                )
+              ),
+              as.character(alpha_row$alpha)
+            )
+          } else if (family == "poisson" || family == "binomial") {
+            init_parameters_alpha <- stats::setNames(
+              purrr::map(
+                parameters[[i - 1]],
+                ~ list(
+                  init_parameters[[g]][[1]],
+                  .x$beta,
+                  .x$z
+                )
+              ),
+              as.character(alpha_row$alpha)
+            )
+          } else if (family == "gamma") {
+            init_parameters_alpha <- stats::setNames(
+              purrr::map(
+                parameters[[i - 1]],
+                ~ list(
+                  init_parameters[[g]][[1]],
+                  .x$beta,
+                  .x$nu,
+                  .x$z
+                )
+              ),
+              as.character(alpha_row$alpha)
+            )
+          }
+        }
+
+        # ----fit models in parallel over alpha----
+        parameters[[i]] <- furrr::future_map(
+          alpha_row$alpha,
+          function(alpha) {
+            MM(
+              x,
+              y,
+              g,
+              family,
+              binomial_size,
+              tol,
+              max_iter,
+              reps,
+              lam,
+              alpha,
+              init_parameters_alpha[[as.character(alpha)]],
+              verbose,
+              penalty,
+              information_criteria,
+              common_sigma,
+              sigma_penalty,
+              pi_penalty
+            )
+          },
+          .options = furrr::furrr_options(seed = TRUE)
         )
-      )
+      }
+
+      # ----flatten results for analysis----
+      parameters <- purrr::flatten(parameters)
 
       future::plan(future::sequential)
     } else {
@@ -497,6 +540,7 @@ MM_Grid <- function(
           y,
           g,
           family,
+          binomial_size,
           tol,
           max_iter,
           reps,
@@ -609,6 +653,7 @@ MM_Grid <- function(
       y,
       g,
       family,
+      binomial_size,
       tol,
       max_iter,
       reps,
