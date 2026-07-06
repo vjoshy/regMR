@@ -46,7 +46,7 @@ install.packages("regMR")
 
 ## Example
 
-1. Data Simulation
+1.  Data Simulation
 
 To generate the clustered data to fit using regMR, we require the package mvtnorm to be installed. More information on mvtnorm can be found here: <https://CRAN.R-project.org/package=mvtnorm>. After setting the seed to ensure reproducibility of the data, initializing the simulation parameters (number of samples (`n`), covariates (`p`), mixture components (`G`), and the correlation constant (`rho`)), and defining the true parameters for the clusters, we can begin to construct the multivariate normal data (`X`) and generate the response (`y`).
 
@@ -93,9 +93,9 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 ```
 
-2. Model Fitting
+2.  Model Fitting
 
-We call `FMRM()` with `family = gaussian()` and `information_criteria = "bic"` to fit a finite Gaussian mixture regression model to the data. `FMRM()` fits regularized finite mixture regression models via the MM algorithm over a range of lambda-alpha pairs (sgl penalty values) and group counts. The maximum group count to be tested is specified in the function below as `G = 4`. The function chooses the model with the lowest information criteria value as specified by the user, which in this case will be BIC. 
+We call `FMRM()` with `family = gaussian()` and `information_criteria = "bic"` to fit a finite Gaussian mixture regression model to the data. `FMRM()` fits regularized finite mixture regression models via the MM algorithm over a range of lambda-alpha pairs (sgl penalty values) and group counts. The maximum group count to be tested is specified in the function below as `G = 4`. The function chooses the model with the lowest information criteria value as specified by the user, which in this case will be BIC.
 
 ```{r example-2}
 # ----Load the regMR package----
@@ -105,7 +105,7 @@ library(regMR)
 fit <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bic")
 ```
 
-3. Use Methods
+3.  Use Methods
 
 `plot()` is an S3 method for plotting results from the `FMRM()` and `MM_Grid()` functions of class FMRM. The function outputs three plots:
 
@@ -121,9 +121,11 @@ plot(fit)
 
 `plot2()` plots two specified covariates of the predictor/design matrix (`X`) against the response vector (`y`). The observations are coloured per the group responsibility matrix (`z_hard`) in the finite mixture regression model passed to the function.
 
-```{r example-4}
+```{r example-4, eval=F, echo=T}
 plot2(fit, X, y, 1, 2)
 ```
+
+![](man/figures/newplot.png)
 
 `summary()` is an S3 method for summarizing results from the `FMRM()` and `MM_Grid()` functions of class FMRM. Outputs the number of mixture components, optimal lambda-alpha pair, log-likelihood, ic, mean squared error, and parameters of the model.
 
