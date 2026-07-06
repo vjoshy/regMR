@@ -10,7 +10,6 @@ MM(
   y,
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
-  binomial_size = NULL,
   tol = 1e-04,
   max_iter = 500,
   reps = 1,
@@ -31,7 +30,9 @@ number of rows is equal to the number of observations n, and the number of
 columns is equal to the number of covariates p.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
-one.}
+one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+matrix of size n x 2, where the first column corresponds to the successes and
+the second the failures.}
 
 \item{G}{An integer greater than or equal to one representing the
 number of mixture components (groups) in a finite mixture regression
@@ -43,10 +44,6 @@ are altered depending on the inputted family. Current accepted types include
 Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 Input is converted to all lowercase within the function for simplification.}
-
-\item{binomial_size}{A single numerical value or a numerical vector the same
-length as y representing the number of trials for each response. Must be
-inputted if family is Binomial.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the

@@ -14,7 +14,9 @@ number of rows is equal to the number of observations n, and the number of
 columns is equal to the number of covariates p.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
-one.}
+one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+matrix of size n x 2, where the first column corresponds to the successes and
+the second the failures.}
 
 \item{covariate_one}{A numeric value specifying the first covariate of x to
 be plotted.}

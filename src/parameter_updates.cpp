@@ -116,7 +116,7 @@ double lambda_max_compute_FGMRM(arma::mat X, arma::mat y, arma::mat gamma_mat,
   return lambda_max;
 }
 
-arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
+arma::vec update_beta_irls_single(arma::mat x, arma::mat y, std::string family,
                                   arma::vec z_g, arma::vec beta_g_old, arma::vec v_g,
                                   double nu_g, double pi_g, double lambda,
                                   bool penalty = false, int max_iter = 500,
@@ -125,8 +125,8 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
   arma::vec beta_g = beta_g_old;
   int iter = 0;
   bool converged = false;
-  int max_y = arma::max(y);
-  int m = std::max(1, max_y);
+  arma::vec m = arma::sum(y, 1);
+  y = y.col(0);
 
   // Prepare penalty vector if needed
   arma::vec penalty_vec;
@@ -168,7 +168,7 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
       weights = mu_g % z_g;
     } else if (family == "binomial"){
       arma::vec var = arma::clamp(mu_g % (1.0 - mu_g), 1e-10, arma::datum::inf);
-      weights = m * var % z_g;
+      weights = m % var % z_g;
       weights = arma::clamp(weights, 1e-10, arma::datum::inf);
     } else {
       weights = arma::square(mu_g) % z_g;
@@ -217,7 +217,7 @@ arma::vec update_beta_irls_single(arma::mat x, arma::vec y, std::string family,
 }
 
 // [[Rcpp::export]]
-arma::mat beta_update_GLM(arma::mat x, arma::vec y, std::string family, arma::mat z_mat,
+arma::mat beta_update_GLM(arma::mat x, arma::mat y, std::string family, arma::mat z_mat,
                               arma::mat beta_old, arma::mat V, arma::vec nu,
                               arma::vec pi, double lambda, bool penalty = false,
                               int max_iter = 500, double tol = 1e-8) {

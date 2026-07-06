@@ -7,7 +7,12 @@
 #' number of rows is equal to the number of observations n, and the number of
 #' columns is equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
-#' one.
+#' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+#' matrix of size n x 2, where the first column corresponds to the successes and
+#' the second the failures.
+#' @param family A string of characters specifying the distribution of the
+#' finite mixture regression model being fit to the data. Parameter updates
+#' are altered depending on the inputted family.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -62,6 +67,7 @@ error_check_MM_Grid <- function(
   g,
   x,
   y,
+  family,
   tol,
   max_iter,
   reps,
@@ -84,9 +90,18 @@ error_check_MM_Grid <- function(
   if (!is.numeric(y) || (!is.vector(y) && !is.matrix(y))) {
     stop("Invalid y\n")
   }
-  y <- as.vector(y)
-  if (nrow(x) != length(y)) {
-    stop("x and y not compatible\n")
+  if (family == "binomial") {
+    if (!is.matrix(y) || ncol(y) != 2) {
+      stop("Invalid y\n")
+    }
+    if (nrow(x) != nrow(y)) {
+      stop("x and y not compatible\n")
+    }
+  } else {
+    y <- as.vector(y)
+    if (nrow(x) != length(y)) {
+      stop("x and y not compatible\n")
+    }
   }
   if (!is.numeric(g) || g < 1) {
     stop("Invalid group size g\n")

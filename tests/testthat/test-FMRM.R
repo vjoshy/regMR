@@ -214,6 +214,34 @@ test_that("check on information criteria works", {
   )
 })
 
+test_that("check on y with Binomial family works", {
+  expect_error(
+    FMRM(X, y, G = 6, family = binomial()),
+    "Invalid y\n",
+    fixed = TRUE
+  )
+})
+
+y <- matrix(0, nrow = n, ncol = 3)
+
+test_that("check on y with Binomial family works", {
+  expect_error(
+    FMRM(X, y, G = 6, family = binomial()),
+    "Invalid y\n",
+    fixed = TRUE
+  )
+})
+
+y <- matrix(0, nrow = n - 1, ncol = 2)
+
+test_that("check on compatibility with Binomial family works", {
+  expect_error(
+    FMRM(X, y, G = 6, family = binomial()),
+    "x and y not compatible\n",
+    fixed = TRUE
+  )
+})
+
 if (requireNamespace("mvtnorm", quietly = TRUE)) {
   set.seed(2025)
 

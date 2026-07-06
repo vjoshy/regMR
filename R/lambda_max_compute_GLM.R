@@ -11,7 +11,9 @@
 #' of columns is equal to the number of covariates p + 1 (for the intercept
 #' term).
 #' @param y Response vector. Either a numeric vector, or something coercible to
-#' one.
+#' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+#' matrix of size n x 2, where the first column corresponds to the successes and
+#' the second the failures.
 #' @param family A string of characters specifying the distribution of the
 #' finite mixture regression model being fit to the data. Parameter updates
 #' are altered depending on the inputted family.
@@ -31,7 +33,7 @@
 lambda_max_compute_GLM <- function(x, y, family, z_mat, beta_init) {
   G <- ncol(z_mat)
   p <- ncol(x)
-  m <- max(1, max(y))
+  m <- rowSums(y)
 
   # ----Add intercept column to x if not already present----
   if (ncol(beta_init) == p + 1) {

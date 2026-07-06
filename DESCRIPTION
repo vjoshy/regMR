@@ -24,7 +24,7 @@ Imports:
     purrr,
     Rcpp,
     reshape2,
-    scatterplot3d,
+    plotly,
     stats
 Suggests: 
     mvtnorm,

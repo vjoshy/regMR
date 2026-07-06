@@ -206,3 +206,31 @@ test_that("check on information criteria works", {
     fixed = TRUE
   )
 })
+
+test_that("check on y with Binomial family works", {
+  expect_error(
+    MM_Grid(g = 6, X, y, family = binomial()),
+    "Invalid y\n",
+    fixed = TRUE
+  )
+})
+
+y <- matrix(0, nrow = n, ncol = 3)
+
+test_that("check on y with Binomial family works", {
+  expect_error(
+    MM_Grid(g = 6, X, y, family = binomial()),
+    "Invalid y\n",
+    fixed = TRUE
+  )
+})
+
+y <- matrix(0, nrow = n - 1, ncol = 2)
+
+test_that("check on compatibility with Binomial family works", {
+  expect_error(
+    MM_Grid(g = 6, X, y, family = binomial()),
+    "x and y not compatible\n",
+    fixed = TRUE
+  )
+})

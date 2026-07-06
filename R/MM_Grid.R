@@ -14,16 +14,15 @@
 #' number of rows is equal to the number of observations n, and the number of
 #' columns is equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
-#' one.
+#' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+#' matrix of size n x 2, where the first column corresponds to the successes and
+#' the second the failures.
 #' @param family A string of characters specifying the distribution of the
 #' finite mixture regression model being fit to the data. Parameter updates
 #' are altered depending on the inputted family. Current accepted types include
 #' Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 #' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 #' Input is converted to all lowercase within the function for simplification.
-#' @param binomial_size A single numerical value or a numerical vector the same
-#' length as y representing the number of trials for each response. Must be
-#' inputted if family is Binomial.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -129,7 +128,6 @@ MM_Grid <- function(
   x,
   y,
   family = c("gaussian", "poisson", "binomial", "gamma"),
-  binomial_size = NULL,
   tol = 10e-04,
   max_iter = 500,
   reps = 1,
@@ -147,11 +145,21 @@ MM_Grid <- function(
   sigma_penalty = TRUE,
   pi_penalty = TRUE
 ) {
+  # ----get family and information criteria arguments----
+  if (inherits(family, "family")) {
+    family <- family$family
+  } else {
+    family <- match.arg(family)
+  }
+  family <- tolower(family)
+  information_criteria <- match.arg(information_criteria)
+
   #----input validation/error check----
   error_check_MM_Grid(
     g,
     x,
     y,
+    family,
     tol,
     max_iter,
     reps,
@@ -169,28 +177,12 @@ MM_Grid <- function(
     pi_penalty
   )
 
-  # ----get family and information criteria arguments----
-  if (inherits(family, "family")) {
-    family <- family$family
-  } else {
-    family <- match.arg(family)
-  }
-  family <- tolower(family)
-  information_criteria <- match.arg(information_criteria)
-
-  # ----check if size is inputted if family is Binomial----
-  if (family == "binomial" && is.null(binomial_size)) {
-    stop(
-      "Require input for binomial_size when family is Binomial. Input is
-         either a single numerical value or a numerical vector the same length
-         as y."
-    )
-  }
-
   # ----Capture the current function call----
   call <- match.call()
 
-  y <- as.matrix(y)
+  if (!is.matrix(y)) {
+    y <- as.matrix(y)
+  }
 
   if (verbose) {
     cat("\n-- g =", g, "--\n")
@@ -235,7 +227,6 @@ MM_Grid <- function(
         y,
         g,
         family,
-        binomial_size,
         tol,
         max_iter,
         10,
@@ -290,8 +281,8 @@ MM_Grid <- function(
     if (family == "poisson") {
       base_intercept <- log(mean(y))
     } else {
-      m <- max(1, max(y))
-      prop <- mean(y / m)
+      m <- rowSums(y)
+      prop <- mean(y[, 1] / m)
       prop <- pmin(pmax(prop, 1e-10), 1 - 1e-10) # ----guard against 0 and 1----
       base_intercept <- log(prop / (1 - prop))
     }
@@ -319,7 +310,6 @@ MM_Grid <- function(
       y,
       g,
       family,
-      binomial_size,
       tol,
       max_iter,
       10,
@@ -366,7 +356,6 @@ MM_Grid <- function(
     lambda_factor <- 0.1
   }
 
-  # ----if penalty is being applied (is true), call MM over lambda-alpha pairs--
   if (penalty) {
     # ----initialize lambda grid if null----
     if (is.null(lambda) && is.null(lambda_max)) {
@@ -509,7 +498,6 @@ MM_Grid <- function(
               y,
               g,
               family,
-              binomial_size,
               tol,
               max_iter,
               reps,
@@ -540,7 +528,6 @@ MM_Grid <- function(
           y,
           g,
           family,
-          binomial_size,
           tol,
           max_iter,
           reps,
@@ -653,7 +640,6 @@ MM_Grid <- function(
       y,
       g,
       family,
-      binomial_size,
       tol,
       max_iter,
       reps,

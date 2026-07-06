@@ -9,7 +9,9 @@
 #' number of rows is equal to the number of observations n, and the number of
 #' columns is equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
-#' one.
+#' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+#' matrix of size n x 2, where the first column corresponds to the successes and
+#' the second the failures.
 #' @param covariate_one A numeric value specifying the first covariate of x to
 #' be plotted.
 #' @param covariate_two A numeric value specifying the second covariate of x to
@@ -71,30 +73,39 @@ plot2 <- function(mod, x, y, covariate_one, covariate_two, ...) {
     stop("Covariate does not exist\n")
   }
 
+  if (!is.matrix(y)) {
+    y <- as.matrix(y)
+  }
+  y <- y[, 1]
+
   # ----extract the hard group assignments from the model----
   df <- as.data.frame(mod$parameters$z_hard)
   Groups <- max.col(df)
-  df <- data.frame(y = y, x = x)
 
   # ----create plot, specified covariates of x vs. y with group assignments as--
   # ----colour----
-  plot <- scatterplot3d::scatterplot3d(
+  plot <- plotly::plot_ly(
     x = x[, covariate_one],
     y = x[, covariate_two],
     z = y,
-    xlab = paste("Covariate ", covariate_one),
-    ylab = paste("Covariate ", covariate_two),
-    zlab = "y",
-    ,
-    pch = 16,
-    color = as.factor(Groups)
-  )
-  fit <- stats::lm(y ~ x[, covariate_one] + x[, covariate_two])
-  plot$plane3d(fit)
-  for (i in 1:nrow(x)) {
-    coords <- plot$xyz.convert(x[i, covariate_one], x[i, covariate_two], y[i])
-    graphics::text(coords$x, coords$y, labels = Groups[i], pos = 3, cex = 0.7)
-  }
+    type = "scatter3d",
+    mode = "markers",
+    marker = list(
+      size = 6,
+      color = as.factor(Groups),
+      colorscale = "Viridis",
+      opacity = 0.8,
+      colorbar = list(title = "Groups")
+    )
+  ) |>
+    plotly::layout(
+      scene = list(
+        xaxis = list(title = paste0("Covariate ", covariate_one)),
+        yaxis = list(title = paste0("Covariate ", covariate_two)),
+        zaxis = list(title = "y"),
+        camera = list(eye = list(x = 1.5, y = 1.5, z = 1.2))
+      )
+    )
 
   return(plot)
 }

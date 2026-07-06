@@ -8,6 +8,7 @@ error_check_MM(
   x,
   y,
   G,
+  family,
   tol,
   max_iter,
   reps,
@@ -28,11 +29,17 @@ number of rows is equal to the number of observations n, and the number of
 columns is equal to the number of covariates p.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
-one.}
+one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+matrix of size n x 2, where the first column corresponds to the successes and
+the second the failures.}
 
 \item{G}{An integer greater than or equal to one representing the
 number of mixture components (groups) in a finite mixture regression
 model.}
+
+\item{family}{A string of characters specifying the distribution of the
+finite mixture regression model being fit to the data. Parameter updates
+are altered depending on the inputted family.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criteria for
 the MM algorithm (default value is 10e-04). If the difference in value of the

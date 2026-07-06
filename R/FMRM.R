@@ -10,7 +10,9 @@
 #' number of rows is equal to the number of observations n, and the number of
 #' columns is equal to the number of covariates p.
 #' @param y Response vector. Either a numeric vector, or something coercible to
-#' one.
+#' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+#' matrix of size n x 2, where the first column corresponds to the successes and
+#' the second the failures.
 #' @param G An integer greater than or equal to two specifying the maximum
 #' number of mixture components (groups) in the estimated model that the
 #' function will attempt to fit the data to.
@@ -20,9 +22,6 @@
 #' Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 #' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 #' Input is converted to all lowercase within the function for simplification.
-#' @param binomial_size A single numerical value or a numerical vector the same
-#' length as y representing the number of trials for each response. Must be
-#' inputted if family is Binomial.
 #' @param tol A non-negative numeric value specifying the stopping criteria for
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
@@ -132,7 +131,6 @@ FMRM <- function(
   y,
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
-  binomial_size = NULL,
   tol = 10e-04,
   max_iter = 500,
   reps = 1,
@@ -151,11 +149,21 @@ FMRM <- function(
   sigma_penalty = TRUE,
   pi_penalty = TRUE
 ) {
+  # ----get family and information criteria arguments----
+  if (inherits(family, "family")) {
+    family <- family$family
+  } else {
+    family <- match.arg(family)
+  }
+  family <- tolower(family)
+  information_criteria <- match.arg(information_criteria)
+
   # ----input validation/error check----
   error_check_FMRM(
     x,
     y,
     G,
+    family,
     tol,
     max_iter,
     reps,
@@ -174,28 +182,12 @@ FMRM <- function(
     pi_penalty
   )
 
-  # ----get family and information criteria arguments----
-  if (inherits(family, "family")) {
-    family <- family$family
-  } else {
-    family <- match.arg(family)
-  }
-  family <- tolower(family)
-  information_criteria <- match.arg(information_criteria)
-
-  # ----check if size is inputted if family is Binomial----
-  if (family == "binomial" && is.null(binomial_size)) {
-    stop(
-      "Require input for binomial_size when family is Binomial. Input is
-         either a single numerical value or a numerical vector the same length
-         as y."
-    )
-  }
-
   # ----Capture the current function call----
   call <- match.call()
 
-  y <- as.matrix(y)
+  if (!is.matrix(y)) {
+    y <- as.matrix(y)
+  }
 
   # ----get covariates----
   p <- ncol(x)
@@ -216,7 +208,6 @@ FMRM <- function(
         x,
         y,
         family,
-        binomial_size,
         tol,
         max_iter,
         reps,
@@ -339,7 +330,6 @@ FMRM <- function(
         x = x,
         y = y,
         family = family,
-        binomial_size = binomial_size,
         tol = tol,
         max_iter = max_iter,
         reps = reps,
@@ -369,7 +359,6 @@ FMRM <- function(
         x = x,
         y = y,
         family = family,
-        binomial_size = binomial_size,
         tol = tol,
         max_iter = max_iter,
         reps = reps,

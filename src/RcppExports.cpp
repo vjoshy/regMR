@@ -77,13 +77,13 @@ BEGIN_RCPP
 END_RCPP
 }
 // beta_update_GLM
-arma::mat beta_update_GLM(arma::mat x, arma::vec y, std::string family, arma::mat z_mat, arma::mat beta_old, arma::mat V, arma::vec nu, arma::vec pi, double lambda, bool penalty, int max_iter, double tol);
+arma::mat beta_update_GLM(arma::mat x, arma::mat y, std::string family, arma::mat z_mat, arma::mat beta_old, arma::mat V, arma::vec nu, arma::vec pi, double lambda, bool penalty, int max_iter, double tol);
 RcppExport SEXP _regMR_beta_update_GLM(SEXP xSEXP, SEXP ySEXP, SEXP familySEXP, SEXP z_matSEXP, SEXP beta_oldSEXP, SEXP VSEXP, SEXP nuSEXP, SEXP piSEXP, SEXP lambdaSEXP, SEXP penaltySEXP, SEXP max_iterSEXP, SEXP tolSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
     Rcpp::traits::input_parameter< arma::mat >::type x(xSEXP);
-    Rcpp::traits::input_parameter< arma::vec >::type y(ySEXP);
+    Rcpp::traits::input_parameter< arma::mat >::type y(ySEXP);
     Rcpp::traits::input_parameter< std::string >::type family(familySEXP);
     Rcpp::traits::input_parameter< arma::mat >::type z_mat(z_matSEXP);
     Rcpp::traits::input_parameter< arma::mat >::type beta_old(beta_oldSEXP);

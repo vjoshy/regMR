@@ -14,7 +14,9 @@ of columns is equal to the number of covariates p + 1 (for the intercept
 term).}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
-one.}
+one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
+matrix of size n x 2, where the first column corresponds to the successes and
+the second the failures.}
 
 \item{family}{A string of characters specifying the distribution of the
 finite mixture regression model being fit to the data. Parameter updates
