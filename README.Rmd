@@ -176,7 +176,7 @@ summary(fit)
 
 4.  Computational Speed
 
-```{r, echo=FALSE, results='hide'}
+```{r, message=FALSE, warning=FALSE}
 gaussian_df %>%
   gt(groupname_col = "Method") %>%
   tab_header(title = "Gaussian Benchmark Results") %>%
@@ -185,7 +185,7 @@ gaussian_df %>%
   cols_align(align = "center", columns = everything())
 ```
 
-```{r, echo=FALSE, results='hide'}
+```{r, message=FALSE, warning=FALSE}
 poisson_df %>%
   gt(groupname_col = "Method") %>%
   tab_header(title = "Poisson Benchmark Results") %>%
@@ -194,7 +194,7 @@ poisson_df %>%
   cols_align(align = "center", columns = everything())
 ```
 
-```{r, echo=FALSE, results='hide'}
+```{r, message=FALSE, warning=FALSE}
 binomial_df %>%
   gt(groupname_col = "Method") %>%
   tab_header(title = "Binomial Benchmark Results") %>%
