@@ -15,36 +15,39 @@ knitr::opts_chunk$set(
 ```
 
 ```{r setup, include=FALSE}
-library(gt)
+library(knitr)
 library(dplyr)
 ```
 
 ```{r, include=FALSE}
 gaussian_df <- data.frame(
-  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
+  Method = rep(c("Parallel", "Sequential", "Sequential, a-s"), each = 5),
   G = rep(3:7, times = 3),
   Replications = 10,
-  Elapsed = c(103.254, 125.252, 230.807, 359.222, 715.479,
+  `Elapsed (seconds)` = c(103.254, 125.252, 230.807, 359.222, 715.479,
               113.547, 206.359, 307.827, 494.598, 1107.395,
-              128.178, 238.118, 262.061, 267.270, 266.581)
+              128.178, 238.118, 262.061, 267.270, 266.581),
+  check.names = FALSE
 )
 
 poisson_df <- data.frame(
-  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
+  Method = rep(c("Parallel", "Sequential", "Sequential, a-s"), each = 5),
   G = rep(3:7, times = 3),
   Replications = 10,
-  Elapsed = c(289.525, 831.046, 836.103, 1622.873, 2265.934,
+  `Elapsed (seconds)` = c(289.525, 831.046, 836.103, 1622.873, 2265.934,
               326.966, 1059.252, 1703.650, 2757.893, 3862.902,
-              329.539, 1041.354, 1219.488, 1170.428, 1333.859)
+              329.539, 1041.354, 1219.488, 1170.428, 1333.859),
+  check.names = FALSE
 )
 
 binomial_df <- data.frame(
-  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
+  Method = rep(c("Parallel", "Sequential", "Sequential, a-s"), each = 5),
   G = rep(3:7, times = 3),
   Replications = 10,
-  Elapsed = c(107.470, 380.681, 873.549, 1646.376, 2815.387,
+  `Elapsed (seconds)` = c(107.470, 380.681, 873.549, 1646.376, 2815.387,
               121.764, 423.203, 1113.758, 2327.621, 3801.199,
-              117.798, 447.627, 445.004, 419.762, 437.278)
+              117.798, 447.627, 445.004, 419.762, 437.278),
+  check.names = FALSE
 )
 ```
 
@@ -174,31 +177,22 @@ plot2(fit, X, fit$parameters$y_hat, 1, 2)
 summary(fit)
 ```
 
-4.  Computational Speed
+## Computational Speed
 
-```{r, message=FALSE, warning=FALSE}
-gaussian_df %>%
-  gt(groupname_col = "Method") %>%
-  tab_header(title = "Gaussian Benchmark Results") %>%
-  fmt_number(columns = Elapsed, decimals = 3) %>%
-  cols_label(Elapsed = "Elapsed (seconds)") %>%
-  cols_align(align = "center", columns = everything())
+### Gaussian Benchmark Results
+
+```{r, echo=FALSE}
+kable(gaussian_df, digits = 3, align = "c")
 ```
 
-```{r, message=FALSE, warning=FALSE}
-poisson_df %>%
-  gt(groupname_col = "Method") %>%
-  tab_header(title = "Poisson Benchmark Results") %>%
-  fmt_number(columns = Elapsed, decimals = 3) %>%
-  cols_label(Elapsed = "Elapsed (seconds)") %>%
-  cols_align(align = "center", columns = everything())
+### Poisson Benchmark Results
+
+```{r, echo=FALSE}
+kable(poisson_df, digits = 3, align = "c")
 ```
 
-```{r, message=FALSE, warning=FALSE}
-binomial_df %>%
-  gt(groupname_col = "Method") %>%
-  tab_header(title = "Binomial Benchmark Results") %>%
-  fmt_number(columns = Elapsed, decimals = 3) %>%
-  cols_label(Elapsed = "Elapsed (seconds)") %>%
-  cols_align(align = "center", columns = everything())
+### Binomial Benchmark Results
+
+```{r, echo=FALSE}
+kable(binomial_df, digits = 3, align = "c")
 ```
