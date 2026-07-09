@@ -313,3 +313,5 @@ summary(fit)
 #>   Beta 5       0.029 -0.000 -0.000
 #>   Beta 6      -0.000 -0.000 -0.031
 ```
+
+4.  Computational Speed

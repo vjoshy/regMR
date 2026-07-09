@@ -14,6 +14,40 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{r setup, include=FALSE}
+library(gt)
+library(dplyr)
+```
+
+```{r, include=FALSE}
+gaussian_df <- data.frame(
+  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
+  G = rep(3:7, times = 3),
+  Replications = 10,
+  Elapsed = c(103.254, 125.252, 230.807, 359.222, 715.479,
+              113.547, 206.359, 307.827, 494.598, 1107.395,
+              128.178, 238.118, 262.061, 267.270, 266.581)
+)
+
+poisson_df <- data.frame(
+  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
+  G = rep(3:7, times = 3),
+  Replications = 10,
+  Elapsed = c(289.525, 831.046, 836.103, 1622.873, 2265.934,
+              326.966, 1059.252, 1703.650, 2757.893, 3862.902,
+              329.539, 1041.354, 1219.488, 1170.428, 1333.859)
+)
+
+binomial_df <- data.frame(
+  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
+  G = rep(3:7, times = 3),
+  Replications = 10,
+  Elapsed = c(107.470, 380.681, 873.549, 1646.376, 2815.387,
+              121.764, 423.203, 1113.758, 2327.621, 3801.199,
+              117.798, 447.627, 445.004, 419.762, 437.278)
+)
+```
+
 # regMR: Regularized Finite Mixture Regression Models Using MM Algorithm
 
 <!-- badges: start -->
@@ -131,10 +165,40 @@ plot2(fit, X, y, 1, 2)
 ```{r example-5, eval=F, echo=T}
 plot2(fit, X, fit$parameters$y_hat, 1, 2)
 ```
+
 ![](man/figures/plot2_2.png)
 
 `summary()` is an S3 method for summarizing results from the `FMRM()` and `MM_Grid()` functions of class FMRM. Outputs the number of mixture components, optimal lambda-alpha pair, log-likelihood, ic, mean squared error, and parameters of the model.
 
 ```{r example-6}
 summary(fit)
+```
+
+4.  Computational Speed
+
+```{r, echo=FALSE, results='hide'}
+gaussian_df %>%
+  gt(groupname_col = "Method") %>%
+  tab_header(title = "Gaussian Benchmark Results") %>%
+  fmt_number(columns = Elapsed, decimals = 3) %>%
+  cols_label(Elapsed = "Elapsed (seconds)") %>%
+  cols_align(align = "center", columns = everything())
+```
+
+```{r, echo=FALSE, results='hide'}
+poisson_df %>%
+  gt(groupname_col = "Method") %>%
+  tab_header(title = "Poisson Benchmark Results") %>%
+  fmt_number(columns = Elapsed, decimals = 3) %>%
+  cols_label(Elapsed = "Elapsed (seconds)") %>%
+  cols_align(align = "center", columns = everything())
+```
+
+```{r, echo=FALSE, results='hide'}
+binomial_df %>%
+  gt(groupname_col = "Method") %>%
+  tab_header(title = "Binomial Benchmark Results") %>%
+  fmt_number(columns = Elapsed, decimals = 3) %>%
+  cols_label(Elapsed = "Elapsed (seconds)") %>%
+  cols_align(align = "center", columns = everything())
 ```
