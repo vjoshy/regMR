@@ -318,60 +318,60 @@ summary(fit)
 
 ### Gaussian Benchmark Results
 
-|     Method      |  G  | Replications | Elapsed (seconds) |
-|:---------------:|:---:|:------------:|:-----------------:|
-|    Parallel     |  3  |      10      |      103.254      |
-|    Parallel     |  4  |      10      |      125.252      |
-|    Parallel     |  5  |      10      |      230.807      |
-|    Parallel     |  6  |      10      |      359.222      |
-|    Parallel     |  7  |      10      |      715.479      |
-|   Sequential    |  3  |      10      |      113.547      |
-|   Sequential    |  4  |      10      |      206.359      |
-|   Sequential    |  5  |      10      |      307.827      |
-|   Sequential    |  6  |      10      |      494.598      |
-|   Sequential    |  7  |      10      |     1107.395      |
-| Sequential, a-s |  3  |      10      |      128.178      |
-| Sequential, a-s |  4  |      10      |      238.118      |
-| Sequential, a-s |  5  |      10      |      262.061      |
-| Sequential, a-s |  6  |      10      |      267.270      |
-| Sequential, a-s |  7  |      10      |      266.581      |
+|       Method       |  G  | Replications | Elapsed (seconds) |
+|:------------------:|:---:|:------------:|:-----------------:|
+|      Parallel      |  3  |      10      |      103.254      |
+|      Parallel      |  4  |      10      |      125.252      |
+|      Parallel      |  5  |      10      |      230.807      |
+|      Parallel      |  6  |      10      |      359.222      |
+|      Parallel      |  7  |      10      |      715.479      |
+|     Sequential     |  3  |      10      |      113.547      |
+|     Sequential     |  4  |      10      |      206.359      |
+|     Sequential     |  5  |      10      |      307.827      |
+|     Sequential     |  6  |      10      |      494.598      |
+|     Sequential     |  7  |      10      |     1107.395      |
+| Automatic Stopping |  3  |      10      |      128.178      |
+| Automatic Stopping |  4  |      10      |      238.118      |
+| Automatic Stopping |  5  |      10      |      262.061      |
+| Automatic Stopping |  6  |      10      |      267.270      |
+| Automatic Stopping |  7  |      10      |      266.581      |
 
 ### Poisson Benchmark Results
 
-|     Method      |  G  | Replications | Elapsed (seconds) |
-|:---------------:|:---:|:------------:|:-----------------:|
-|    Parallel     |  3  |      10      |      289.525      |
-|    Parallel     |  4  |      10      |      831.046      |
-|    Parallel     |  5  |      10      |      836.103      |
-|    Parallel     |  6  |      10      |     1622.873      |
-|    Parallel     |  7  |      10      |     2265.934      |
-|   Sequential    |  3  |      10      |      326.966      |
-|   Sequential    |  4  |      10      |     1059.252      |
-|   Sequential    |  5  |      10      |     1703.650      |
-|   Sequential    |  6  |      10      |     2757.893      |
-|   Sequential    |  7  |      10      |     3862.902      |
-| Sequential, a-s |  3  |      10      |      329.539      |
-| Sequential, a-s |  4  |      10      |     1041.354      |
-| Sequential, a-s |  5  |      10      |     1219.488      |
-| Sequential, a-s |  6  |      10      |     1170.428      |
-| Sequential, a-s |  7  |      10      |     1333.859      |
+|       Method       |  G  | Replications | Elapsed (seconds) |
+|:------------------:|:---:|:------------:|:-----------------:|
+|      Parallel      |  3  |      10      |      289.525      |
+|      Parallel      |  4  |      10      |      831.046      |
+|      Parallel      |  5  |      10      |      836.103      |
+|      Parallel      |  6  |      10      |     1622.873      |
+|      Parallel      |  7  |      10      |     2265.934      |
+|     Sequential     |  3  |      10      |      326.966      |
+|     Sequential     |  4  |      10      |     1059.252      |
+|     Sequential     |  5  |      10      |     1703.650      |
+|     Sequential     |  6  |      10      |     2757.893      |
+|     Sequential     |  7  |      10      |     3862.902      |
+| Automatic Stopping |  3  |      10      |      329.539      |
+| Automatic Stopping |  4  |      10      |     1041.354      |
+| Automatic Stopping |  5  |      10      |     1219.488      |
+| Automatic Stopping |  6  |      10      |     1170.428      |
+| Automatic Stopping |  7  |      10      |     1333.859      |
 
 ### Binomial Benchmark Results
 
-|     Method      |  G  | Replications | Elapsed (seconds) |
-|:---------------:|:---:|:------------:|:-----------------:|
-|    Parallel     |  3  |      10      |      107.470      |
-|    Parallel     |  4  |      10      |      380.681      |
-|    Parallel     |  5  |      10      |      873.549      |
-|    Parallel     |  6  |      10      |     1646.376      |
-|    Parallel     |  7  |      10      |     2815.387      |
-|   Sequential    |  3  |      10      |      121.764      |
-|   Sequential    |  4  |      10      |      423.203      |
-|   Sequential    |  5  |      10      |     1113.758      |
-|   Sequential    |  6  |      10      |     2327.621      |
-|   Sequential    |  7  |      10      |     3801.199      |
-| Sequential, a-s |  3  |      10      |      117.798      |
-| Sequential, a-s |  4  |      10      |      447.627      |
-| Sequential, a-s |  5  |      10      |      445.004      |
-| Sequential, a-s |  6  |      10      |      419.762      |
-| Sequential, a-s |  7  |      10      |      437.278      |
+|       Method       |  G  | Replications | Elapsed (seconds) |
+|:------------------:|:---:|:------------:|:-----------------:|
+|      Parallel      |  3  |      10      |      107.470      |
+|      Parallel      |  4  |      10      |      380.681      |
+|      Parallel      |  5  |      10      |      873.549      |
+|      Parallel      |  6  |      10      |     1646.376      |
+|      Parallel      |  7  |      10      |     2815.387      |
+|     Sequential     |  3  |      10      |      121.764      |
+|     Sequential     |  4  |      10      |      423.203      |
+|     Sequential     |  5  |      10      |     1113.758      |
+|     Sequential     |  6  |      10      |     2327.621      |
+|     Sequential     |  7  |      10      |     3801.199      |
+| Automatic Stopping |  3  |      10      |      117.798      |
+| Automatic Stopping |  4  |      10      |      447.627      |
+| Automatic Stopping |  5  |      10      |      445.004      |
+| Automatic Stopping |  6  |      10      |      419.762      |
+| Automatic Stopping |  7  |      10      |      437.278      |

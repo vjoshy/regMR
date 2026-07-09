@@ -21,7 +21,7 @@ library(dplyr)
 
 ```{r, include=FALSE}
 gaussian_df <- data.frame(
-  Method = rep(c("Parallel", "Sequential", "Sequential, a-s"), each = 5),
+  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
   G = rep(3:7, times = 3),
   Replications = 10,
   `Elapsed (seconds)` = c(103.254, 125.252, 230.807, 359.222, 715.479,
@@ -31,7 +31,7 @@ gaussian_df <- data.frame(
 )
 
 poisson_df <- data.frame(
-  Method = rep(c("Parallel", "Sequential", "Sequential, a-s"), each = 5),
+  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
   G = rep(3:7, times = 3),
   Replications = 10,
   `Elapsed (seconds)` = c(289.525, 831.046, 836.103, 1622.873, 2265.934,
@@ -41,7 +41,7 @@ poisson_df <- data.frame(
 )
 
 binomial_df <- data.frame(
-  Method = rep(c("Parallel", "Sequential", "Sequential, a-s"), each = 5),
+  Method = rep(c("Parallel", "Sequential", "Automatic Stopping"), each = 5),
   G = rep(3:7, times = 3),
   Replications = 10,
   `Elapsed (seconds)` = c(107.470, 380.681, 873.549, 1646.376, 2815.387,
