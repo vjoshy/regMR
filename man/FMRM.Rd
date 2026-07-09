@@ -22,7 +22,7 @@ FMRM(
   n_random_la = 100,
   information_criteria = c("bic", "gebic", "aic", "icl"),
   automatic_stopping = FALSE,
-  parallel = TRUE,
+  parallel = FALSE,
   common_sigma = FALSE,
   sigma_penalty = TRUE,
   pi_penalty = TRUE
@@ -106,10 +106,11 @@ Likelihood (ICL) Criterion ("icl").}
 \item{automatic_stopping}{A logical value which, if true (false is the
 default value), allows the function to implement IC-based automatic stopping on
 the mixture components. When the condition for stopping is met, the function
-stops iterating over the group count.}
+stops iterating over the group count. When switched on, parallel is set to
+false to increase speed.}
 
-\item{parallel}{A logical value which, if true (default value), allows the
-function to run parallel workers to increase computational speed.}
+\item{parallel}{A logical value which, if true (false is the default value),
+allows the function to run parallel workers to increase computational speed.}
 
 \item{common_sigma}{A logical value which, if true (false is the default value)
 and family = "gaussian" or gaussian(), estimates the standard deviations as
@@ -175,6 +176,6 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
-mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), verbose = FALSE)
+mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), parallel = TRUE, verbose = FALSE)
 \dontshow{\}) # examplesIf}
 }

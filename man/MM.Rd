@@ -34,7 +34,7 @@ one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
 matrix of size n x 2, where the first column corresponds to the successes and
 the second the failures.}
 
-\item{G}{An integer greater than or equal to one representing the
+\item{G}{An integer greater than or equal to two representing the
 number of mixture components (groups) in a finite mixture regression
 model.}
 

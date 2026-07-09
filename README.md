@@ -139,7 +139,8 @@ library(regMR)
 #> ────────────────────────────────────────
 
 # ----Fit model----
-fit <- FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bic")
+fit <- FMRM(x = X, y = y, G = 4, family = gaussian(), 
+            information_criteria = "bic", parallel = TRUE)
 #> 
 #> -- g = 2 --
 #> ================================================================================ 
@@ -262,15 +263,21 @@ plot(fit)
 <img src="man/figures/README-example-3-3.png" width="100%" />
 
 `plot2()` plots two specified covariates of the predictor/design matrix
-(`X`) against the response vector (`y`). The observations are coloured
-per the group responsibility matrix (`z_hard`) in the finite mixture
-regression model passed to the function.
+(`X`) against a response vector (`y` or `y_hat`). The observations are
+coloured per the group responsibility matrix (`z_hard`) in the finite
+mixture regression model passed to the function.
 
 ``` r
 plot2(fit, X, y, 1, 2)
 ```
 
-![](man/figures/newplot.png)
+![](man/figures/plot2_1.png)
+
+``` r
+plot2(fit, X, fit$parameters$y_hat, 1, 2)
+```
+
+![](man/figures/plot2_2.png)
 
 `summary()` is an S3 method for summarizing results from the `FMRM()`
 and `MM_Grid()` functions of class FMRM. Outputs the number of mixture
@@ -284,7 +291,7 @@ summary(fit)
 #> =======================================================================
 #> 
 #> Call:
-#>  FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bic") 
+#>  FMRM(x = X, y = y, G = 4, family = gaussian(), information_criteria = "bic",      parallel = TRUE) 
 #> 
 #>  G = 3 
 #> 

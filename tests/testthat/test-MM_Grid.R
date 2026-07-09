@@ -46,14 +46,14 @@ y <- numeric(n)
 test_that("check on g works", {
   expect_error(
     MM_Grid(g = 'a', X, y),
-    "Invalid group size g\n"
+    "Invalid group size G\n"
   )
 })
 
 test_that("check on g works", {
   expect_error(
     MM_Grid(g = 0, X, y),
-    "Invalid group size g\n"
+    "Invalid group size G\n"
   )
 })
 

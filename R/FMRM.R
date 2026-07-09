@@ -67,9 +67,10 @@
 #' @param automatic_stopping A logical value which, if true (false is the
 #' default value), allows the function to implement IC-based automatic stopping on
 #' the mixture components. When the condition for stopping is met, the function
-#' stops iterating over the group count.
-#' @param parallel A logical value which, if true (default value), allows the
-#' function to run parallel workers to increase computational speed.
+#' stops iterating over the group count. When switched on, parallel is set to
+#' false to increase speed.
+#' @param parallel A logical value which, if true (false is the default value),
+#' allows the function to run parallel workers to increase computational speed.
 #' @param common_sigma A logical value which, if true (false is the default value)
 #' and family = "gaussian" or gaussian(), estimates the standard deviations as
 #' equivalent across mixture components.
@@ -125,7 +126,7 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), verbose = FALSE)
+#' mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), parallel = TRUE, verbose = FALSE)
 FMRM <- function(
   x,
   y,
@@ -144,7 +145,7 @@ FMRM <- function(
   n_random_la = 100,
   information_criteria = c("bic", "gebic", "aic", "icl"),
   automatic_stopping = FALSE,
-  parallel = TRUE,
+  parallel = FALSE,
   common_sigma = FALSE,
   sigma_penalty = TRUE,
   pi_penalty = TRUE
@@ -159,27 +160,27 @@ FMRM <- function(
   information_criteria <- match.arg(information_criteria)
 
   # ----input validation/error check----
-  error_check_FMRM(
-    x,
-    y,
-    G,
-    family,
-    tol,
-    max_iter,
-    reps,
-    lambda,
-    lambda_max,
-    n_lambda,
-    alpha,
-    verbose,
-    penalty,
-    random,
-    n_random_la,
-    automatic_stopping,
-    parallel,
-    common_sigma,
-    sigma_penalty,
-    pi_penalty
+  error_check(
+    x = x,
+    y = y,
+    G = G,
+    family = family,
+    tol = tol,
+    max_iter = max_iter,
+    reps = reps,
+    lambda = lambda,
+    lambda_max = lambda_max,
+    n_lambda = n_lambda,
+    alpha = alpha,
+    verbose = verbose,
+    penalty = penalty,
+    random = random,
+    n_random_la = n_random_la,
+    automatic_stopping = automatic_stopping,
+    parallel = parallel,
+    common_sigma = common_sigma,
+    sigma_penalty = sigma_penalty,
+    pi_penalty = pi_penalty
   )
 
   # ----Capture the current function call----
@@ -220,7 +221,7 @@ FMRM <- function(
         random,
         n_random_la,
         information_criteria,
-        parallel,
+        parallel = FALSE,
         common_sigma,
         sigma_penalty,
         pi_penalty

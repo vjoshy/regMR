@@ -22,14 +22,14 @@ MM_Grid(
   random = FALSE,
   n_random_la = 100,
   information_criteria = c("bic", "gebic", "aic", "icl"),
-  parallel = TRUE,
+  parallel = FALSE,
   common_sigma = FALSE,
   sigma_penalty = TRUE,
   pi_penalty = TRUE
 )
 }
 \arguments{
-\item{g}{An integer greater than or equal to one representing the
+\item{g}{An integer greater than or equal to two representing the
 number of mixture components (groups) in a finite mixture regression
 model.}
 
@@ -103,8 +103,8 @@ Information Criterion (BIC) ("bic"), group-structured Extended BIC (gEBIC) ("geb
 Akaike Information Criterion (AIC) ("aic"), and Integrated Classification
 Likelihood (ICL) Criterion ("icl").}
 
-\item{parallel}{A logical value which, if true (default value), allows the
-function to run parallel workers to increase computational speed.}
+\item{parallel}{A logical value which, if true (false is the default value),
+allows the function to run parallel workers to increase computational speed.}
 
 \item{common_sigma}{A logical value which, if true (false is the default value)
 and family = "gaussian" or gaussian(), estimates the standard deviations as
@@ -170,6 +170,6 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
-mod <- MM_Grid(g = 3, X, y, family = gaussian(), verbose = FALSE)
+mod <- MM_Grid(g = 3, X, y, family = gaussian(), parallel = TRUE, verbose = FALSE)
 \dontshow{\}) # examplesIf}
 }

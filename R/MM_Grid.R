@@ -7,7 +7,7 @@
 #' lowest information criteria (as specified). It can be ran sequentially or in parallel.
 #' This function is used for model estimation.
 #'
-#' @param g An integer greater than or equal to one representing the
+#' @param g An integer greater than or equal to two representing the
 #' number of mixture components (groups) in a finite mixture regression
 #' model.
 #' @param x Predictor/design matrix. A numeric matrix of size n x p where the
@@ -65,8 +65,8 @@
 #' Information Criterion (BIC) ("bic"), group-structured Extended BIC (gEBIC) ("gebic"),
 #' Akaike Information Criterion (AIC) ("aic"), and Integrated Classification
 #' Likelihood (ICL) Criterion ("icl").
-#' @param parallel A logical value which, if true (default value), allows the
-#' function to run parallel workers to increase computational speed.
+#' @param parallel A logical value which, if true (false is the default value),
+#' allows the function to run parallel workers to increase computational speed.
 #' @param common_sigma A logical value which, if true (false is the default value)
 #' and family = "gaussian" or gaussian(), estimates the standard deviations as
 #' equivalent across mixture components.
@@ -122,7 +122,7 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' mod <- MM_Grid(g = 3, X, y, family = gaussian(), verbose = FALSE)
+#' mod <- MM_Grid(g = 3, X, y, family = gaussian(), parallel = TRUE, verbose = FALSE)
 MM_Grid <- function(
   g,
   x,
@@ -140,7 +140,7 @@ MM_Grid <- function(
   random = FALSE,
   n_random_la = 100,
   information_criteria = c("bic", "gebic", "aic", "icl"),
-  parallel = TRUE,
+  parallel = FALSE,
   common_sigma = FALSE,
   sigma_penalty = TRUE,
   pi_penalty = TRUE
@@ -155,26 +155,26 @@ MM_Grid <- function(
   information_criteria <- match.arg(information_criteria)
 
   #----input validation/error check----
-  error_check_MM_Grid(
-    g,
-    x,
-    y,
-    family,
-    tol,
-    max_iter,
-    reps,
-    lambda,
-    lambda_max,
-    n_lambda,
-    alpha,
-    verbose,
-    penalty,
-    random,
-    n_random_la,
-    parallel,
-    common_sigma,
-    sigma_penalty,
-    pi_penalty
+  error_check(
+    x = x,
+    y = y,
+    G = g,
+    family = family,
+    tol = tol,
+    max_iter = max_iter,
+    reps = reps,
+    lambda = lambda,
+    lambda_max = lambda_max,
+    n_lambda = n_lambda,
+    alpha = alpha,
+    verbose = verbose,
+    penalty = penalty,
+    random = random,
+    n_random_la = n_random_la,
+    parallel = parallel,
+    common_sigma = common_sigma,
+    sigma_penalty = sigma_penalty,
+    pi_penalty = pi_penalty
   )
 
   # ----Capture the current function call----

@@ -49,7 +49,7 @@
 #' # ----Simulate response y----
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
-#' mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), verbose = FALSE)
+#' mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), parallel = TRUE, verbose = FALSE)
 #'
 #' # ----Display summary----
 #' summary(mod)

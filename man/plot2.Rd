@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot2.R
 \name{plot2}
 \alias{plot2}
-\title{Plot Covariates of X Against Y With Group Assignments}
+\title{Plot Covariates of X Against Response With Group Assignments}
 \usage{
 plot2(mod, x, y, covariate_one, covariate_two, ...)
 }
@@ -14,9 +14,8 @@ number of rows is equal to the number of observations n, and the number of
 columns is equal to the number of covariates p.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
-one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
-matrix of size n x 2, where the first column corresponds to the successes and
-the second the failures.}
+one. Can either be y or y_hat, the expected predicted responses. The latter
+is accessed through mod$parameters$y_hat.}
 
 \item{covariate_one}{A numeric value specifying the first covariate of x to
 be plotted.}
@@ -27,13 +26,13 @@ be plotted.}
 \item{...}{Additional arguments for plotting (currently unused).}
 }
 \value{
-A 3-D plot of the specified covariates of x against y, with the
-group assignments highlighted in colour.
+A 3-D plot of the specified covariates of x against a response, with
+the group assignments highlighted in colour.
 }
 \description{
 This function creates a 3-D plot for finite mixture regression models of
-class FMRM. It plots the specified covariates of x against y, with the group
-assignments highlighted in colour.
+class FMRM. It plots the specified covariates of x against a response
+(y or y_hat), with the group assignments highlighted in colour.
 }
 \examples{
 \dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}
@@ -73,7 +72,7 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
 # ----Fit model----
-mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), verbose = FALSE)
+mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), parallel = TRUE, verbose = FALSE)
 
 # ----Call plot2----
 plot <- plot2(mod, X, y, 1, 2)

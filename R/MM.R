@@ -14,7 +14,7 @@
 #' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
 #' matrix of size n x 2, where the first column corresponds to the successes and
 #' the second the failures.
-#' @param G An integer greater than or equal to one representing the
+#' @param G An integer greater than or equal to two representing the
 #' number of mixture components (groups) in a finite mixture regression
 #' model.
 #' @param family A string of characters specifying the distribution of the
@@ -132,23 +132,21 @@ MM <- function(
   information_criteria <- match.arg(information_criteria)
 
   #----input validation/error check----
-  error_check_MM(
-    x,
-    y,
-    G,
-    family,
-    tol,
-    max_iter,
-    reps,
-    lambda,
-    alpha,
-    init_parameters,
-    verbose,
-    penalty,
-    information_criteria,
-    common_sigma,
-    sigma_penalty,
-    pi_penalty
+  error_check(
+    x = x,
+    y = y,
+    G = G,
+    family = family,
+    tol = tol,
+    max_iter = max_iter,
+    reps = reps,
+    lambda = lambda,
+    alpha = alpha,
+    verbose = verbose,
+    penalty = penalty,
+    common_sigma = common_sigma,
+    sigma_penalty = sigma_penalty,
+    pi_penalty = pi_penalty
   )
 
   # ----get number of covariates and observations, add ones for the intercept---
