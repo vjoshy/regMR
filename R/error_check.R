@@ -17,6 +17,10 @@
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
 #' iterations, the algorithm stops.
+#' @param irwls_tol A non-negative numeric value specifying the stopping criteria
+#' for the IRWLS procedure (default value is 1e-08). If the difference in value
+#' of the beta values is within tol in two consecutive iterations, the procedure
+#' stops.
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
@@ -73,6 +77,7 @@ error_check <- function(
   G = NULL,
   family = NULL,
   tol = NULL,
+  irwls_tol = NULL,
   max_iter = NULL,
   reps = NULL,
   lambda = NULL,
@@ -117,6 +122,9 @@ error_check <- function(
   }
   if (!is.numeric(tol) || tol <= 0) {
     stop("Invalid tolerance level\n")
+  }
+  if (!is.numeric(irwls_tol) || irwls_tol <= 0) {
+    stop("Invalid IRWLS tolerance level\n")
   }
   if (!is.numeric(max_iter) || max_iter < 1) {
     stop("Invalid max_iter\n")

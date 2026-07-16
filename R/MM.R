@@ -27,6 +27,10 @@
 #' the MM algorithm (default value is 10e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
 #' iterations, the algorithm stops.
+#' @param irwls_tol A non-negative numeric value specifying the stopping criteria
+#' for the IRWLS procedure (default value is 1e-08). If the difference in value
+#' of the beta values is within tol in two consecutive iterations, the procedure
+#' stops.
 #' @param max_iter An integer greater than or equal to one specifying the
 #' maximum number of iterations ran within the MM algorithm. Default value is
 #' 500.
@@ -110,6 +114,7 @@ MM <- function(
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
   tol = 1e-04,
+  irwls_tol = 1e-08,
   max_iter = 500,
   reps = 1,
   lambda = 0,
@@ -138,6 +143,7 @@ MM <- function(
     G = G,
     family = family,
     tol = tol,
+    irwls_tol = irwls_tol,
     max_iter = max_iter,
     reps = reps,
     lambda = lambda,
@@ -315,7 +321,7 @@ MM <- function(
             lambda,
             penalty,
             max_iter,
-            1e-08
+            irwls_tol
           )
         } else {
           beta <- beta_update_GLM(
@@ -330,7 +336,7 @@ MM <- function(
             lambda,
             penalty,
             max_iter,
-            1e-08
+            irwls_tol
           )
         }
       }

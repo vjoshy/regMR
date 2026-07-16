@@ -71,6 +71,20 @@ test_that("check on tol works", {
   )
 })
 
+test_that("check on irwls_tol works", {
+  expect_error(
+    FMRM(X, y, G = 6, irwls_tol = 'a'),
+    "Invalid IRWLS tolerance level\n"
+  )
+})
+
+test_that("check on irwls_tol works", {
+  expect_error(
+    FMRM(X, y, G = 6, irwls_tol = -1),
+    "Invalid IRWLS tolerance level\n"
+  )
+})
+
 test_that("check on max_iter works", {
   expect_error(
     FMRM(X, y, G = 6, max_iter = 'a'),
