@@ -84,15 +84,19 @@ compute_gamma <- function(x, y, family, pi, beta, ...) {
     # ----derive rates----
     rate_matrix <- t(nu / t(mu))
 
-    component_densities <- vapply(
+    component_densities <- suppressWarnings(vapply(
       1:G,
       function(g) {
         densities <- pi[g] *
-          stats::dgamma(y, shape = nu[g], rate = rate_matrix[, g])
+          suppressWarnings(stats::dgamma(
+            y,
+            shape = nu[g],
+            rate = rate_matrix[, g]
+          ))
         return(densities)
       },
       numeric(n)
-    )
+    ))
   }
 
   mixture_densities <- rowSums(component_densities)

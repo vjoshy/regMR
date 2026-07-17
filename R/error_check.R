@@ -7,9 +7,9 @@
 #' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
 #' matrix of size n x 2, where the first column corresponds to the successes and
 #' the second the failures.
-#' @param G An integer greater than or equal to two specifying the maximum
-#' number of mixture components (groups) in the estimated model that the
-#' function will attempt to fit the data to.
+#' @param G An integer greater than or equal to two if from FMRM, else one,
+#' specifying the maximum number or the number of mixture components (groups)
+#' in the estimated model that the function will attempt to fit the data to.
 #' @param family A string of characters specifying the distribution of the
 #' finite mixture regression model being fit to the data. Parameter updates
 #' are altered depending on the inputted family.
@@ -117,8 +117,14 @@ error_check <- function(
       stop("x and y not compatible\n")
     }
   }
-  if (!is.numeric(G) || G <= 1) {
-    stop("Invalid group size G\n")
+  if (caller_name == "FMRM") {
+    if (!is.numeric(G) || G <= 1) {
+      stop("Invalid group size G\n")
+    }
+  } else {
+    if (!is.numeric(G) || G < 1) {
+      stop("Invalid group size G\n")
+    }
   }
   if (!is.numeric(tol) || tol <= 0) {
     stop("Invalid tolerance level\n")

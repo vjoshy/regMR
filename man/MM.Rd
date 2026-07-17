@@ -35,7 +35,7 @@ one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
 matrix of size n x 2, where the first column corresponds to the successes and
 the second the failures.}
 
-\item{G}{An integer greater than or equal to two representing the
+\item{G}{An integer greater than or equal to one representing the
 number of mixture components (groups) in a finite mixture regression
 model.}
 
@@ -73,7 +73,11 @@ specifying the weight between the lasso penalty and group lasso penalty being
 applied. Alpha = 1 gives the lasso fit and alpha = 0 gives the group lasso
 fit.}
 
-\item{init_parameters}{description}
+\item{init_parameters}{A list containing the initial parameter estimates for
+the finite mixture regression model being fit. Default value is NULL as the
+function contains procedures for initialization. If Gaussian, init_parameters
+= list(pi, beta, sigma, z), if Poisson or Binomial, init_parameters
+= list(pi, beta, z), and if Gamma, init_parameters = list(pi, beta, nu, z).}
 
 \item{verbose}{A logical value which, if true (default value), allows the
 function to print progress updates.}
@@ -107,10 +111,10 @@ mixture regression model.
 }
 \description{
 Applies the Majorization-Minimization Algorithm to the inputted data given
-the specified parameters and distribution (family) to estimate a finite mixture regression
-model. Initial estimates for model parameters are
-provided within the function, but can be specified in the function call.
-This function is used for model estimation.
+the specified parameters and distribution (family) to estimate a finite
+mixture regression model. Initial estimates for model parameters are provided
+within the function, but can be specified in the function call. This function
+is used for model estimation.
 }
 \examples{
 \dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

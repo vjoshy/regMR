@@ -2,10 +2,10 @@
 #' Models
 #'
 #' Applies the Majorization-Minimization Algorithm to the inputted data given
-#' the specified parameters and distribution (family) to estimate a finite mixture regression
-#' model. Initial estimates for model parameters are
-#' provided within the function, but can be specified in the function call.
-#' This function is used for model estimation.
+#' the specified parameters and distribution (family) to estimate a finite
+#' mixture regression model. Initial estimates for model parameters are provided
+#' within the function, but can be specified in the function call. This function
+#' is used for model estimation.
 #'
 #' @param x Predictor/design matrix. A numeric matrix of size n x p where the
 #' number of rows is equal to the number of observations n, and the number of
@@ -14,7 +14,7 @@
 #' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
 #' matrix of size n x 2, where the first column corresponds to the successes and
 #' the second the failures.
-#' @param G An integer greater than or equal to two representing the
+#' @param G An integer greater than or equal to one representing the
 #' number of mixture components (groups) in a finite mixture regression
 #' model.
 #' @param family A string of characters specifying the distribution of the
@@ -44,7 +44,11 @@
 #' specifying the weight between the lasso penalty and group lasso penalty being
 #' applied. Alpha = 1 gives the lasso fit and alpha = 0 gives the group lasso
 #' fit.
-#' @param init_parameters description
+#' @param init_parameters A list containing the initial parameter estimates for
+#' the finite mixture regression model being fit. Default value is NULL as the
+#' function contains procedures for initialization. If Gaussian, init_parameters
+#' = list(pi, beta, sigma, z), if Poisson or Binomial, init_parameters
+#' = list(pi, beta, z), and if Gamma, init_parameters = list(pi, beta, nu, z).
 #' @param verbose A logical value which, if true (default value), allows the
 #' function to print progress updates.
 #' @param penalty A logical value which, if true (default value), allows the
@@ -197,9 +201,9 @@ MM <- function(
         init_sigma <- sqrt(init_mod$parameters$variance$sigmasq)
       }
 
-      init_gamma <- init_mod$z
+      init_z <- init_mod$z
 
-      init_parameters <- list(init_pi, init_beta, init_sigma, init_gamma)
+      init_parameters <- list(init_pi, init_beta, init_sigma, init_z)
     } else if (family == "poisson" || family == "binomial") {
       # ----initialize parameter estimates using random initialization----
       init_pi <- rep(1 / G, G)
@@ -227,6 +231,24 @@ MM <- function(
       init_parameters <- list(init_pi, init_beta, init_z)
     } else if (family == "gamma") {
       # ----initialize parameter estimates using random initialization----
+      init_pi <- rep(1 / G, G)
+
+      base_intercept <- -1 / mean(y)
+      init_beta <- matrix(0, nrow = G, ncol = p + 1)
+      for (g in 1:G) {
+        init_beta[g, 1] <- base_intercept +
+          stats::rnorm(1, 0, 0.1 * abs(base_intercept))
+        init_beta[g, 2:(p + 1)] <- stats::rnorm(p, 0, 0.05)
+      }
+
+      init_nu <- rep(2, G)
+
+      init_z <- matrix(0, nrow = n, ncol = G)
+      assignments <- sample(1:G, n, replace = TRUE)
+      for (i in 1:n) {
+        init_z[i, assignments[i]] <- 1
+      }
+
       init_parameters <- list(init_pi, init_beta, init_nu, init_z)
     }
   }
@@ -369,6 +391,7 @@ MM <- function(
 
       if (family == "gamma") {
         # ----update nu parameter----
+        nu <- nu_update(x, y, gamma_mat, beta, N)
       }
 
       # ----log likelihood----
@@ -399,6 +422,10 @@ MM <- function(
       # ----objective function being minimized----
       objective_fun_old <- objective_fun_new
       objective_fun_new <- objective_function(ll, pen)
+
+      if (!is.finite(objective_fun_new)) {
+        break
+      }
 
       if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol) {
         break

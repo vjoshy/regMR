@@ -38,9 +38,9 @@ one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
 matrix of size n x 2, where the first column corresponds to the successes and
 the second the failures.}
 
-\item{G}{An integer greater than or equal to two specifying the maximum
-number of mixture components (groups) in the estimated model that the
-function will attempt to fit the data to.}
+\item{G}{An integer greater than or equal to two if from FMRM, else one,
+specifying the maximum number or the number of mixture components (groups)
+in the estimated model that the function will attempt to fit the data to.}
 
 \item{family}{A string of characters specifying the distribution of the
 finite mixture regression model being fit to the data. Parameter updates

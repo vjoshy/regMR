@@ -30,7 +30,7 @@ MM_Grid(
 )
 }
 \arguments{
-\item{g}{An integer greater than or equal to two representing the
+\item{g}{An integer greater than or equal to one representing the
 number of mixture components (groups) in a finite mixture regression
 model.}
 
@@ -134,10 +134,10 @@ for plotting purposes, and the function call for summary purposes.
 }
 \description{
 Applies the Majorization-Minimization Algorithm to the inputted data over all
-lambda-alpha pairs given the specified parameters and distribution (family) to estimate a finite
-mixture regression model. The function chooses the model with the
-lowest information criteria (as specified). It can be ran sequentially or in parallel.
-This function is used for model estimation.
+lambda-alpha pairs given the specified parameters and distribution (family)
+to estimate a finite mixture regression model. The function chooses the model
+with the lowest information criteria (as specified). It can be ran
+sequentially or in parallel. This function is used for model estimation.
 }
 \examples{
 \dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

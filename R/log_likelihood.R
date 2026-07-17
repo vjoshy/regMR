@@ -80,13 +80,18 @@ log_likelihood <- function(x, y, family, pi, beta, ...) {
     # ----derive rates----
     rate_matrix <- t(nu / t(mu))
 
-    component_densities <- vapply(
+    component_densities <- suppressWarnings(vapply(
       1:G,
       function(g) {
-        pi[g] * stats::dgamma(y, shape = nu[g], rate = rate_matrix[, g])
+        pi[g] *
+          suppressWarnings(stats::dgamma(
+            y,
+            shape = nu[g],
+            rate = rate_matrix[, g]
+          ))
       },
       numeric(n)
-    )
+    ))
   }
 
   if (n == 1) {

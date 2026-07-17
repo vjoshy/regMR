@@ -2,12 +2,12 @@
 #' Mixture Regression Models
 #'
 #' Applies the Majorization-Minimization Algorithm to the inputted data over all
-#' lambda-alpha pairs given the specified parameters and distribution (family) to estimate a finite
-#' mixture regression model. The function chooses the model with the
-#' lowest information criteria (as specified). It can be ran sequentially or in parallel.
-#' This function is used for model estimation.
+#' lambda-alpha pairs given the specified parameters and distribution (family)
+#' to estimate a finite mixture regression model. The function chooses the model
+#' with the lowest information criteria (as specified). It can be ran
+#' sequentially or in parallel. This function is used for model estimation.
 #'
-#' @param g An integer greater than or equal to two representing the
+#' @param g An integer greater than or equal to one representing the
 #' number of mixture components (groups) in a finite mixture regression
 #' model.
 #' @param x Predictor/design matrix. A numeric matrix of size n x p where the
@@ -348,6 +348,74 @@ MM_Grid <- function(
     # ----create intitial parameter list----
     init_parameters[[g]] <- list(init_pi[[g]], init_beta[[g]], init_z[[g]])
   } else if (family == "gamma") {
+    # ----lists for initial parameters----
+    init_pi <- list()
+    init_beta <- list()
+    init_nu <- list()
+    init_z <- list()
+
+    init_pi[[g]] <- rep(1 / g, g)
+
+    base_intercept <- -1 / mean(y)
+    init_beta[[g]] <- matrix(0, nrow = g, ncol = p + 1)
+    for (comp in 1:g) {
+      init_beta[[g]][comp, 1] <- base_intercept +
+        stats::rnorm(1, 0, 0.1 * abs(base_intercept))
+      if (p > 0) {
+        init_beta[[g]][comp, 2:(p + 1)] <- stats::rnorm(p, 0, 0.05)
+      }
+    }
+
+    init_nu[[g]] <- rep(2, g)
+
+    init_z[[g]] <- matrix(0, nrow = n, ncol = g)
+    assignments <- sample(1:g, n, replace = TRUE)
+    for (i in 1:n) {
+      init_z[[g]][i, assignments[i]] <- 1
+    }
+
+    init_parameters[[g]] <- list(
+      init_pi[[g]],
+      init_beta[[g]],
+      init_nu[[g]],
+      init_z[[g]]
+    )
+
+    # ----call MM once with lambda, alpha = 0----
+    noreg_chosen_parameters <- MM(
+      x,
+      y,
+      g,
+      family,
+      tol,
+      irwls_tol,
+      max_iter,
+      10,
+      0,
+      0,
+      init_parameters[[g]],
+      verbose,
+      FALSE,
+      information_criteria,
+      common_sigma,
+      sigma_penalty,
+      pi_penalty
+    )
+
+    # ----check if unregularized model succeeded----
+    if (is.na(noreg_chosen_parameters$ic)) {
+      # ----fallback to original initialization if unregularized model fails----
+      if (verbose) {
+        cat("Unregularized model failed, using original initialization\n")
+      }
+    } else {
+      # ----use successful unregularized model results----
+      init_pi[[g]] <- noreg_chosen_parameters$pi
+      init_beta[[g]] <- noreg_chosen_parameters$beta
+      init_nu[[g]] <- noreg_chosen_parameters$nu
+      init_z[[g]] <- noreg_chosen_parameters$z
+    }
+
     # ----create intitial parameter list----
     init_parameters[[g]] <- list(
       init_pi[[g]],
@@ -388,6 +456,15 @@ MM_Grid <- function(
             init_parameters[[g]][[3]]
           )
         }
+      } else if (family == "gamma") {
+        # ----gamma init list is list(pi, beta, nu, z), so z is at [[4]]----
+        lambda_max <- lambda_max_compute_GLM(
+          x,
+          y,
+          family,
+          init_parameters[[g]][[4]],
+          init_parameters[[g]][[2]]
+        )
       } else {
         lambda_max <- lambda_max_compute_GLM(
           x,
@@ -460,12 +537,18 @@ MM_Grid <- function(
             init_parameters_alpha <- stats::setNames(
               purrr::map(
                 parameters[[i - 1]],
-                ~ list(
-                  init_parameters[[g]][[1]],
-                  .x$beta,
-                  .x$sigma,
-                  .x$z
-                )
+                ~ {
+                  if (is.na(.x$ic)) {
+                    init_parameters[[g]]
+                  } else {
+                    list(
+                      init_parameters[[g]][[1]],
+                      .x$beta,
+                      .x$sigma,
+                      .x$z
+                    )
+                  }
+                }
               ),
               as.character(alpha_row$alpha)
             )
@@ -473,11 +556,17 @@ MM_Grid <- function(
             init_parameters_alpha <- stats::setNames(
               purrr::map(
                 parameters[[i - 1]],
-                ~ list(
-                  init_parameters[[g]][[1]],
-                  .x$beta,
-                  .x$z
-                )
+                ~ {
+                  if (is.na(.x$ic)) {
+                    init_parameters[[g]]
+                  } else {
+                    list(
+                      init_parameters[[g]][[1]],
+                      .x$beta,
+                      .x$z
+                    )
+                  }
+                }
               ),
               as.character(alpha_row$alpha)
             )
@@ -485,12 +574,18 @@ MM_Grid <- function(
             init_parameters_alpha <- stats::setNames(
               purrr::map(
                 parameters[[i - 1]],
-                ~ list(
-                  init_parameters[[g]][[1]],
-                  .x$beta,
-                  .x$nu,
-                  .x$z
-                )
+                ~ {
+                  if (is.na(.x$ic)) {
+                    init_parameters[[g]]
+                  } else {
+                    list(
+                      init_parameters[[g]][[1]],
+                      .x$beta,
+                      .x$nu,
+                      .x$z
+                    )
+                  }
+                }
               ),
               as.character(alpha_row$alpha)
             )
