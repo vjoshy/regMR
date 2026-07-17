@@ -221,6 +221,24 @@ MM <- function(
       init_parameters <- list(init_pi, init_beta, init_z)
     } else if (family == "gamma") {
       # ----initialize parameter estimates using random initialization----
+      init_pi <- rep(1 / G, G)
+
+      base_intercept <- -1 / mean(y)
+      init_beta <- matrix(0, nrow = G, ncol = p + 1)
+      for (g in 1:G) {
+        init_beta[g, 1] <- base_intercept +
+          stats::rnorm(1, 0, 0.1 * abs(base_intercept))
+        init_beta[g, 2:(p + 1)] <- stats::rnorm(p, 0, 0.05)
+      }
+
+      init_nu <- rep(2, G)
+
+      init_z <- matrix(0, nrow = n, ncol = G)
+      assignments <- sample(1:G, n, replace = TRUE)
+      for (i in 1:n) {
+        init_z[i, assignments[i]] <- 1
+      }
+
       init_parameters <- list(init_pi, init_beta, init_nu, init_z)
     }
   }
@@ -362,7 +380,7 @@ MM <- function(
       }
 
       if (family == "gamma") {
-        # ----update nu parameter----
+        nu <- nu_update(x, y, gamma_mat, beta, N)
       }
 
       # ----log likelihood----
@@ -394,6 +412,10 @@ MM <- function(
       objective_fun_old <- objective_fun_new
       objective_fun_new <- objective_function(ll, pen)
 
+      if (!is.finite(objective_fun_new)) {
+        break
+      }
+
       if (iter > 1 && abs(objective_fun_new - objective_fun_old) <= tol) {
         break
       }
@@ -401,8 +423,11 @@ MM <- function(
       iter <- iter + 1
     }
 
-    # ----if error in algorithm, set history to NA for specific run----
-    if (is.na(objective_fun_new) || is.na(objective_fun_old) || any(is.na(N))) {
+    if (
+      !is.finite(objective_fun_new) ||
+        !is.finite(objective_fun_old) ||
+        any(is.na(N))
+    ) {
       pis[[k]] <- betas[[k]] <- sigmas[[k]] <- logliks[k] <- ics[k] <- NA
     } else {
       # ----compute information criteria----
