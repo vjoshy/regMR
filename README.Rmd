@@ -61,9 +61,9 @@ binomial_df <- data.frame(
 
 ## Overview
 
-regMR provides a comprehensive framework for fitting regularized finite mixture regression models via a MM algorithm. The sparse group lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection with respect to groups and covariates. The package provides multiple functions for estimation and allows users to fit models over different lambda-alpha sgl penalties and group counts. There are four families of finite mixture regression models able to be fit: Gaussian, Poisson, Binomial, and Gamma. These are specified using the `family` argument in the three main functions the package contains, `FMRM()`, `MM_Grid()`, and `MM()`. The models can also be selected using different information criterion including the default Bayesian Information Criterion (BIC), group-structured Extended BIC (gEBIC), Akaike Information Criterion (AIC) , and Integrated Classification Likelihood (ICL) Criterion. See the documentation for more information regarding how the arguments are specified.
+regMR provides a comprehensive framework for fitting regularized finite mixture regression models via an MM algorithm. The sparse group lasso (sgl) penalty is applied to parameter updates within the MM algorithm for variable selection with respect to groups and covariates. The package provides multiple functions for estimation and allows users to fit models over different lambda-alpha sgl penalties and group counts. There are four families of finite mixture regression models able to be fit: Gaussian, Poisson, Binomial, and Gamma. These are specified using the `family` argument in the three main functions the package contains, `FMRM()`, `MM_Grid()`, and `MM()`. The models can also be selected using different information criteria including the default Bayesian Information Criterion (BIC), group-structured Extended BIC (gEBIC), Akaike Information Criterion (AIC), and Integrated Classification Likelihood (ICL) Criterion. See the documentation for more information regarding how the arguments are specified.
 
-This readme file provides a brief and basic example on how to use the regMR package. It walks through generating clustered data to fit a finite Gaussian mixture regression model to, applying `FMRM()` to carry out that procedure over different lambda-alpha sgl penalties and group counts, and how to apply the plotting and summary methods/functions to the model, getting the most use out of the package.
+This readme file provides a brief and basic example of how to use the regMR package. It walks through generating clustered data to which a finite Gaussian mixture regression model is fit, applying `FMRM()` to carry out that procedure over different lambda-alpha sgl penalties and group counts, and applying the plotting and summary methods/functions to the model to get the most use out of the package.
 
 ## Installation
 
@@ -179,7 +179,7 @@ summary(fit)
 
 ## Computational Details and Benchmarking
 
-These simulations were carried out in R (version 4.5.0) with RStudio (version 2026.06.0+242). For benchmarking, the `rbenchmark` package was used, found here: <https://cran.r-project.org/web/packages/rbenchmark/index.html>. They were ran on a MacBook Air (2022) with an M2 chip, 8 cores (4 performance and 4 efficiency), and 8 GB of memory. The code used to generate the data to fit each family of finite mixture regression model to is included below.
+These simulations were carried out in R (version 4.5.0) with RStudio (version 2026.06.0+242). For benchmarking, the `rbenchmark` package was used, found here: <https://cran.r-project.org/web/packages/rbenchmark/index.html>. They were run on a MacBook Air (2022) with an M2 chip, 8 cores (4 performance and 4 efficiency), and 8 GB of memory. The code used to generate the data used to fit each family of finite mixture regression model is included below.
 
 ```{r, eval=FALSE, echo=TRUE}
 set.seed(2025)
