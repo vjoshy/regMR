@@ -33,8 +33,8 @@ This readme file provides a brief and basic example of how to use the
 regMR package. It walks through generating clustered data to which a
 finite Gaussian mixture regression model is fit, applying `FMRM()` to
 carry out that procedure over different lambda-alpha sgl penalties and
-group counts, and applying the plotting and summary methods/functions
-to the model to get the most use out of the package.
+group counts, and applying the plotting and summary methods/functions to
+the model to get the most use out of the package.
 
 ## Installation
 
@@ -319,8 +319,7 @@ summary(fit)
 
 These simulations were carried out in R (version 4.5.0) with RStudio
 (version 2026.06.0+242). For benchmarking, the `rbenchmark` package was
-used, found here:
-<https://cran.r-project.org/web/packages/rbenchmark/index.html>. They
+used, found here: <https://CRAN.R-project.org/package=rbenchmark>. They
 were run on a MacBook Air (2022) with an M2 chip, 8 cores (4 performance
 and 4 efficiency), and 8 GB of memory. The code used to generate the
 data used to fit each family of finite mixture regression model is

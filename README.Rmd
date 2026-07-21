@@ -179,7 +179,7 @@ summary(fit)
 
 ## Computational Details and Benchmarking
 
-These simulations were carried out in R (version 4.5.0) with RStudio (version 2026.06.0+242). For benchmarking, the `rbenchmark` package was used, found here: <https://cran.r-project.org/web/packages/rbenchmark/index.html>. They were run on a MacBook Air (2022) with an M2 chip, 8 cores (4 performance and 4 efficiency), and 8 GB of memory. The code used to generate the data used to fit each family of finite mixture regression model is included below.
+These simulations were carried out in R (version 4.5.0) with RStudio (version 2026.06.0+242). For benchmarking, the `rbenchmark` package was used, found here: <https://CRAN.R-project.org/package=rbenchmark>. They were run on a MacBook Air (2022) with an M2 chip, 8 cores (4 performance and 4 efficiency), and 8 GB of memory. The code used to generate the data used to fit each family of finite mixture regression model is included below.
 
 ```{r, eval=FALSE, echo=TRUE}
 set.seed(2025)

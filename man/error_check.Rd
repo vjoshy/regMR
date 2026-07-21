@@ -47,7 +47,7 @@ finite mixture regression model being fit to the data. Parameter updates
 are altered depending on the inputted family.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criterion for
-the MM algorithm (default value is 1e-04). If the difference in value of the
+the MM algorithm (default value is 1e-03). If the difference in value of the
 objective function being minimized is within tol in two consecutive
 iterations, the algorithm stops.}
 

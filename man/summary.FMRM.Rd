@@ -58,7 +58,14 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
-mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), parallel = TRUE, verbose = FALSE)
+# ----Fit model----
+mod <- FMRM(x = X,
+            y = y,
+            G = 3,
+            family = gaussian(),
+            parallel = TRUE,
+            random = TRUE,
+            verbose = FALSE)
 
 # ----Display summary----
 summary(mod)

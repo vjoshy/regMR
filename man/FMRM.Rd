@@ -9,7 +9,7 @@ FMRM(
   y,
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
-  tol = 1e-04,
+  tol = 0.001,
   irwls_tol = 1e-08,
   max_iter = 500,
   reps = 1,
@@ -51,7 +51,7 @@ poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 Input is converted to all lowercase within the function for simplification.}
 
 \item{tol}{A non-negative numeric value specifying the stopping criterion for
-the MM algorithm (default value is 1e-04). If the difference in value of the
+the MM algorithm (default value is 1e-03). If the difference in value of the
 objective function being minimized is within tol in two consecutive
 iterations, the algorithm stops.}
 
@@ -180,6 +180,13 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
-mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), parallel = TRUE, verbose = FALSE)
+# ----Fit model----
+mod <- FMRM(x = X,
+            y = y,
+            G = 3,
+            family = gaussian(),
+            parallel = TRUE,
+            random = TRUE,
+            verbose = FALSE)
 \dontshow{\}) # examplesIf}
 }

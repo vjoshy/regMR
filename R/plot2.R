@@ -59,7 +59,13 @@
 #' y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 #'
 #' # ----Fit model----
-#' mod <- FMRM(x = X, y = y, G = 3, family = gaussian(), parallel = TRUE, verbose = FALSE)
+#' mod <- FMRM(x = X,
+#'             y = y,
+#'             G = 3,
+#'             family = gaussian(),
+#'             parallel = TRUE,
+#'             random = TRUE,
+#'             verbose = FALSE)
 #'
 #' # ----Call plot2----
 #' plot <- plot2(mod, X, y, 1, 2)

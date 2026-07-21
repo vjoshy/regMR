@@ -24,7 +24,7 @@
 #' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 #' Input is converted to all lowercase within the function for simplification.
 #' @param tol A non-negative numeric value specifying the stopping criterion for
-#' the MM algorithm (default value is 1e-04). If the difference in value of the
+#' the MM algorithm (default value is 1e-03). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
 #' iterations, the algorithm stops.
 #' @param irwls_tol A non-negative numeric value specifying the stopping criterion
@@ -116,7 +116,7 @@ MM <- function(
   y,
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
-  tol = 1e-04,
+  tol = 1e-03,
   irwls_tol = 1e-08,
   max_iter = 500,
   reps = 1,
