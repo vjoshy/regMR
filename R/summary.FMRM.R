@@ -129,7 +129,7 @@ summary.FMRM <- function(object, ...) {
     cat("\n Sigma       ")
     cat(paste(sprintf("%6.3f", object$parameters$sigma), collapse = " "))
   } else if (class(object)[1] == "FGamMRM") {
-    cat("\n Nu (Shape)       ")
+    cat("\n Nu (Shape)  ")
     cat(paste(sprintf("%6.3f", object$parameters$nu), collapse = " "))
   }
   cat("\n\n Beta (Regression Parameters)\n")

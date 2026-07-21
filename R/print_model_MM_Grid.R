@@ -47,7 +47,7 @@ print_model_MM_Grid <- function(
     cat("\n Sigma       ")
     cat(paste(sprintf("%6.3f", chosen_parameters$sigma), collapse = " "))
   } else if (family == "gamma") {
-    cat("\n Nu (Shape)       ")
+    cat("\n Nu (Shape)  ")
     cat(paste(sprintf("%6.3f", chosen_parameters$nu), collapse = " "))
   }
   cat("\n\n Beta (Regression Parameters)\n")
