@@ -1,6 +1,6 @@
 Package: regMR
 Title: Regularized Finite Mixture Regression Models Using MM Algorithm
-Version: 0.1.0
+Version: 1.0.0
 Authors@R: c(
     person("Cameron", "Bechthold", email = "cbechtho@uoguelph.ca", role = c("aut", "cre", "cph")),
     person("Vinay", "Joshy", email = "joshy@uoguelph.ca", role = c("aut", "ctb", "cph")),
