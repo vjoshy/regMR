@@ -2,7 +2,7 @@
 % Please edit documentation in R/error_check.R
 \name{error_check}
 \alias{error_check}
-\title{Error Check Function.}
+\title{Error Check Function}
 \usage{
 error_check(
   x = NULL,
@@ -46,18 +46,18 @@ in the estimated model that the function will attempt to fit the data to.}
 finite mixture regression model being fit to the data. Parameter updates
 are altered depending on the inputted family.}
 
-\item{tol}{A non-negative numeric value specifying the stopping criteria for
-the MM algorithm (default value is 10e-04). If the difference in value of the
+\item{tol}{A non-negative numeric value specifying the stopping criterion for
+the MM algorithm (default value is 1e-04). If the difference in value of the
 objective function being minimized is within tol in two consecutive
 iterations, the algorithm stops.}
 
-\item{irwls_tol}{A non-negative numeric value specifying the stopping criteria
+\item{irwls_tol}{A non-negative numeric value specifying the stopping criterion
 for the IRWLS procedure (default value is 1e-08). If the difference in value
-of the beta values is within tol in two consecutive iterations, the procedure
+of the beta values is within irwls_tol in two consecutive iterations, the procedure
 stops.}
 
 \item{max_iter}{An integer greater than or equal to one specifying the
-maximum number of iterations ran within the MM algorithm. Default value is
+maximum number of iterations run within the MM algorithm. Default value is
 500.}
 
 \item{reps}{An integer greater than or equal to one specifying the
@@ -94,7 +94,7 @@ updates and objective function within iterations of the MM algorithm.}
 allows the function to take a random sample of size n_random_la from the
 lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.}
 
-\item{n_random_la}{A non-negative integer (default value 100) specifying the
+\item{n_random_la}{A positive integer (default value 100) specifying the
 number of lambda-alpha pairs to be sampled when random is TRUE.}
 
 \item{automatic_stopping}{A logical value which, if true (false is the
@@ -102,7 +102,7 @@ default value), allows the function to implement IC-based automatic stopping on
 the mixture components. When the condition for stopping is met, the function
 stops iterating over the group count.}
 
-\item{parallel}{A logical value which, if true (default value), allows the
+\item{parallel}{A logical value which, if true (false is the default value), allows the
 function to run parallel workers to increase computational speed.}
 
 \item{common_sigma}{A logical value which, if true (false is the default value)
@@ -121,6 +121,6 @@ all values in the pi vector are replaced with the value one.}
 No return value, called for side effects.
 }
 \description{
-Error Check Function.
+Error Check Function
 }
 \keyword{internal}

@@ -23,16 +23,16 @@
 #' Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 #' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 #' Input is converted to all lowercase within the function for simplification.
-#' @param tol A non-negative numeric value specifying the stopping criteria for
-#' the MM algorithm (default value is 10e-04). If the difference in value of the
+#' @param tol A non-negative numeric value specifying the stopping criterion for
+#' the MM algorithm (default value is 1e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
 #' iterations, the algorithm stops.
-#' @param irwls_tol A non-negative numeric value specifying the stopping criteria
+#' @param irwls_tol A non-negative numeric value specifying the stopping criterion
 #' for the IRWLS procedure (default value is 1e-08). If the difference in value
-#' of the beta values is within tol in two consecutive iterations, the procedure
+#' of the beta values is within irwls_tol in two consecutive iterations, the procedure
 #' stops.
 #' @param max_iter An integer greater than or equal to one specifying the
-#' maximum number of iterations ran within the MM algorithm. Default value is
+#' maximum number of iterations run within the MM algorithm. Default value is
 #' 500.
 #' @param reps An integer greater than or equal to one specifying the
 #' number of times the MM algorithm is repeated on the same initial parameters.
@@ -66,9 +66,8 @@
 #' @param sigma_penalty A logical value which, if true (default value)
 #' and family = "gaussian" or gaussian(), allows a variance-induced penalty to
 #' be applied to the objective function being minimized within the MM algorithm.
-#' @param pi_penalty A logical value which, if true (default value), allows the
-#' MM algorithm to use estimates for pi in other parameter updates. If false,
-#' all values in the pi vector are replaced with the value one.
+#' @param pi_penalty A logical value which, if true (default value), scales the
+#' Sparse Group LASSO penalty by mixing proportion sizes.
 #'
 #' @returns A list containing the parameters of the estimated finite
 #' mixture regression model.

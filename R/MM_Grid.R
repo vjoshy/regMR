@@ -4,7 +4,7 @@
 #' Applies the Majorization-Minimization Algorithm to the inputted data over all
 #' lambda-alpha pairs given the specified parameters and distribution (family)
 #' to estimate a finite mixture regression model. The function chooses the model
-#' with the lowest information criteria (as specified). It can be ran
+#' with the lowest information criteria (as specified). It can be run
 #' sequentially or in parallel. This function is used for model estimation.
 #'
 #' @param g An integer greater than or equal to one representing the
@@ -23,16 +23,16 @@
 #' Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 #' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 #' Input is converted to all lowercase within the function for simplification.
-#' @param tol A non-negative numeric value specifying the stopping criteria for
-#' the MM algorithm (default value is 10e-04). If the difference in value of the
+#' @param tol A non-negative numeric value specifying the stopping criterion for
+#' the MM algorithm (default value is 1e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
 #' iterations, the algorithm stops.
-#' @param irwls_tol A non-negative numeric value specifying the stopping criteria
+#' @param irwls_tol A non-negative numeric value specifying the stopping criterion
 #' for the IRWLS procedure (default value is 1e-08). If the difference in value
-#' of the beta values is within tol in two consecutive iterations, the procedure
+#' of the beta values is within irwls_tol in two consecutive iterations, the procedure
 #' stops.
 #' @param max_iter An integer greater than or equal to one specifying the
-#' maximum number of iterations ran within the MM algorithm. Default value is
+#' maximum number of iterations run within the MM algorithm. Default value is
 #' 500.
 #' @param reps An integer greater than or equal to one specifying the
 #' number of times the MM algorithm is repeated on the same initial parameters.
@@ -60,7 +60,7 @@
 #' @param random A logical value which, if true (false is the default value),
 #' allows the function to take a random sample of size n_random_la from the
 #' lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.
-#' @param n_random_la A non-negative integer (default value 100) specifying the
+#' @param n_random_la A positive integer (default value 100) specifying the
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
 #' @param information_criteria A string of characters specifying the
 #' information criteria for model selection purposes. The model that minimizes the
@@ -77,9 +77,8 @@
 #' @param sigma_penalty A logical value which, if true (default value)
 #' and family = "gaussian" or gaussian(), allows a variance-induced penalty to
 #' be applied to the objective function being minimized within the MM algorithm.
-#' @param pi_penalty A logical value which, if true (default value), allows the
-#' MM algorithm to use estimates for pi in other parameter updates. If false,
-#' all values in the pi vector are replaced with the value one.
+#' @param pi_penalty A logical value which, if true (default value), scales the
+#' Sparse Group LASSO penalty by mixing proportion sizes.
 #'
 #' @returns An object, depending on inputted family, of class
 #' FGMRM, FPMRM, FBMRM, or FGamMRM and FMRM containing the parameters of the estimated
@@ -132,7 +131,7 @@ MM_Grid <- function(
   x,
   y,
   family = c("gaussian", "poisson", "binomial", "gamma"),
-  tol = 10e-04,
+  tol = 1e-04,
   irwls_tol = 1e-08,
   max_iter = 500,
   reps = 1,
@@ -269,7 +268,7 @@ MM_Grid <- function(
       init_z[[g]] <- init_mod$z
     }
 
-    # ----create intitial parameter list----
+    # ----create initial parameter list----
     init_parameters[[g]] <- list(
       init_pi[[g]],
       init_beta[[g]],
@@ -345,7 +344,7 @@ MM_Grid <- function(
       init_beta[[g]] <- noreg_chosen_parameters$beta
     }
 
-    # ----create intitial parameter list----
+    # ----create initial parameter list----
     init_parameters[[g]] <- list(init_pi[[g]], init_beta[[g]], init_z[[g]])
   } else if (family == "gamma") {
     # ----lists for initial parameters----
@@ -416,7 +415,7 @@ MM_Grid <- function(
       init_z[[g]] <- noreg_chosen_parameters$z
     }
 
-    # ----create intitial parameter list----
+    # ----create initial parameter list----
     init_parameters[[g]] <- list(
       init_pi[[g]],
       init_beta[[g]],

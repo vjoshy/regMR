@@ -6,10 +6,10 @@
 #' in MM_Grid() when initializing the lambda-alpha penalty grid. This computation
 #' differs from the one for finite Gaussian mixture regression distributions.
 #'
-#' @param x Predictor/design matrix. A numeric matrix of size n x (p + 1), where
+#' @param x Predictor/design matrix. A numeric matrix of size n x p, where
 #' the number of rows is equal to the number of observations n, and the number
-#' of columns is equal to the number of covariates p + 1 (for the intercept
-#' term).
+#' of columns is equal to the number of covariates p. An intercept column is
+#' added internally by the function.
 #' @param y Response vector. Either a numeric vector, or something coercible to
 #' one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
 #' matrix of size n x 2, where the first column corresponds to the successes and
@@ -22,9 +22,8 @@
 #' number of mixture components G, representing the group responsibilities for
 #' the given model.
 #' @param beta_init Regression parameters for each mixture component (group). A
-#' numeric matrix of size G x (p + 1), where the number of rows is equal to the
-#' number of mixture components G, and the number of columns is equal to the
-#' number of covariates p + 1.
+#' numeric matrix of size G x (p + 1), where G is the number of mixture
+#' components and p is the number of covariates.
 #'
 #' @returns A non-negative numeric value representing the maximum lambda value
 #' to be used for the sgl penalty.

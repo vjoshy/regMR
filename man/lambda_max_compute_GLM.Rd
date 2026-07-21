@@ -7,10 +7,10 @@
 lambda_max_compute_GLM(x, y, family, z_mat, beta_init)
 }
 \arguments{
-\item{x}{Predictor/design matrix. A numeric matrix of size n x (p + 1), where
+\item{x}{Predictor/design matrix. A numeric matrix of size n x p, where
 the number of rows is equal to the number of observations n, and the number
-of columns is equal to the number of covariates p + 1 (for the intercept
-term).}
+of columns is equal to the number of covariates p. An intercept column is
+added internally by the function.}
 
 \item{y}{Response vector. Either a numeric vector, or something coercible to
 one (i.e. matrix with one column). If family is Binomial, y becomes a numeric
@@ -27,9 +27,8 @@ number of mixture components G, representing the group responsibilities for
 the given model.}
 
 \item{beta_init}{Regression parameters for each mixture component (group). A
-numeric matrix of size G x (p + 1), where the number of rows is equal to the
-number of mixture components G, and the number of columns is equal to the
-number of covariates p + 1.}
+numeric matrix of size G x (p + 1), where G is the number of mixture
+components and p is the number of covariates.}
 }
 \value{
 A non-negative numeric value representing the maximum lambda value

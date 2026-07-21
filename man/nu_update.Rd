@@ -26,11 +26,11 @@ covariates p + 1.}
 
 \item{N}{A numeric vector containing the column sums of gamma_mat.}
 
-\item{max_iter}{An non-negative integer greater than or equal to one
-specifying the maximum number of iterations ran when updating nu. Default
+\item{max_iter}{An integer greater than or equal to one
+specifying the maximum number of iterations run when updating nu. Default
 value is 50.}
 
-\item{tol}{A non-negative numeric value specifying the stopping criteria when
+\item{tol}{A non-negative numeric value specifying the stopping criterion when
 updating nu (default value is 1e-08).}
 }
 \value{

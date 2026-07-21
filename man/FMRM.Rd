@@ -9,7 +9,7 @@ FMRM(
   y,
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
-  tol = 0.001,
+  tol = 1e-04,
   irwls_tol = 1e-08,
   max_iter = 500,
   reps = 1,
@@ -50,18 +50,18 @@ Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 Input is converted to all lowercase within the function for simplification.}
 
-\item{tol}{A non-negative numeric value specifying the stopping criteria for
-the MM algorithm (default value is 10e-04). If the difference in value of the
+\item{tol}{A non-negative numeric value specifying the stopping criterion for
+the MM algorithm (default value is 1e-04). If the difference in value of the
 objective function being minimized is within tol in two consecutive
 iterations, the algorithm stops.}
 
-\item{irwls_tol}{A non-negative numeric value specifying the stopping criteria
+\item{irwls_tol}{A non-negative numeric value specifying the stopping criterion
 for the IRWLS procedure (default value is 1e-08). If the difference in value
-of the beta values is within tol in two consecutive iterations, the procedure
+of the beta values is within irwls_tol in two consecutive iterations, the procedure
 stops.}
 
 \item{max_iter}{An integer greater than or equal to one specifying the
-maximum number of iterations ran within the MM algorithm. Default value is
+maximum number of iterations run within the MM algorithm. Default value is
 500.}
 
 \item{reps}{An integer greater than or equal to one specifying the
@@ -98,7 +98,7 @@ updates and objective function within iterations of the MM algorithm.}
 allows the function to take a random sample of size n_random_la from the
 lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.}
 
-\item{n_random_la}{A non-negative integer (default value 100) specifying the
+\item{n_random_la}{A positive integer (default value 100) specifying the
 number of lambda-alpha pairs to be sampled when random is TRUE.}
 
 \item{information_criteria}{A string of characters specifying the
@@ -112,8 +112,7 @@ Likelihood (ICL) Criterion ("icl").}
 \item{automatic_stopping}{A logical value which, if true (false is the
 default value), allows the function to implement IC-based automatic stopping on
 the mixture components. When the condition for stopping is met, the function
-stops iterating over the group count. When switched on, parallel is set to
-false to increase speed.}
+stops iterating over the group count.}
 
 \item{parallel}{A logical value which, if true (false is the default value),
 allows the function to run parallel workers to increase computational speed.}
@@ -126,9 +125,8 @@ equivalent across mixture components.}
 and family = "gaussian" or gaussian(), allows a variance-induced penalty to
 be applied to the objective function being minimized within the MM algorithm.}
 
-\item{pi_penalty}{A logical value which, if true (default value), allows the
-MM algorithm to use estimates for pi in other parameter updates. If false,
-all values in the pi vector are replaced with the value one.}
+\item{pi_penalty}{A logical value which, if true (default value), scales the
+Sparse Group LASSO penalty by mixing proportion sizes.}
 }
 \value{
 An object, depending on inputted family, of class
@@ -143,7 +141,7 @@ Applies the Majorization-Minimization Algorithm to the inputted data over all
 group counts from 2 to G and all lambda-alpha pairs given the specified
 parameters and distribution (family) to estimate a finite mixture regression model.
 The function chooses the model with the lowest information criteria (as specified).
-It can be ran sequentially or in parallel. This function is for model estimation.
+It can be run sequentially or in parallel. This function is for model estimation.
 }
 \examples{
 \dontshow{if (rlang::is_installed("mvtnorm")) (if (getRversion() >= "3.4") withAutoprint else force)(\{ # examplesIf}

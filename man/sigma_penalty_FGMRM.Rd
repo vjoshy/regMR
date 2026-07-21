@@ -11,10 +11,11 @@ sigma_penalty_FGMRM(sigma, S_x, a_n)
 component (group). Either a numeric vector or something coercible to
 one.}
 
-\item{S_x}{A numeric value representing the sample variance of the response.}
+\item{S_x}{A numeric value representing the sample variance of the response
+values falling within the interquartile range (IQR).}
 
 \item{a_n}{A numeric value used as an arbitrary factor for scaling purposes.
-Is set equal to (1/n), the number of observations in the data.}
+Is set to 1/n, where n is the number of observations in the data.}
 }
 \value{
 A numeric scalar representing the variance penalty to be

@@ -18,10 +18,10 @@
 #' @param pi Mixing proportions for each component. Either a numeric vector, or
 #' something coercible to one.
 #'
-#' @returns A numeric matrix of size G x (p + 1), where the number of
+#' @returns A numeric matrix of size G x p, where the number of
 #' rows is equal to the number of mixture components G, and the number of
-#' columns is equal to the number of covariates p + 1, representing the sgl
-#' penalty majorization matrix.
+#' columns is equal to the number of covariates p (excluding the intercept),
+#' representing the sgl penalty majorization matrix.
 #'
 #' @keywords internal
 compute_V <- function(G, beta, alpha, pi) {

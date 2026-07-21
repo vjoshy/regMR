@@ -17,7 +17,7 @@
 #' be plotted.
 #' @param ... Additional arguments for plotting (currently unused).
 #'
-#' @returns A 3-D plot of the specified covariates of x against a response, with
+#' @returns A 3-D plotly plot of the specified covariates of x against a response, with
 #' the group assignments highlighted in colour.
 #' @importFrom graphics text
 #' @export

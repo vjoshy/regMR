@@ -11,9 +11,10 @@
 #' @param sigma Component-wise standard deviations for each mixture
 #' component (group). Either a numeric vector or something coercible to
 #' one.
-#' @param S_x A numeric value representing the sample variance of the response.
+#' @param S_x A numeric value representing the sample variance of the response
+#' values falling within the interquartile range (IQR).
 #' @param a_n A numeric value used as an arbitrary factor for scaling purposes.
-#' Is set equal to (1/n), the number of observations in the data.
+#' Is set to 1/n, where n is the number of observations in the data.
 #'
 #' @returns A numeric scalar representing the variance penalty to be
 #' applied to the objective function being minimized.

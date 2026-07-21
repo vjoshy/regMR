@@ -4,7 +4,7 @@
 #' group counts from 2 to G and all lambda-alpha pairs given the specified
 #' parameters and distribution (family) to estimate a finite mixture regression model.
 #' The function chooses the model with the lowest information criteria (as specified).
-#' It can be ran sequentially or in parallel. This function is for model estimation.
+#' It can be run sequentially or in parallel. This function is for model estimation.
 #'
 #' @param x Predictor/design matrix. A numeric matrix of size n x p where the
 #' number of rows is equal to the number of observations n, and the number of
@@ -22,16 +22,16 @@
 #' Gaussian ("gaussian" or gaussian(), default value), Poisson ("poisson" or
 #' poisson()), Binomial ("binomial" or binomial()), and Gamma ("gamma" or Gamma()).
 #' Input is converted to all lowercase within the function for simplification.
-#' @param tol A non-negative numeric value specifying the stopping criteria for
-#' the MM algorithm (default value is 10e-04). If the difference in value of the
+#' @param tol A non-negative numeric value specifying the stopping criterion for
+#' the MM algorithm (default value is 1e-04). If the difference in value of the
 #' objective function being minimized is within tol in two consecutive
 #' iterations, the algorithm stops.
-#' @param irwls_tol A non-negative numeric value specifying the stopping criteria
+#' @param irwls_tol A non-negative numeric value specifying the stopping criterion
 #' for the IRWLS procedure (default value is 1e-08). If the difference in value
-#' of the beta values is within tol in two consecutive iterations, the procedure
+#' of the beta values is within irwls_tol in two consecutive iterations, the procedure
 #' stops.
 #' @param max_iter An integer greater than or equal to one specifying the
-#' maximum number of iterations ran within the MM algorithm. Default value is
+#' maximum number of iterations run within the MM algorithm. Default value is
 #' 500.
 #' @param reps An integer greater than or equal to one specifying the
 #' number of times the MM algorithm is repeated on the same initial parameters.
@@ -59,7 +59,7 @@
 #' @param random A logical value which, if true (false is the default value),
 #' allows the function to take a random sample of size n_random_la from the
 #' lambda-alpha pairs and run the MM algorithm over the reduced penalty grid.
-#' @param n_random_la A non-negative integer (default value 100) specifying the
+#' @param n_random_la A positive integer (default value 100) specifying the
 #' number of lambda-alpha pairs to be sampled when random is TRUE.
 #' @param information_criteria A string of characters specifying the
 #' information criteria for model selection purposes. The model that minimizes the
@@ -71,8 +71,7 @@
 #' @param automatic_stopping A logical value which, if true (false is the
 #' default value), allows the function to implement IC-based automatic stopping on
 #' the mixture components. When the condition for stopping is met, the function
-#' stops iterating over the group count. When switched on, parallel is set to
-#' false to increase speed.
+#' stops iterating over the group count.
 #' @param parallel A logical value which, if true (false is the default value),
 #' allows the function to run parallel workers to increase computational speed.
 #' @param common_sigma A logical value which, if true (false is the default value)
@@ -81,9 +80,8 @@
 #' @param sigma_penalty A logical value which, if true (default value)
 #' and family = "gaussian" or gaussian(), allows a variance-induced penalty to
 #' be applied to the objective function being minimized within the MM algorithm.
-#' @param pi_penalty A logical value which, if true (default value), allows the
-#' MM algorithm to use estimates for pi in other parameter updates. If false,
-#' all values in the pi vector are replaced with the value one.
+#' @param pi_penalty A logical value which, if true (default value), scales the
+#' Sparse Group LASSO penalty by mixing proportion sizes.
 #'
 #' @returns An object, depending on inputted family, of class
 #' FGMRM, FPMRM, FBMRM, or FGamMRM and FMRM containing the parameters of the estimated
@@ -136,7 +134,7 @@ FMRM <- function(
   y,
   G,
   family = c("gaussian", "poisson", "binomial", "gamma"),
-  tol = 10e-04,
+  tol = 1e-04,
   irwls_tol = 1e-08,
   max_iter = 500,
   reps = 1,

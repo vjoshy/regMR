@@ -11,8 +11,10 @@
 #' @param information_criteria A string of characters specifying the
 #' information criteria for model selection purposes. The model that minimizes the
 #' information criteria over all group counts and lambda-alpha pairs will be selected.
-#' Current accepted types include BIC ("bic") (default value), EBIC ("ebic"),
-#' and AIC ("aic").
+#' Current accepted types include the default Bayesian
+#' Information Criterion (BIC) ("bic"), group-structured Extended BIC (gEBIC) ("gebic"),
+#' Akaike Information Criterion (AIC) ("aic"), and Integrated Classification
+#' Likelihood (ICL) Criterion ("icl").
 #'
 #' @returns No return value, called for side effects
 #'

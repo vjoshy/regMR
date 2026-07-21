@@ -26,7 +26,7 @@ be plotted.}
 \item{...}{Additional arguments for plotting (currently unused).}
 }
 \value{
-A 3-D plot of the specified covariates of x against a response, with
+A 3-D plotly plot of the specified covariates of x against a response, with
 the group assignments highlighted in colour.
 }
 \description{
