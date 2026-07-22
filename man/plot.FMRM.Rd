@@ -29,7 +29,7 @@ all models with the same alpha as the optimal alpha.
 set.seed(2025)
 
 # ----Simulate data----
-n <- 500   # total samples
+n <- 250   # total samples
 p <- 6     # number of covariates
 G <- 3     # number of mixture components
 rho = 0.2  # correlation

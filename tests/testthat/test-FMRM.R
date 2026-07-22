@@ -1,5 +1,4 @@
-n <- 500
-
+n <- 250
 X <- 0
 y <- numeric(n)
 
@@ -262,7 +261,7 @@ if (requireNamespace("mvtnorm", quietly = TRUE)) {
   # ----Gaussian----
 
   # ----Simulate data----
-  n <- 500 # total samples
+  n <- 250 # total samples
   p <- 6 # number of covariates
   G <- 3 # number of mixture components
   rho = 0.2 # correlation
@@ -321,6 +320,7 @@ if (requireNamespace("mvtnorm", quietly = TRUE)) {
     y = y,
     G = 3,
     family = gaussian(),
+    alpha = c(0, 0.5, 1),
     parallel = TRUE,
     verbose = FALSE
   )
@@ -334,6 +334,7 @@ if (requireNamespace("mvtnorm", quietly = TRUE)) {
     y = y,
     G = 3,
     family = gaussian(),
+    alpha = c(0, 0.5, 1),
     parallel = FALSE,
     verbose = FALSE
   )
@@ -347,6 +348,7 @@ if (requireNamespace("mvtnorm", quietly = TRUE)) {
     y = y,
     G = 3,
     family = gaussian(),
+    alpha = c(0, 0.5, 1),
     parallel = FALSE,
     automatic_stopping = TRUE,
     verbose = FALSE
@@ -361,7 +363,7 @@ if (requireNamespace("mvtnorm", quietly = TRUE)) {
   # ----Poisson----
 
   # ----Simulate data----
-  n <- 500 # total samples
+  n <- 250 # total samples
   p <- 6 # number of covariates
   G <- 3 # number of mixture components
   rho <- 0.2 # correlation
@@ -422,6 +424,7 @@ if (requireNamespace("mvtnorm", quietly = TRUE)) {
     y = y,
     G = 3,
     family = poisson(),
+    alpha = c(0, 0.5, 1),
     parallel = TRUE,
     verbose = FALSE
   )

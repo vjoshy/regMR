@@ -144,7 +144,7 @@ sequentially or in parallel. This function is used for model estimation.
 set.seed(2025)
 
 # ----Simulate data----
-n <- 500   # total samples
+n <- 250   # total samples
 p <- 6     # number of covariates
 G <- 3     # number of mixture components
 rho = 0.2  # correlation
@@ -175,6 +175,12 @@ mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
 # ----Simulate response y----
 y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
 
-mod <- MM_Grid(g = 3, X, y, family = gaussian(), parallel = TRUE, verbose = FALSE)
+mod <- MM_Grid(g = 3,
+               X,
+               y,
+               family = gaussian(),
+               parallel = TRUE,
+               random = TRUE,
+               verbose = FALSE)
 \dontshow{\}) # examplesIf}
 }

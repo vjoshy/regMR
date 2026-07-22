@@ -149,7 +149,7 @@ It can be run sequentially or in parallel. This function is for model estimation
 set.seed(2025)
 
 # ----Simulate data----
-n <- 500   # total samples
+n <- 250   # total samples
 p <- 6     # number of covariates
 G <- 3     # number of mixture components
 rho = 0.2  # correlation
