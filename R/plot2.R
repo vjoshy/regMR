@@ -65,6 +65,7 @@
 #'             family = gaussian(),
 #'             parallel = TRUE,
 #'             random = TRUE,
+#'             n_random_la = 25,
 #'             verbose = FALSE)
 #'
 #' # ----Call plot2----
