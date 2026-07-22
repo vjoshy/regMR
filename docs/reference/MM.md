@@ -1,0 +1,191 @@
+# Majorization-Minimization Algorithm for Finite Mixture Regression Models
+
+Applies the Majorization-Minimization Algorithm to the inputted data
+given the specified parameters and distribution (family) to estimate a
+finite mixture regression model. Initial estimates for model parameters
+are provided within the function, but can be specified in the function
+call. This function is used for model estimation.
+
+## Usage
+
+``` r
+MM(
+  x,
+  y,
+  G,
+  family = c("gaussian", "poisson", "binomial", "gamma"),
+  tol = 0.001,
+  irwls_tol = 1e-08,
+  max_iter = 500,
+  reps = 1,
+  lambda = 0,
+  alpha = 0,
+  init_parameters = NULL,
+  verbose = TRUE,
+  penalty = TRUE,
+  information_criteria = c("bic", "gebic", "aic", "icl"),
+  common_sigma = FALSE,
+  sigma_penalty = TRUE,
+  pi_penalty = TRUE
+)
+```
+
+## Arguments
+
+- x:
+
+  Predictor/design matrix. A numeric matrix of size n x p where the
+  number of rows is equal to the number of observations n, and the
+  number of columns is equal to the number of covariates p.
+
+- y:
+
+  Response vector. Either a numeric vector, or something coercible to
+  one (i.e. matrix with one column). If family is Binomial, y becomes a
+  numeric matrix of size n x 2, where the first column corresponds to
+  the successes and the second the failures.
+
+- G:
+
+  An integer greater than or equal to one representing the number of
+  mixture components (groups) in a finite mixture regression model.
+
+- family:
+
+  A string of characters specifying the distribution of the finite
+  mixture regression model being fit to the data. Parameter updates are
+  altered depending on the inputted family. Current accepted types
+  include Gaussian ("gaussian" or gaussian(), default value), Poisson
+  ("poisson" or poisson()), Binomial ("binomial" or binomial()), and
+  Gamma ("gamma" or Gamma()). Input is converted to all lowercase within
+  the function for simplification.
+
+- tol:
+
+  A non-negative numeric value specifying the stopping criterion for the
+  MM algorithm (default value is 1e-03). If the difference in value of
+  the objective function being minimized is within tol in two
+  consecutive iterations, the algorithm stops.
+
+- irwls_tol:
+
+  A non-negative numeric value specifying the stopping criterion for the
+  IRWLS procedure (default value is 1e-08). If the difference in value
+  of the beta values is within irwls_tol in two consecutive iterations,
+  the procedure stops.
+
+- max_iter:
+
+  An integer greater than or equal to one specifying the maximum number
+  of iterations run within the MM algorithm. Default value is 500.
+
+- reps:
+
+  An integer greater than or equal to one specifying the number of times
+  the MM algorithm is repeated on the same initial parameters. Default
+  value is 1.
+
+- lambda:
+
+  A non-negative numeric value (tuning parameter) specifying the
+  strength of the sparse group lasso (sgl) penalty. Default value is
+  zero (no penalty applied).
+
+- alpha:
+
+  A numeric value between zero (default value) and one inclusive
+  specifying the weight between the lasso penalty and group lasso
+  penalty being applied. Alpha = 1 gives the lasso fit and alpha = 0
+  gives the group lasso fit.
+
+- init_parameters:
+
+  A list containing the initial parameter estimates for the finite
+  mixture regression model being fit. Default value is NULL as the
+  function contains procedures for initialization. If Gaussian,
+  init_parameters = list(pi, beta, sigma, z), if Poisson or Binomial,
+  init_parameters = list(pi, beta, z), and if Gamma, init_parameters =
+  list(pi, beta, nu, z).
+
+- verbose:
+
+  A logical value which, if true (default value), allows the function to
+  print progress updates.
+
+- penalty:
+
+  A logical value which, if true (default value), allows the function to
+  apply the sgl penalty to the regression parameter updates and
+  objective function within iterations of the MM algorithm.
+
+- information_criteria:
+
+  A string of characters specifying the information criteria for model
+  selection purposes. The model that minimizes the information criteria
+  will be selected. Current accepted types include the default Bayesian
+  Information Criterion (BIC) ("bic"), group-structured Extended BIC
+  (gEBIC) ("gebic"), Akaike Information Criterion (AIC) ("aic"), and
+  Integrated Classification Likelihood (ICL) Criterion ("icl").
+
+- common_sigma:
+
+  A logical value which, if true (false is the default value) and family
+  = "gaussian" or gaussian(), estimates the standard deviations as
+  equivalent across mixture components.
+
+- sigma_penalty:
+
+  A logical value which, if true (default value) and family = "gaussian"
+  or gaussian(), allows a variance-induced penalty to be applied to the
+  objective function being minimized within the MM algorithm.
+
+- pi_penalty:
+
+  A logical value which, if true (default value), scales the Sparse
+  Group LASSO penalty by mixing proportion sizes.
+
+## Value
+
+A list containing the parameters of the estimated finite mixture
+regression model.
+
+## Examples
+
+``` r
+
+set.seed(2025)
+
+# ----Simulate data----
+n <- 500   # total samples
+p <- 6     # number of covariates
+G <- 3     # number of mixture components
+rho = 0.2  # correlation
+
+# ----True parameters for 3 clusters----
+betas <- matrix(c(
+  1,  2, -1,  0.5, 0, 0, 0,  # component 1
+  5, -2,  1,  0, 0, 0, 0,  # component 2
+  -3, 0,  2, 0, 0, 0, 0     # component 3
+), nrow = G, byrow = TRUE)
+pis <- c(0.4, 0.4, 0.2)
+sigmas <- c(3, 1.5, 1)/2
+
+# ----Generate correlation matrix----
+cor_mat <- outer(1:p, 1:p, function(i, j) rho^abs(i - j))
+Sigma <- cor_mat
+
+# ----Simulate design matrix X (n × p)----
+X <- mvtnorm::rmvnorm(n, mean = rep(0, p), sigma = Sigma)
+
+# ----Generate responsibilities----
+z <- rmultinom(n, size = 1, prob = pis)
+groups <- apply(z, 2, which.max)
+
+# ----b0 + b1x1 + b2x2 + ... + bkxp----
+mu_vec <- rowSums(cbind(1, X) * betas[groups, ])
+
+# ----Simulate response y----
+y <- rnorm(n, mean = mu_vec, sd = sigmas[groups])
+
+mod <- MM(X, y, G = 3, family = gaussian(), lambda = 5, alpha = 1)
+```

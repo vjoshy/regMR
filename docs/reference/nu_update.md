@@ -1,0 +1,58 @@
+# Shape Parameter (Nu) for a Finite Gamma Mixture Regression Distribution
+
+Update/compute shape parameter for a finite Gamma mixture regression
+distribution. This function is used during model estimation,
+specifically within iterations of the MM algorithm.
+
+## Usage
+
+``` r
+nu_update(x, y, gamma_mat, beta, N, max_iter = 50, tol = 1e-08)
+```
+
+## Arguments
+
+- x:
+
+  Predictor/design matrix. A numeric matrix of size n x (p + 1), where
+  the number of rows is equal to the number of observations n, and the
+  number of columns is equal to the number of covariates p + 1 (for the
+  intercept term).
+
+- y:
+
+  Response vector. Either a numeric vector, or something coercible to
+  one (i.e. matrix with one column).
+
+- gamma_mat:
+
+  Group responsibility matrix. A numeric matrix of size n x G, where the
+  number of rows is equal to the number of observations n, and the
+  number of columns is equal to the number of mixture components
+  (groups) G.
+
+- beta:
+
+  Regression parameters for each mixture component. A numeric matrix of
+  size G x (p + 1), where the number of rows is equal to the number of
+  mixture components G, and the number of columns is equal to the number
+  of covariates p + 1.
+
+- N:
+
+  A numeric vector containing the column sums of gamma_mat.
+
+- max_iter:
+
+  An integer greater than or equal to one specifying the maximum number
+  of iterations run when updating nu. Default value is 50.
+
+- tol:
+
+  A non-negative numeric value specifying the stopping criterion when
+  updating nu (default value is 1e-08).
+
+## Value
+
+A numeric vector containing the shape parameter for the corresponding
+finite Gamma mixture regression model.
